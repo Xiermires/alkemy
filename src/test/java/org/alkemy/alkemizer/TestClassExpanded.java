@@ -36,6 +36,11 @@ public class TestClassExpanded
         return foo;
     }
     
+    public void set$$foo(int foo)
+    {
+        this.foo = foo;
+    }
+    
     public String get$$bar()
     {
         return bar;
