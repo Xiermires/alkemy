@@ -75,7 +75,7 @@ public class MethodHandleAccessorFactory
         {
             try
             {
-                return createLambaRef(MethodHandles.lookup(), Function.class, Function.class.getMethod("apply", Object.class), handle);
+                return createLambdaRef(MethodHandles.lookup(), Function.class, Function.class.getMethod("apply", Object.class), handle);
             }
             catch (IllegalAccessException | SecurityException e)
             {
@@ -96,7 +96,7 @@ public class MethodHandleAccessorFactory
         {
             try
             {
-                return (Supplier<R>) createLambaRef(MethodHandles.lookup(), Supplier.class, Supplier.class.getMethod("get"), handle);
+                return (Supplier<R>) createLambdaRef(MethodHandles.lookup(), Supplier.class, Supplier.class.getMethod("get"), handle);
             }
             catch (IllegalAccessException | SecurityException e)
             {
@@ -117,7 +117,7 @@ public class MethodHandleAccessorFactory
         {
             try
             {
-                return (BiConsumer<T, R>) createLambaRef(MethodHandles.lookup(), BiConsumer.class, BiConsumer.class.getMethod("accept", Object.class, Object.class),
+                return (BiConsumer<T, R>) createLambdaRef(MethodHandles.lookup(), BiConsumer.class, BiConsumer.class.getMethod("accept", Object.class, Object.class),
                         handle);
             }
             catch (IllegalAccessException | SecurityException e)
@@ -139,7 +139,7 @@ public class MethodHandleAccessorFactory
         {
             try
             {
-                return (Consumer<R>) createLambaRef(MethodHandles.lookup(), Consumer.class, Consumer.class.getMethod("accept", Object.class), handle);
+                return (Consumer<R>) createLambdaRef(MethodHandles.lookup(), Consumer.class, Consumer.class.getMethod("accept", Object.class), handle);
             }
             catch (IllegalAccessException | SecurityException e)
             {
@@ -153,7 +153,7 @@ public class MethodHandleAccessorFactory
         return null;
     }
 
-    private static <T> T createLambaRef(Lookup lookup, Class<T> funcClass, Method funcMethod, MethodHandle handle) throws Throwable
+    private static <T> T createLambdaRef(Lookup lookup, Class<T> funcClass, Method funcMethod, MethodHandle handle) throws Throwable
     {
         final Class<?> funcRet = funcMethod.getReturnType();
         final Class<?>[] funcParams = funcMethod.getParameterTypes();
