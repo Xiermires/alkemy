@@ -35,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.alkemy.annotations.Transmutation;
+import org.alkemy.annotations.TransmutationNode;
 import org.apache.log4j.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -71,12 +72,12 @@ public class Alkemizer extends ClassVisitor
         cr.accept(new Alkemizer(cr.getClassName(), cw), ClassReader.SKIP_FRAMES);
         return cw.toByteArray();
     }
-    
+
     public static String getGetterName(String fieldName)
     {
         return "get$$" + fieldName;
     }
-    
+
     public static String getSetterName(String fieldName)
     {
         return "set$$" + fieldName;
@@ -92,18 +93,21 @@ public class Alkemizer extends ClassVisitor
     @Override
     public void visitEnd()
     {
-        appendIsInstrumented();
-        appendGetters();
-        appendSetters();
+        if (!alkemizableFields.isEmpty())
+        {
+            appendIsInstrumented();
+            appendGetters();
+            appendSetters();
+        }
 
         super.visitEnd();
     }
-    
+
     private void appendIsInstrumented()
     {
         final String methodName = IS_INSTRUMENTED;
         final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, methodName, "()Z", null, null);
-        
+
         mv.visitInsn(ICONST_1);
         mv.visitInsn(IRETURN);
         mv.visitMaxs(0, 0);
@@ -158,7 +162,8 @@ public class Alkemizer extends ClassVisitor
         private final Set<String> alkemizableAnnotations;
         private final Set<String> nonAlkemizableAnnotations;
 
-        FieldAnnotationVisitor(FieldVisitor fv, String name, String type, List<AlkemizableField> alkemizables, Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations)
+        FieldAnnotationVisitor(FieldVisitor fv, String name, String type, List<AlkemizableField> alkemizables, Set<String> alkemizableAnnotations,
+                Set<String> nonAlkemizableAnnotations)
         {
             super(Opcodes.ASM5, fv);
 
@@ -181,7 +186,9 @@ public class Alkemizer extends ClassVisitor
 
         private boolean isAlkemizable(String desc)
         {
-            return !nonAlkemizableAnnotations.contains(desc) && (alkemizableAnnotations.contains(desc) || isAnnotationPresent(desc, Transmutation.class));
+            return !nonAlkemizableAnnotations.contains(desc)
+                    && (alkemizableAnnotations.contains(desc) || TransmutationNode.class.getName().equals(getAnnotationQualifiedName(desc)) || isAnnotationPresent(desc,
+                            Transmutation.class));
         }
 
         private static String getAnnotationQualifiedName(String desc)

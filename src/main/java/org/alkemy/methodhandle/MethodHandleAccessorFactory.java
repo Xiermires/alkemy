@@ -41,7 +41,8 @@ public class MethodHandleAccessorFactory
     public static boolean isInstrumented(Field f) throws IllegalAccessException, SecurityException
     {
         final Class<?> clazz = f.getDeclaringClass();
-        return ref2StaticGetter(methodHandle(clazz, Alkemizer.IS_INSTRUMENTED), clazz, boolean.class).get();
+        final Supplier<Boolean> ref = ref2StaticGetter(methodHandle(clazz, Alkemizer.IS_INSTRUMENTED), clazz, boolean.class);
+        return Objects.nonNull(ref) && ref.get();
     }
 
     @SuppressWarnings("unchecked") 
