@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -28,12 +27,15 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-import org.alkemy.global.Helper;
-import org.alkemy.global.Measure;
-import org.alkemy.global.Measure.Measurable;
-import org.alkemy.global.ObjIntFunction;
+import org.alkemy.general.Helper;
+import org.alkemy.general.Measure;
+import org.alkemy.general.Measure.Measurable;
+import org.alkemy.general.ObjIntFunction;
+import org.alkemy.methodhandle.MethodHandleAccessorFactory;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -44,9 +46,18 @@ import org.objectweb.asm.ClassWriter;
 public class AlkemizerTest
 {
     @Test
-    public void alkemizeTestClass() throws IOException
+    public void alkemizeIsInstrumented() throws IllegalAccessException, NoSuchMethodException, SecurityException, Throwable
     {
-        final Class<?> clazz = alkemize("org.alkemy.alkemizer.TestClass");
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
+        final Supplier<Boolean> s = MethodHandleAccessorFactory.ref2StaticGetter(methodHandle(clazz, "is$$instrumented"), clazz, boolean.class);
+
+        assertThat(s.get(), is(true));
+    }
+
+    @Test
+    public void alkemizeGetterSetter() throws IOException
+    {
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
 
         final Set<String> methodNames = new HashSet<>();
         for (Method m : clazz.getMethods())
@@ -59,7 +70,7 @@ public class AlkemizerTest
     @Test
     public void tryMethodhandle() throws Throwable
     {
-        final Class<?> clazz = alkemize("org.alkemy.alkemizer.TestClass");
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
         final MethodHandle handle = methodHandle(clazz, "get$$foo");
 
         final TestClass tc = (TestClass) clazz.newInstance();
@@ -68,22 +79,48 @@ public class AlkemizerTest
     }
 
     @Test
-    public void tryLambdaMetaFactory() throws Throwable
+    public void tryLambdaMetaFactoryGetter() throws Throwable
     {
-        final Class<?> clazz = alkemize("org.alkemy.alkemizer.TestClass");
-        final Function<Object, Integer> f = lambdaRef(methodHandle(clazz, "get$$foo"), Object.class, int.class);
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
+        final MethodHandle methodHandle = MethodHandleAccessorFactory.methodHandle(clazz, "get$$foo");
+        final Function<Object, Integer> f = MethodHandleAccessorFactory.ref2MemberGetter(methodHandle, Object.class, int.class);
 
         final TestClass tc = (TestClass) clazz.newInstance();
         assertThat(-1, is(f.apply(tc)));
     }
 
     @Test
+    public void tryLambdaMetaFactoryStaticGetter() throws Throwable
+    {
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
+        final MethodHandle methodHandle = MethodHandleAccessorFactory.methodHandle(clazz, Alkemizer.IS_INSTRUMENTED);
+        final Supplier<Boolean> f = MethodHandleAccessorFactory.ref2StaticGetter(methodHandle, Object.class, boolean.class);
+
+        assertThat(true, is(f.get()));
+    }
+
+    @Test
+    public void tryLambdaMetaFactorySetter() throws Throwable
+    {
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
+        final MethodHandle getterHandle = MethodHandleAccessorFactory.methodHandle(clazz, Alkemizer.getGetterName("foo"));
+        final MethodHandle setterHandle = MethodHandleAccessorFactory.methodHandle(clazz, Alkemizer.getSetterName("foo"), int.class);
+        final Function<TestClass, Integer> getter = MethodHandleAccessorFactory.ref2MemberGetter(getterHandle, TestClass.class, int.class);
+        final BiConsumer<TestClass, Integer> setter = MethodHandleAccessorFactory.ref2MemberSetter(setterHandle, TestClass.class, int.class);
+
+        final TestClass tc = (TestClass) clazz.newInstance();
+        setter.accept(tc, 1);
+
+        assertThat(1, is(getter.apply(tc)));
+    }
+
+    @Test
     public void performanceMeasurements() throws Throwable
     {
-        final Class<?> clazz = alkemize("org.alkemy.alkemizer.TestClass");
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
         final MethodHandle handle = methodHandle(clazz, "get$$bar");
         final Method method = clazz.getDeclaredMethod("get$$bar");
-        final Function<Object, String> function = lambdaRef(handle, Object.class, String.class);
+        final Function<Object, String> function = MethodHandleAccessorFactory.ref2MemberGetter(handle, Object.class, String.class);
 
         final TestClass tc = (TestClass) clazz.newInstance();
 
@@ -169,12 +206,12 @@ public class AlkemizerTest
         }));
     }
 
-    @Test 
+    @Test
     public void compareLambdaRefsPerformance() throws Throwable
     {
-        final Class<?> clazz = alkemize("org.alkemy.alkemizer.TestClass");
+        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
         final MethodHandle handle = methodHandle(clazz, "get$$foo");
-        final Function<TestClass, Integer> f1 = lambdaRef(handle, TestClass.class, Integer.class);
+        final Function<TestClass, Integer> f1 = MethodHandleAccessorFactory.ref2MemberGetter(handle, TestClass.class, Integer.class);
         final ObjIntFunction<TestClass> f2 = objIntLambdaRef(handle, TestClass.class);
 
         final TestClass tc = (TestClass) clazz.newInstance();
@@ -216,7 +253,7 @@ public class AlkemizerTest
         }));
     }
 
-    private Class<?> alkemize(String clazz) throws IOException
+    public static Class<?> alkemize(String clazz) throws IOException
     {
         final ClassReader cr = new ClassReader(clazz);
         final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -230,20 +267,15 @@ public class AlkemizerTest
         return MethodHandles.lookup().unreflect(method);
     }
 
-    private <T, R> Function<T, R> lambdaRef(MethodHandle handle, Class<T> t, Class<R> r) throws Throwable
-    {
-        final MethodType func = handle.type();
-        final CallSite site = LambdaMetafactory.metafactory(MethodHandles.lookup(), "apply", MethodType.methodType(Function.class), func.generic(), handle, func);
-        final MethodHandle factory = site.getTarget();
-        return (Function<T, R>) factory.invoke();
-    }
-
-    // FIXME AbstractMethodError. 
     private <T> ObjIntFunction<T> objIntLambdaRef(MethodHandle handle, Class<T> t) throws Throwable
     {
-        final MethodType func = handle.type();
-        final CallSite site = LambdaMetafactory.metafactory(MethodHandles.lookup(), "apply", MethodType.methodType(ObjIntFunction.class), func, handle, func);
-        final MethodHandle factory = site.getTarget();
-        return (ObjIntFunction<T>) factory.invoke();
+        final Method funcMethod = ObjIntFunction.class.getMethod("apply", Object.class);
+        final Class<?> funcRet = funcMethod.getReturnType();
+        final Class<?>[] funcParams = funcMethod.getParameterTypes();
+        final MethodType funcType = MethodType.methodType(funcRet, funcParams);
+
+        return (ObjIntFunction<T>) LambdaMetafactory
+                .metafactory(MethodHandles.lookup(), funcMethod.getName(), MethodType.methodType(ObjIntFunction.class), funcType, handle, handle.type()).getTarget()
+                .invoke();
     }
 }

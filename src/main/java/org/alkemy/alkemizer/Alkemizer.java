@@ -16,8 +16,10 @@
 package org.alkemy.alkemizer;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
@@ -32,7 +34,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alkemy.transmutate.Transmutation;
+import org.alkemy.annotations.Transmutation;
 import org.apache.log4j.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -45,6 +47,8 @@ import org.objectweb.asm.Type;
 
 public class Alkemizer extends ClassVisitor
 {
+    public static final String IS_INSTRUMENTED = "is$$instrumented";
+
     private static final Logger log = Logger.getLogger(Alkemizer.class);
 
     private final List<AlkemizableField> alkemizableFields = new ArrayList<>();
@@ -67,6 +71,16 @@ public class Alkemizer extends ClassVisitor
         cr.accept(new Alkemizer(cr.getClassName(), cw), ClassReader.SKIP_FRAMES);
         return cw.toByteArray();
     }
+    
+    public static String getGetterName(String fieldName)
+    {
+        return "get$$" + fieldName;
+    }
+    
+    public static String getSetterName(String fieldName)
+    {
+        return "set$$" + fieldName;
+    }
 
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
@@ -78,10 +92,21 @@ public class Alkemizer extends ClassVisitor
     @Override
     public void visitEnd()
     {
+        appendIsInstrumented();
         appendGetters();
         appendSetters();
 
         super.visitEnd();
+    }
+    
+    private void appendIsInstrumented()
+    {
+        final String methodName = IS_INSTRUMENTED;
+        final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, methodName, "()Z", null, null);
+        
+        mv.visitInsn(ICONST_1);
+        mv.visitInsn(IRETURN);
+        mv.visitMaxs(0, 0);
     }
 
     private void appendGetters()
@@ -102,7 +127,7 @@ public class Alkemizer extends ClassVisitor
 
     private void appendGetter(String name, String desc)
     {
-        final String methodName = "get$$" + name;
+        final String methodName = getGetterName(name);
         final MethodVisitor mv = super.visitMethod(ACC_PUBLIC, methodName, "()" + desc, null, null);
 
         mv.visitVarInsn(ALOAD, 0);
@@ -113,7 +138,7 @@ public class Alkemizer extends ClassVisitor
 
     private void appendSetter(String name, String desc)
     {
-        final String methodName = "set$$" + name;
+        final String methodName = getSetterName(name);
         final MethodVisitor mv = visitMethod(ACC_PUBLIC, methodName, "(" + desc + ")V", null, null);
 
         mv.visitVarInsn(ALOAD, 0);

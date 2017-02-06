@@ -13,46 +13,31 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.util;
 
-import org.alkemy.general.Foo;
+import java.util.Collection;
+import java.util.function.Predicate;
 
-public class TestClassExpanded
+public class Nodes
 {
-    public TestClassExpanded(int foo, String bar)
+    public static <E> void drainContentsTo(Node<E> orig, Collection<? super E> dest, Predicate<E> filter)
     {
-        this.foo = foo;
-        this.bar = bar;
+        traverse(orig, dest, filter);
     }
-    
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
+
+    private static <E> void traverse(Node<E> orig, Collection<? super E> dest, Predicate<E> filter)
     {
-        return true;
-    }
-    
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
+        for (Node<E> child : orig.children())
+        {
+            final E data = child.data();
+            if (filter.test(data))
+            {
+                dest.add(data);
+            }
+            else
+            {
+                traverse(child, dest, filter);
+            }
+        }
     }
 }

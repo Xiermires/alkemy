@@ -13,46 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.general;
 
-import org.alkemy.general.Foo;
-
-public class TestClassExpanded
+public class Measure
 {
-    public TestClassExpanded(int foo, String bar)
+    public static long measure(Measurable measurable) throws Throwable
     {
-        this.foo = foo;
-        this.bar = bar;
+        final long i = System.nanoTime();
+        measurable.start();
+        return System.nanoTime() - i;
     }
     
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
+    public static interface Measurable
     {
-        return true;
-    }
-    
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
+        void start() throws Throwable;
     }
 }

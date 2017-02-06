@@ -13,19 +13,39 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.global;
+package org.alkemy.core;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.alkemy.exception.AccessException;
+import org.alkemy.exception.TargetException;
 
-import org.alkemy.transmutate.Transmutation;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Transmutation(PassThrough.class)
-public @interface Bar
+public interface ValueAccessor extends Bound<Object>
 {
+    /**
+     * Returns the value type.
+     * 
+     * @throws AccessException
+     *             If an error occurs while recovering the value type.
+     */
+    Class<?> getType() throws TargetException;
 
+    /**
+     * Returns the value.
+     * 
+     * @throws AccessException
+     *             If an error occurs while recovering the value.
+     */
+    Object get() throws AccessException;
+
+    /**
+     * Sets a value.
+     * 
+     * @throws AccessException
+     *             If an error occurs while setting the value.
+     */
+    void set(Object value) throws AccessException;
+
+    /**
+     * Returns the target name. Each target name is unique in the owner context.
+     */
+    String getTargetName();
 }

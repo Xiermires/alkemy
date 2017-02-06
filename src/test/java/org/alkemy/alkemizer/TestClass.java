@@ -15,8 +15,9 @@
  *******************************************************************************/
 package org.alkemy.alkemizer;
 
-import org.alkemy.global.Bar;
-import org.alkemy.global.Foo;
+import org.alkemy.general.Bar;
+import org.alkemy.general.Foo;
+
 
 public class TestClass
 {

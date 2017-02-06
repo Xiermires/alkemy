@@ -13,46 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.core;
 
-import org.alkemy.general.Foo;
-
-public class TestClassExpanded
+public interface AlkemyElementFactory<E, T>
 {
-    public TestClassExpanded(int foo, String bar)
-    {
-        this.foo = foo;
-        this.bar = bar;
-    }
-    
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
-    {
-        return true;
-    }
-    
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
-    }
+    /**
+     * Creates an unbound mapping for this target.
+     * @param valueAccessor 
+     */
+    E createLeaf(T desc, ValueAccessor valueAccessor);
+
+    /**
+     * Creates an unbound mapping node for this target.
+     * @param valueAccessor 
+     */
+    E createNode(T desc, ValueAccessor valueAccessor, Class<?> nodeType);
 }

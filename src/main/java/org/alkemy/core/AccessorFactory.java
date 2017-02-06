@@ -13,10 +13,35 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.global;
+package org.alkemy.core;
 
-@FunctionalInterface
-public interface ObjIntFunction<T>
+import java.lang.reflect.Field;
+
+import org.alkemy.methodhandle.MethodHandleAccessorFactory;
+
+public class AccessorFactory
 {
-    int apply(T t);
+    private AccessorFactory()
+    {
+    }
+
+    public static ValueAccessor createAccessor(Field f)
+    {
+        try
+        {
+            if (MethodHandleAccessorFactory.isInstrumented(f))
+            {
+                return MethodHandleAccessorFactory.createAccessor(f);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (IllegalAccessException | SecurityException e)
+        {
+            // TODO
+            throw new RuntimeException("TODO");
+        }
+    }
 }

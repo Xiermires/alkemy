@@ -13,11 +13,16 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.global;
+package org.alkemy.methodhandle;
 
-import org.alkemy.transmutate.TransmutationProvider;
+import org.alkemy.general.Bar;
+import org.alkemy.general.Foo;
 
-public class PassThrough extends TransmutationProvider
+public class TestClass
 {
+    @Foo
+    public int foo = -1;
 
+    @Bar
+    public String bar = "bar";
 }

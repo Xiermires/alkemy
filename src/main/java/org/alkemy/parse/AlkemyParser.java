@@ -13,46 +13,15 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.parse;
 
-import org.alkemy.general.Foo;
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.util.Node;
 
-public class TestClassExpanded
+public interface AlkemyParser<E extends AlkemyElement>
 {
-    public TestClassExpanded(int foo, String bar)
-    {
-        this.foo = foo;
-        this.bar = bar;
-    }
-    
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
-    {
-        return true;
-    }
-    
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
-    }
+    /**
+     * Returns the {@link Node} root of a tree of <b>unbound</b> elements associated to the owner's type.
+     */
+    Node<E> parse(Class<?> ownerType);
 }

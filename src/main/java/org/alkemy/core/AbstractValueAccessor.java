@@ -13,37 +13,36 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.global;
+package org.alkemy.core;
 
-public class Helper
+import java.util.Objects;
+
+import org.alkemy.exception.InvalidBound;
+
+public abstract class AbstractValueAccessor implements ValueAccessor
 {
-    public static Class<?> loadClass(String className, byte[] b)
-    {
-        // override classDefine (as it is protected) and define the class.
-        Class<?> clazz = null;
-        try
-        {
-            ClassLoader loader = ClassLoader.getSystemClassLoader();
-            Class<?> cls = Class.forName("java.lang.ClassLoader");
-            java.lang.reflect.Method method = cls.getDeclaredMethod("defineClass", new Class[] { String.class, byte[].class, int.class, int.class });
+    protected Object bound;
 
-            // protected method invocaton
-            method.setAccessible(true);
-            try
-            {
-                Object[] args = new Object[] { className, b, 0, b.length };
-                clazz = (Class<?>) method.invoke(loader, args);
-            }
-            finally
-            {
-                method.setAccessible(false);
-            }
-        }
-        catch (Exception e)
+    @Override
+    public void bindTo(Object t)
+    {
+        if (Objects.nonNull(t))
         {
-            e.printStackTrace();
-            System.exit(1);
+            if (t.getClass().equals(getDeclaringClass()))
+            {
+                bound = t;
+            }
+            else
+            {
+                throw new InvalidBound("Trying to bind class type '%s' with accessor class type '%s'", t.getClass(), getBoundClass());
+            }
         }
-        return clazz;
+    }
+
+    protected abstract Class<?> getDeclaringClass();
+    
+    private Class<?> getBoundClass()
+    {
+        return Objects.nonNull(bound) ? bound.getClass() : null;
     }
 }

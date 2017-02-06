@@ -13,46 +13,24 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.parser.impl;
 
 import org.alkemy.general.Foo;
 
-public class TestClassExpanded
+public class TestClass
 {
-    public TestClassExpanded(int foo, String bar)
-    {
-        this.foo = foo;
-        this.bar = bar;
-    }
+    @Foo
+    int n1 = 1;
     
     @Foo
-    private int foo = -1;
+    int n2 = 2; 
     
     @Foo
-    private String bar;
+    int n3 = 3;
     
-    public static boolean is$$instrumented()
-    {
-        return true;
-    }
+    @Foo
+    int n4 = 4;
     
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
-    }
+    @Foo
+    int n5 = 5;
 }

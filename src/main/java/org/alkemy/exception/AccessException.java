@@ -13,19 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.global;
+package org.alkemy.exception;
 
-public class Measure
+public class AccessException extends TargetException
 {
-    public static long measure(Measurable measurable) throws Throwable
+    private static final long serialVersionUID = 1L;
+    
+    public AccessException(String message, Object... args)
     {
-        final long i = System.nanoTime();
-        measurable.start();
-        return System.nanoTime() - i;
+        super(message, args);
     }
     
-    public static interface Measurable
+    public AccessException(String message, Exception cause, Object... args)
     {
-        void start() throws Throwable;
-    }
+        super(message, cause, args);
+    } 
 }

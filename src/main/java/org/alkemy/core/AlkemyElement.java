@@ -13,46 +13,28 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.core;
 
-import org.alkemy.general.Foo;
+import java.lang.reflect.AnnotatedElement;
 
-public class TestClassExpanded
+public class AlkemyElement
 {
-    public TestClassExpanded(int foo, String bar)
+    private AnnotatedElement desc;
+    private ValueAccessor valueAccessor;
+
+    public AlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor)
     {
-        this.foo = foo;
-        this.bar = bar;
+        this.desc = desc;
+        this.valueAccessor = valueAccessor;
     }
     
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
+    public AnnotatedElement getDesc()
     {
-        return true;
+        return desc;
     }
-    
-    public int get$$foo()
+
+    public ValueAccessor getValueAccessor()
     {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
+        return valueAccessor;
     }
 }

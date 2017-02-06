@@ -13,46 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.exception;
 
-import org.alkemy.general.Foo;
-
-public class TestClassExpanded
+public abstract class FormattedException extends RuntimeException
 {
-    public TestClassExpanded(int foo, String bar)
+    private static final long serialVersionUID = 1L;
+    
+    protected FormattedException(String format, Object... args)
     {
-        this.foo = foo;
-        this.bar = bar;
+        super(String.format(format, args).toString());
     }
     
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
+    protected FormattedException(String format, Exception cause, Object... args)
     {
-        return true;
-    }
-    
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
+        super(String.format(format, args).toString(), cause);
     }
 }

@@ -13,46 +13,41 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.parse.impl;
 
-import org.alkemy.general.Foo;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 
-public class TestClassExpanded
+public class AnnotatedElementWrapper implements AnnotatedElement
 {
-    public TestClassExpanded(int foo, String bar)
+    private final Annotation[] annotations;
+
+    AnnotatedElementWrapper(Annotation[] annotations)
     {
-        this.foo = foo;
-        this.bar = bar;
+        this.annotations = annotations;
     }
-    
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
+
+    @Override
+    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass)
     {
-        return true;
+        throw new UnsupportedOperationException("not needed.");
     }
-    
-    public int get$$foo()
+
+    @Override
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass)
     {
-        return foo;
+        throw new UnsupportedOperationException("not needed.");
     }
-    
-    public void set$$foo(final int foo)
+
+    @Override
+    public Annotation[] getAnnotations()
     {
-        this.foo = foo;
+        return annotations;
     }
-    
-    public String get$$bar()
+
+    @Override
+    public Annotation[] getDeclaredAnnotations()
     {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
+        return annotations;
     }
 }

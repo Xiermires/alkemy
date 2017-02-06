@@ -13,46 +13,23 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.annotations;
 
-import org.alkemy.general.Foo;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class TestClassExpanded
+/**
+ * This annotation provides an order of alkemy elements.
+ * <p>
+ * It is guaranteed that any alkemy element names contained within the {@link #value()} will be processed in the specified order.
+ * <p>
+ * All alkemy elements present must appear within the ordering sequence.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE })
+public @interface Order
 {
-    public TestClassExpanded(int foo, String bar)
-    {
-        this.foo = foo;
-        this.bar = bar;
-    }
-    
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
-    {
-        return true;
-    }
-    
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
-    }
+    String[] value();
 }

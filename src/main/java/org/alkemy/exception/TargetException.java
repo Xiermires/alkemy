@@ -13,19 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.global;
+package org.alkemy.exception;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import org.alkemy.transmutate.Transmutation;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Transmutation(PassThrough.class)
-public @interface Foo
+public class TargetException extends FormattedException
 {
-
+    private static final long serialVersionUID = 1L;
+    
+    public TargetException(String message, Object... args)
+    {
+        super(message, args);
+    }
+    
+    public TargetException(String message, Exception cause, Object... args)
+    {
+        super(message, cause, args);
+    }    
 }

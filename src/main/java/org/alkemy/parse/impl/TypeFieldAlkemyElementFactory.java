@@ -13,46 +13,30 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.parse.impl;
 
-import org.alkemy.general.Foo;
+import java.lang.reflect.AnnotatedElement;
 
-public class TestClassExpanded
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.core.AlkemyElementFactory;
+import org.alkemy.core.ValueAccessor;
+
+public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AlkemyElement, AnnotatedElement>
 {
-    public TestClassExpanded(int foo, String bar)
+    public static AlkemyElementFactory<AlkemyElement, AnnotatedElement> create()
     {
-        this.foo = foo;
-        this.bar = bar;
+        return new TypeFieldAlkemyElementFactory();
     }
     
-    @Foo
-    private int foo = -1;
-    
-    @Foo
-    private String bar;
-    
-    public static boolean is$$instrumented()
+    @Override
+    public AlkemyElement createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
     {
-        return true;
+        return new AlkemyElement(desc, valueAccessor);
     }
-    
-    public int get$$foo()
+
+    @Override
+    public AlkemyElement createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
     {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
+        return new AlkemyElement(desc, valueAccessor);
     }
 }

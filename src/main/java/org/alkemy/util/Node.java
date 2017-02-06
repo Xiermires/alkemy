@@ -13,16 +13,35 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.transmutate;
+package org.alkemy.util;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.ANNOTATION_TYPE)
-public @interface Transmutation
+public class Node<E>
 {
-    Class<? extends TransmutationProvider> value();
+    private final E data;
+    private final Node<E> parent;
+    private final List<Node<E>> children;
+    
+    public Node(E data, Node<E> parent, List<Node<E>> children)
+    {
+        this.data = data;
+        this.parent = parent;
+        this.children = children;
+    }
+    
+    public Node<E> parent()
+    {
+        return parent;
+    }
+
+    public E data()
+    {
+        return data;
+    }
+
+    public List<Node<E>> children()
+    {
+        return children;
+    }
 }
