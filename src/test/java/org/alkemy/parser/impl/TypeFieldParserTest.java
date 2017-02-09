@@ -24,8 +24,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.agenttools.AgentTools;
-import org.alkemy.alkemizer.AlkemizerCTF;
 import org.alkemy.core.AlkemyElement;
 import org.alkemy.core.AlkemyElementFactory;
 import org.alkemy.parse.AlkemyLexer;
@@ -34,19 +32,11 @@ import org.alkemy.parse.impl.TypeFieldAlkemyElementFactory;
 import org.alkemy.parse.impl.TypeFieldLexer;
 import org.alkemy.parse.impl.TypeFieldParser;
 import org.alkemy.util.Node;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class TypeFieldParserTest
 {
-    @BeforeClass
-    public static void pre() throws IOException
-    {
-        AgentTools.retransform(new AlkemizerCTF(), "org.alkemy.parser.impl.TestClass", "org.alkemy.parser.impl.TestNode", "org.alkemy.parser.impl.TestOrdered",
-                "org.alkemy.parser.impl.TestUnordered");
-    }
-
     @Test
     public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
     {
@@ -60,11 +50,9 @@ public class TypeFieldParserTest
         assertThat(result.size(), is(5));
 
         final TestClass tc = new TestClass();
-        for (AlkemyElement e : result)
-        {
-            e.getValueAccessor().bindTo(tc);
-        }
-        assertThat(1 + 2 + 3 + 4 + 5, is(result.stream().mapToInt(d -> (int) d.getValueAccessor().get()).sum()));
+        result.forEach(e -> e.bindTo(tc));
+
+        assertThat(1 + 2 + 3 + 4 + 5, is(result.stream().mapToInt(d -> (int) d.get()).sum()));
     }
 
     @Test
@@ -94,11 +82,12 @@ public class TypeFieldParserTest
 
         final StringBuilder sb = new StringBuilder();
         final TestOrdered to = new TestOrdered();
-        for (AlkemyElement e : result)
+        result.forEach(e ->
         {
-            e.getValueAccessor().bindTo(to);
-            sb.append(e.getValueAccessor().get()).append(" ");
-        }
+            e.bindTo(to);
+            sb.append(e.get()).append(" ");
+        });
+
         assertThat("This is an example of ordered alkemyElements ", is(sb.toString()));
     }
 
@@ -120,11 +109,11 @@ public class TypeFieldParserTest
 
         StringBuilder sb = new StringBuilder();
         final TestUnordered tu = new TestUnordered();
-        for (AlkemyElement e : result)
+        result.forEach(e ->
         {
-            e.getValueAccessor().bindTo(tu);
-            sb.append(e.getValueAccessor().get()).append(" ");
-        }
+            e.bindTo(tu);
+            sb.append(e.get()).append(" ");
+        });
         assertThat("Hello 0 World 1 true ", is(not(sb.toString())));
     }
 

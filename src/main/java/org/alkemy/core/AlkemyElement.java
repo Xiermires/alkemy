@@ -17,7 +17,10 @@ package org.alkemy.core;
 
 import java.lang.reflect.AnnotatedElement;
 
-public class AlkemyElement
+import org.alkemy.exception.AccessException;
+import org.alkemy.exception.TargetException;
+
+public class AlkemyElement implements ValueAccessor
 {
     private AnnotatedElement desc;
     private ValueAccessor valueAccessor;
@@ -33,8 +36,33 @@ public class AlkemyElement
         return desc;
     }
 
-    public ValueAccessor getValueAccessor()
+    @Override
+    public void bindTo(Object t)
     {
-        return valueAccessor;
+        valueAccessor.bindTo(t);
+    }
+
+    @Override
+    public Class<?> getType() throws TargetException
+    {
+        return valueAccessor.getType();
+    }
+
+    @Override
+    public Object get() throws AccessException
+    {
+        return valueAccessor.get();
+    }
+
+    @Override
+    public void set(Object value) throws AccessException
+    {
+        valueAccessor.set(value);
+    }
+
+    @Override
+    public String getTargetName()
+    {
+        return valueAccessor.getTargetName();
     }
 }
