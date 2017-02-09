@@ -20,11 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.alkemy.annotations.Transmutation;
+import org.alkemy.annotations.AlkemyLeaf;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Transmutation(PassThrough.class)
+@AlkemyLeaf(PassThrough.class)
 public @interface Foo
 {
 

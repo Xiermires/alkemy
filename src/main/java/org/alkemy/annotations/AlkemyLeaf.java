@@ -20,9 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.alkemy.transmutate.TransmutationProvider;
+
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface TransmutationNode
+@Target(ElementType.ANNOTATION_TYPE)
+public @interface AlkemyLeaf
 {
-    // TODO: This marker class is to go once AlkemyLexer#isNode() does a deep AlkemyElement search.
+    Class<? extends TransmutationProvider> value();
 }

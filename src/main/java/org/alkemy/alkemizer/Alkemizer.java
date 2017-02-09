@@ -34,8 +34,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alkemy.annotations.Transmutation;
-import org.alkemy.annotations.TransmutationNode;
+import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.annotations.AlkemyNode;
 import org.apache.log4j.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -187,8 +187,8 @@ public class Alkemizer extends ClassVisitor
         private boolean isAlkemizable(String desc)
         {
             return !nonAlkemizableAnnotations.contains(desc)
-                    && (alkemizableAnnotations.contains(desc) || TransmutationNode.class.getName().equals(getAnnotationQualifiedName(desc)) || isAnnotationPresent(desc,
-                            Transmutation.class));
+                    && (alkemizableAnnotations.contains(desc) || AlkemyNode.class.getName().equals(getAnnotationQualifiedName(desc)) || isAnnotationPresent(desc,
+                            AlkemyLeaf.class));
         }
 
         private static String getAnnotationQualifiedName(String desc)

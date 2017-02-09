@@ -17,8 +17,8 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.annotations.Transmutation;
-import org.alkemy.annotations.TransmutationNode;
+import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.core.AlkemyElement;
 import org.alkemy.core.AlkemyElementFactory;
 import org.alkemy.core.ValueAccessor;
@@ -43,13 +43,13 @@ public class TypeFieldLexer<E extends AlkemyElement> implements AlkemyLexer<E, A
     public boolean isNode(AnnotatedElement desc)
     {
         // TODO : Deep search for leaves
-        return desc.isAnnotationPresent(TransmutationNode.class);
+        return desc.isAnnotationPresent(AlkemyNode.class);
     }
 
     @Override
     public boolean isLeaf(AnnotatedElement desc)
     {
-        return !AnnotationUtils.getAnnotationsQualifiedAs(desc, Transmutation.class).isEmpty();
+        return !AnnotationUtils.getAnnotationsQualifiedAs(desc, AlkemyLeaf.class).isEmpty();
     }
 
     @Override
