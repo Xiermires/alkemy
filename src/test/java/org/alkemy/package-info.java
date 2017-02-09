@@ -13,12 +13,15 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parser.impl;
-
-import org.alkemy.annotations.AlkemyNode;
-
-public class TestNode
-{
-    @AlkemyNode
-    TestClass testClass;
-}
+/**
+ * FIXME: 
+ * 
+ * Maven hangs while running these tests in normal mode <em>mvn test</em>.
+ * <p>
+ * But succeeds in debug mode <em>mvn -Dmaven.surefire.debug test</em>.
+ * <p>
+ * Reason unknown, probably related to some temporary files use. Need to dig.
+ * <p>
+ * In Eclipse, test run without any issues.
+ */
+package org.alkemy;

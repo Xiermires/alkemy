@@ -13,12 +13,18 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parser.impl;
+package org.alkemy.alkemizer;
 
-import org.alkemy.annotations.AlkemyNode;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
 
-public class TestNode
+public class AlkemizerCTF implements ClassFileTransformer
 {
-    @AlkemyNode
-    TestClass testClass;
+    @Override
+    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer)
+            throws IllegalClassFormatException
+    {
+        return Alkemizer.alkemize(className, classfileBuffer);
+    }
 }

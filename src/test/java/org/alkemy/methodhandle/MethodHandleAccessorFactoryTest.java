@@ -21,21 +21,27 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
-import org.alkemy.alkemizer.AlkemizerTest;
+import org.agenttools.AgentTools;
+import org.alkemy.alkemizer.AlkemizerCTF;
 import org.alkemy.core.ValueAccessor;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class MethodHandleAccessorFactoryTest
 {
+    @BeforeClass
+    public static void pre() throws IOException
+    {
+        AgentTools.retransform(new AlkemizerCTF(), "org.alkemy.methodhandle.TestClass");
+    }
+    
     @Test
     public void testIntAccessor() throws NoSuchFieldException, SecurityException, IllegalAccessException, InstantiationException, IOException
     {
-        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
-        
         final Field f = TestClass.class.getDeclaredField("foo");
         final ValueAccessor accessor = MethodHandleAccessorFactory.createAccessor(f);
         
-        final TestClass tc = (TestClass) clazz.newInstance();
+        final TestClass tc = new TestClass();
         
         assertThat(f.get(tc), is(-1));
         

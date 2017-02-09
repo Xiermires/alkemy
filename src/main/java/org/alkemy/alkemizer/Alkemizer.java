@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.AlkemyNode;
+import org.alkemy.general.Helper;
 import org.apache.log4j.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -46,7 +47,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-public class Alkemizer extends ClassVisitor
+public class Alkemizer extends ClassVisitor 
 {
     public static final String IS_INSTRUMENTED = "is$$instrumented";
 
@@ -61,16 +62,23 @@ public class Alkemizer extends ClassVisitor
     private Alkemizer(String className, ClassVisitor cv)
     {
         super(Opcodes.ASM5, cv);
-
         this.className = className;
     }
-
-    public static byte[] alkemize(byte[] clazz)
+    
+    static byte[] alkemize(String className, byte[] classBytes)
     {
-        final ClassReader cr = new ClassReader(clazz);
+        final ClassReader cr = new ClassReader(classBytes);
         final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         cr.accept(new Alkemizer(cr.getClassName(), cw), ClassReader.SKIP_FRAMES);
         return cw.toByteArray();
+    }
+    
+    static Class<?> alkemize(String className) throws IOException
+    {
+        final ClassReader cr = new ClassReader(className);
+        final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        cr.accept(cw, ClassReader.SKIP_FRAMES);
+        return Helper.loadClass(className, alkemize(className, cw.toByteArray()));
     }
 
     public static String getGetterName(String fieldName)

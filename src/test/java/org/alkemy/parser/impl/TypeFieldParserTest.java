@@ -24,7 +24,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alkemy.alkemizer.AlkemizerTest;
+import org.agenttools.AgentTools;
+import org.alkemy.alkemizer.AlkemizerCTF;
 import org.alkemy.core.AlkemyElement;
 import org.alkemy.core.AlkemyElementFactory;
 import org.alkemy.parse.AlkemyLexer;
@@ -39,27 +40,26 @@ import org.junit.Test;
 
 public class TypeFieldParserTest
 {
-    static Class<?> clazz;
-    
     @BeforeClass
     public static void pre() throws IOException
     {
-        clazz = AlkemizerTest.alkemize("org.alkemy.parser.impl.TestClass");
+        AgentTools.retransform(new AlkemizerCTF(), "org.alkemy.parser.impl.TestClass", "org.alkemy.parser.impl.TestNode", "org.alkemy.parser.impl.TestOrdered",
+                "org.alkemy.parser.impl.TestUnordered");
     }
-    
+
     @Test
     public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
     {
         final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = new TypeFieldAlkemyElementFactory();
         final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
         final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
-        
+
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestClass.class).drainTo(result);
-        
+
         assertThat(result.size(), is(5));
-        
-        final TestClass tc = (TestClass) clazz.newInstance();
+
+        final TestClass tc = new TestClass();
         for (AlkemyElement e : result)
         {
             e.getValueAccessor().bindTo(tc);
@@ -73,15 +73,13 @@ public class TypeFieldParserTest
         final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = new TypeFieldAlkemyElementFactory();
         final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
         final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
-        
-        AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestNode");
-        
+
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestNode.class).drainTo(result);
-        
+
         assertThat(result.size(), is(6));
     }
-    
+
     @Test
     public void testOrdered() throws IOException, InstantiationException, IllegalAccessException
     {
@@ -89,15 +87,13 @@ public class TypeFieldParserTest
         final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
         final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
 
-        final Class<?> orderedClass = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestOrdered");
-
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestOrdered.class).drainTo(result);
-        
+
         assertThat(result.size(), is(7));
 
         final StringBuilder sb = new StringBuilder();
-        final TestOrdered to = (TestOrdered) orderedClass.newInstance();
+        final TestOrdered to = new TestOrdered();
         for (AlkemyElement e : result)
         {
             e.getValueAccessor().bindTo(to);
@@ -115,17 +111,15 @@ public class TypeFieldParserTest
         final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
         final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
 
-        final Class<?> unorderedClass = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestUnordered");
-
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         final Node<AlkemyElement> parsedElements = parser.parse(TestUnordered.class);
 
         parsedElements.drainTo(result);
-        
+
         assertThat(result.size(), is(5));
 
         StringBuilder sb = new StringBuilder();
-        final TestUnordered tu = (TestUnordered) unorderedClass.newInstance();
+        final TestUnordered tu = new TestUnordered();
         for (AlkemyElement e : result)
         {
             e.getValueAccessor().bindTo(tu);

@@ -18,7 +18,6 @@ package org.alkemy.alkemizer;
 import org.alkemy.general.Bar;
 import org.alkemy.general.Foo;
 
-
 public class TestClass
 {
     @Foo
