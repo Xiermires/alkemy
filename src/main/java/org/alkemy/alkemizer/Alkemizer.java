@@ -37,7 +37,6 @@ import java.util.regex.Pattern;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.general.Helper;
-import org.apache.log4j.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -46,12 +45,14 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Alkemizer extends ClassVisitor 
 {
     public static final String IS_INSTRUMENTED = "is$$instrumented";
 
-    private static final Logger log = Logger.getLogger(Alkemizer.class);
+    private static final Logger log = LoggerFactory.getLogger(Alkemizer.class);
 
     private final List<AlkemizableField> alkemizableFields = new ArrayList<>();
     private final Set<String> alkemizableAnnotations = new HashSet<>();

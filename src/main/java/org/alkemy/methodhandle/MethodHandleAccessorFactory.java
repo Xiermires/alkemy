@@ -32,11 +32,12 @@ import java.util.function.Supplier;
 
 import org.alkemy.alkemizer.Alkemizer;
 import org.alkemy.core.ValueAccessor;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MethodHandleAccessorFactory
 {
-    private static final Logger log = Logger.getLogger(MethodHandleAccessorFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(MethodHandleAccessorFactory.class);
 
     public static boolean isInstrumented(Field f) throws IllegalAccessException, SecurityException
     {
