@@ -15,9 +15,9 @@
  *******************************************************************************/
 package org.alkemy.general;
 
-import org.alkemy.transmutate.TransmutationProvider;
+import org.alkemy.provider.AlkemyProvider;
 
-public class PassThrough extends TransmutationProvider
+public class PassThrough extends AlkemyProvider
 {
 
 }
