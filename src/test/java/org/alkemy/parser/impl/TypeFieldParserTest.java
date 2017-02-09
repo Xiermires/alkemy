@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.alkemy.alkemizer.AlkemizerTest;
 import org.alkemy.core.AlkemyElement;
@@ -34,12 +33,20 @@ import org.alkemy.parse.impl.TypeFieldAlkemyElementFactory;
 import org.alkemy.parse.impl.TypeFieldLexer;
 import org.alkemy.parse.impl.TypeFieldParser;
 import org.alkemy.util.Node;
-import org.alkemy.util.Nodes;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class TypeFieldParserTest
 {
+    static Class<?> clazz;
+    
+    @BeforeClass
+    public static void pre() throws IOException
+    {
+        clazz = AlkemizerTest.alkemize("org.alkemy.parser.impl.TestClass");
+    }
+    
     @Test
     public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
     {
@@ -47,11 +54,8 @@ public class TypeFieldParserTest
         final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
         final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
         
-        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
-        
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
-        final Node<AlkemyElement> parsedElements = parser.parse(TestClass.class);
-        Nodes.drainContentsTo(parsedElements, result, x -> true);
+        parser.parse(TestClass.class).drainTo(result);
         
         assertThat(result.size(), is(5));
         
@@ -70,12 +74,10 @@ public class TypeFieldParserTest
         final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
         final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
         
-        final Class<?> clazz = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestNode");
-        AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestClass");
+        AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestNode");
         
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
-        final Node<AlkemyElement> parsedElements = parser.parse(TestNode.class);
-        Nodes.drainContentsTo(parsedElements, result, x -> true);
+        parser.parse(TestNode.class).drainTo(result);
         
         assertThat(result.size(), is(6));
     }
@@ -90,13 +92,11 @@ public class TypeFieldParserTest
         final Class<?> orderedClass = AlkemizerTest.alkemize(getClass().getPackage().getName() + ".TestOrdered");
 
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
-        final Node<AlkemyElement> parsedElements = parser.parse(TestOrdered.class);
-
-        Nodes.drainContentsTo(parsedElements, result, x -> Objects.nonNull(x.getValueAccessor()));
-
+        parser.parse(TestOrdered.class).drainTo(result);
+        
         assertThat(result.size(), is(7));
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         final TestOrdered to = (TestOrdered) orderedClass.newInstance();
         for (AlkemyElement e : result)
         {
@@ -120,8 +120,8 @@ public class TypeFieldParserTest
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         final Node<AlkemyElement> parsedElements = parser.parse(TestUnordered.class);
 
-        Nodes.drainContentsTo(parsedElements, result, x -> Objects.nonNull(x.getValueAccessor()));
-
+        parsedElements.drainTo(result);
+        
         assertThat(result.size(), is(5));
 
         StringBuilder sb = new StringBuilder();

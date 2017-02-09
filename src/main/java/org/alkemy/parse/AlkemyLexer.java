@@ -31,14 +31,12 @@ public interface AlkemyLexer<E extends AlkemyElement, T>
     boolean isLeaf(T desc);
 
     /**
-     * Creates an unbound mapping for this target.
-     * @param valueAccessor 
+     * Creates an unbound {@link AlkemyElement} for this leaf.
      */
     E createLeaf(T desc, ValueAccessor valueAccessor);
 
     /**
-     * Creates an unbound mapping node for this target.
-     * @param valueAccessor 
+     * Creates an unbound {@link AlkemyElement} for this node.
      */
     E createNode(T desc, ValueAccessor valueAccessor, Class<?> nodeType);
 }

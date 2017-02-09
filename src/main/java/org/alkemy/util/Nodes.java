@@ -1,90 +1,137 @@
-/*******************************************************************************
- * Copyright (c) 2017, Xavier Miret Andres <xavier.mires@gmail.com>
- *
- * Permission to use, copy, modify, and/or distribute this software for any 
- * purpose with or without fee is hereby granted, provided that the above 
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES 
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALLIMPLIED WARRANTIES OF 
- * MERCHANTABILITY  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR 
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES 
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN 
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *******************************************************************************/
 package org.alkemy.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-// TODO: Change all Node functionality to use the java.util.stream.Node interface.
+import org.alkemy.util.Node.Builder;
+
 public class Nodes
 {
-    public static <E> void drainContentsTo(Node<E> orig, Collection<? super E> dest, Predicate<E> filter)
+    public static <E> Node.Builder<E> arborescence(E root)
     {
-        traverse(orig, dest, filter);
+        return new ArberescenceBuilder<>(null, root);
     }
 
-    public static <E> void traverse(Node<E> orig, Consumer<E> consumer)
+    static class ArberescenceBuilder<E> implements Node.Builder<E>
     {
-        for (Node<E> child : orig.children())
+        private E data;
+        private ArberescenceBuilder<E> parent;
+        private List<ArberescenceBuilder<E>> children;
+
+        ArberescenceBuilder(ArberescenceBuilder<E> parent, E data)
         {
-            final E data = child.data();
-            consumer.accept(data);
-            
-            if (!child.children().isEmpty())
-            {
-                traverse(child, consumer);
-            }
+            this.data = data;
+            this.parent = parent;
         }
-    }
-    
-    private static <E> void traverse(Node<E> orig, Collection<? super E> dest, Predicate<E> filter)
-    {
-        for (Node<E> child : orig.children())
+
+        @Override
+        public Builder<E> addChild(E data)
         {
-            final E data = child.data();
-            if (filter.test(data))
+            if (children == null)
             {
-                dest.add(data);
+                children = new ArrayList<ArberescenceBuilder<E>>();
             }
-            
-            if (!child.children().isEmpty())
-            {
-                traverse(child, dest, filter);
-            }
+            final ArberescenceBuilder<E> child = new ArberescenceBuilder<>(this, data);
+            this.children.add(child);
+            return child;
         }
-    }
 
-    public static <E, T> Node<T> transform(Node<E> orig, Function<E, T> transformer)
-    {
-        final Node<T> dest = new Node<T>(transformer.apply(orig.data()), null, new ArrayList<Node<T>>());
-        transform(orig, dest, transformer);
-        return dest;
-    }
-
-    private static <E, T> void transform(Node<E> orig, Node<T> dest, Function<E, T> transformer)
-    {
-        for (final Node<E> node : orig.children())
+        @Override
+        public Node<E> build()
         {
-            final E e = node.data();
-            final T t = transformer.apply(e);
-
-            if (node.children().size() == 0)
+            ArberescenceBuilder<E> node = this;
+            while (node.parent != null)
             {
-                dest.children().add(new Node<T>(t, dest, Collections.<Node<T>> emptyList()));
+                node = node.parent;
+            }
+            return node.drainTo(new NodeImpl<>(), true);
+        }
+
+        private Node<E> drainTo(NodeImpl<E> parent, boolean isRoot)
+        {
+            parent.data = data;
+            parent.parent = isRoot ? null : parent;
+
+            if (children != null)
+            {
+                parent.children = children.stream().map(b -> b.drainTo(new NodeImpl<E>(), false)).collect(Collectors.toList());
             }
             else
-            {
-                final Node<T> vertex = new Node<T>(t, dest, new ArrayList<Node<T>>());
-                dest.children().add(vertex);
-                transform(node, vertex, transformer);
+            { 
+                parent.children = Collections.emptyList();
             }
+            return parent;
+        }
+    }
+
+    static class NodeImpl<E> implements Node<E>
+    {
+        private E data;
+        private Node<E> parent;
+        private List<Node<E>> children;
+
+        public Node<E> parent()
+        {
+            return parent;
+        }
+
+        public E data()
+        {
+            return data;
+        }
+
+        public List<Node<E>> children()
+        {
+            return children;
+        }
+
+        @Override
+        public void drainTo(Collection<? super E> c)
+        {
+            traverse(e -> c.add(e), p -> true);
+        }
+        
+        @Override
+        public void drainTo(Collection<? super E> c, Predicate<? super E> p)
+        {
+            traverse(e -> c.add(e));
+        }
+
+        @Override
+        public void traverse(Consumer<? super E> c)
+        {
+            children().forEach(e -> process(e, c, p -> true));
+        }
+        
+        @Override
+        public void traverse(Consumer<? super E> c, Predicate<? super E> p)
+        {
+            children().forEach(e -> process(e, c, p));
+        }
+
+        private void process(Node<E> e, Consumer<? super E> c, Predicate<? super E> p)
+        {
+            if (p.test(e.data()))
+            {
+                c.accept(e.data());
+            }
+            
+            if (!e.children().isEmpty())
+            {
+                e.children().forEach(ec -> process(ec, c, p));
+            }
+        }
+
+        @Override
+        public <R> R map(Function<E, R> f)
+        {
+            return f.apply(data);
         }
     }
 }

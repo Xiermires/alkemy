@@ -18,9 +18,7 @@ package org.alkemy.parse.impl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +26,11 @@ import java.util.Map;
 import org.alkemy.annotations.Order;
 import org.alkemy.core.AccessorFactory;
 import org.alkemy.core.AlkemyElement;
-import org.alkemy.core.ValueAccessor;
 import org.alkemy.exception.InvalidOrder;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes;
 
 public class TypeFieldParser<E extends AlkemyElement> implements AlkemyParser<E>
 {
@@ -51,11 +49,10 @@ public class TypeFieldParser<E extends AlkemyElement> implements AlkemyParser<E>
     @Override
     public Node<E> parse(Class<?> type)
     {
-        final Node<E> root = new Node<E>(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]), null, type), null, new ArrayList<Node<E>>());
-        return _parse(type, root);
+        return _parse(type, Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]), null, type))).build();
     }
 
-    private Node<E> _parse(Class<?> type, Node<E> parent)
+    private Node.Builder<E> _parse(Class<?> type, Node.Builder<E> parent)
     {
         if (Object.class.equals(type))
         {
@@ -70,14 +67,11 @@ public class TypeFieldParser<E extends AlkemyElement> implements AlkemyParser<E>
         {
             if (lexer.isLeaf(f))
             {
-                final ValueAccessor valueAccessor = AccessorFactory.createAccessor(f);
-                parent.children().add(new Node<E>(lexer.createLeaf(f, valueAccessor), parent, Collections.<Node<E>> emptyList()));
+                parent.addChild(lexer.createLeaf(f, AccessorFactory.createAccessor(f)));
             }
             else if (lexer.isNode(f))
             {
-                final Node<E> tmp = new Node<E>(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]), null, type), null, new ArrayList<Node<E>>());
-                final ValueAccessor valueAccessor = AccessorFactory.createAccessor(f);
-                parent.children().add(new Node<E>(lexer.createNode(f, valueAccessor, f.getType()), parent, _parse(f.getType(), tmp).children()));
+                _parse(f.getType(), parent.addChild(lexer.createNode(f, AccessorFactory.createAccessor(f), f.getType())));
             }
         }
         return parent;
