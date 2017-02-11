@@ -128,10 +128,14 @@ public class Nodes
                 if (p.test(e.data()))
                 {
                     c.accept(e);
-                    if (keepProcessingOnFailure && e.hasChildren())
+                    if (e.hasChildren())
                     {
                         e.traverse(c, p, keepProcessingOnFailure);
                     }
+                }
+                else if (keepProcessingOnFailure && e.hasChildren())
+                {
+                    e.traverse(c, p, keepProcessingOnFailure);
                 }
             });
         }
