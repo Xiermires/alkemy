@@ -13,16 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.exception;
 
-public class AlkemistFactory
+public class InvalidArgument extends AlkemyException
 {
-    private AlkemistFactory()
-    {   
+    private static final long serialVersionUID = 1L;
+    
+    public InvalidArgument(String message, Object... args)
+    {
+        super(message, args);
     }
     
-    public static Alkemist create()
+    public InvalidArgument(String message, Exception cause, Object... args)
     {
-        return new Alkemist();
+        super(message, cause, args);
     }
 }

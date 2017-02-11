@@ -20,9 +20,14 @@ import java.lang.reflect.AnnotatedElement;
 import org.alkemy.core.AlkemyElement;
 import org.alkemy.core.AlkemyElementFactory;
 import org.alkemy.core.ValueAccessor;
+import org.alkemy.util.AnnotationUtils;
 
 public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AlkemyElement, AnnotatedElement>
 {
+    private TypeFieldAlkemyElementFactory()
+    {   
+    }
+    
     public static AlkemyElementFactory<AlkemyElement, AnnotatedElement> create()
     {
         return new TypeFieldAlkemyElementFactory();
@@ -31,12 +36,12 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Alkem
     @Override
     public AlkemyElement createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
     {
-        return new AlkemyElement(desc, valueAccessor);
+        return new AlkemyElement(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
     }
 
     @Override
     public AlkemyElement createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
     {
-        return new AlkemyElement(desc, valueAccessor);
+        return new AlkemyElement(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
     }
 }

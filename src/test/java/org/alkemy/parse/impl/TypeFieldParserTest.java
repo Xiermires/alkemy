@@ -13,24 +13,18 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parser.impl;
+package org.alkemy.parse.impl;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.alkemy.core.AlkemyElement;
-import org.alkemy.core.AlkemyElementFactory;
-import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
-import org.alkemy.parse.impl.TypeFieldAlkemyElementFactory;
-import org.alkemy.parse.impl.TypeFieldLexer;
-import org.alkemy.parse.impl.TypeFieldParser;
 import org.alkemy.util.Node;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,13 +34,10 @@ public class TypeFieldParserTest
     @Test
     public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = new TypeFieldAlkemyElementFactory();
-        final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
-        final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
-
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestClass.class).drainTo(result);
-
+        
         assertThat(result.size(), is(5));
 
         final TestClass tc = new TestClass();
@@ -58,10 +49,7 @@ public class TypeFieldParserTest
     @Test
     public void parseTestNode() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = new TypeFieldAlkemyElementFactory();
-        final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
-        final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
-
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestNode.class).drainTo(result);
 
@@ -71,10 +59,7 @@ public class TypeFieldParserTest
     @Test
     public void testOrdered() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = new TypeFieldAlkemyElementFactory();
-        final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
-        final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
-
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestOrdered.class).drainTo(result);
 
@@ -96,10 +81,7 @@ public class TypeFieldParserTest
     // According to the spec Class#getFile, this test can succeed or fail.
     public void testUnordered() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = new TypeFieldAlkemyElementFactory();
-        final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
-        final AlkemyParser<AlkemyElement> parser = TypeFieldParser.create(lexer);
-
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         final Node<AlkemyElement> parsedElements = parser.parse(TestUnordered.class);
 

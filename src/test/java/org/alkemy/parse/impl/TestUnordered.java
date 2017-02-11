@@ -13,16 +13,24 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.parse.impl;
 
-public class AlkemistFactory
+import org.alkemy.util.PassThrough.Bar;
+
+public class TestUnordered
 {
-    private AlkemistFactory()
-    {   
-    }
+    @Bar
+    String s1 = "Hello";
     
-    public static Alkemist create()
-    {
-        return new Alkemist();
-    }
+    @Bar
+    int i2 = 0;
+    
+    @Bar
+    String s3 = "World";
+    
+    @Bar
+    long l4 = 1l;
+    
+    @Bar
+    Boolean s5 = Boolean.TRUE;
 }

@@ -20,23 +20,39 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.exception.AlkemyException;
+import org.alkemy.visitor.AlkemyElementVisitor;
+
 public class AnnotationUtils
 {
-    public static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(AnnotatedElement target, Class<QualifyingType> qualifyingType)
+    public static Class<? extends AlkemyElementVisitor> findVisitorType(AnnotatedElement ae)
     {
-        return getAnnotationsQualifiedAs(target.getAnnotations(), qualifyingType);
+        final List<Pair<Annotation, AlkemyLeaf>> visitors = AnnotationUtils.getAnnotationsQualifiedAs(ae, AlkemyLeaf.class);
+        
+        // Allow one visitor type per AlkemyElement only
+        if (visitors.size() > 1)
+        {
+            throw new AlkemyException("Invalid configuration. Multiple alkemy visitors defined for a single element.");
+        }
+        return visitors.isEmpty() ? null : visitors.get(0).second.value(); 
+    }
+    
+    private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(AnnotatedElement target, Class<QualifyingType> type)
+    {
+        return getAnnotationsQualifiedAs(target.getAnnotations(), type);
     }
 
-    public static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(Annotation[] annotations, Class<QualifyingType> qualifyingType)
+    private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(Annotation[] as, Class<QualifyingType> type)
     {
-        final List<Pair<Annotation, QualifyingType>> duplas = new ArrayList<Pair<Annotation, QualifyingType>>();
-        for (final Annotation a : annotations)
+        final List<Pair<Annotation, QualifyingType>> pairs = new ArrayList<Pair<Annotation, QualifyingType>>();
+        for (final Annotation a : as)
         {
-            if (a.annotationType().isAnnotationPresent(qualifyingType))
+            if (a.annotationType().isAnnotationPresent(type))
             {
-                duplas.add(Pair.create(a, a.annotationType().getAnnotation(qualifyingType)));
+                pairs.add(Pair.create(a, a.annotationType().getAnnotation(type)));
             }
         }
-        return duplas;
+        return pairs;
     }
 }

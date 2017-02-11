@@ -13,16 +13,37 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.common;
 
-public class AlkemistFactory
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.core.Bound;
+import org.alkemy.util.Node;
+import org.alkemy.visitor.AlkemyElementVisitor;
+import org.objenesis.ObjenesisBase;
+import org.objenesis.strategy.SerializingInstantiatorStrategy;
+
+public abstract class ObjectInitializer implements AlkemyElementVisitor, Bound<Object>
 {
-    private AlkemistFactory()
-    {   
-    }
-    
-    public static Alkemist create()
+    protected Object o;
+    private ObjenesisBase objenesis = new ObjenesisBase(new SerializingInstantiatorStrategy()); // TODO: Instrument Ctor.
+
+    @Override
+    public void visit(Node<? extends AlkemyElement> e)
     {
-        return new Alkemist();
+        if (e.hasChildren() && e.data().get() == null)
+        {
+            e.data().set(objenesis.newInstance(e.data().type()));
+        }
+        e.data().bindTo(o);
+        visit(e.data());
     }
+
+    protected abstract void visit(AlkemyElement e);
+
+    @Override
+    public void bindTo(Object o)
+    {
+        this.o = o;
+    }
+
 }

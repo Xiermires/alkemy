@@ -13,19 +13,13 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.exception;
+package org.alkemy.visitor;
 
-public class TargetException extends FormattedException
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.core.Bound;
+import org.alkemy.util.Node;
+
+public interface AlkemyElementVisitor extends Bound<Object>
 {
-    private static final long serialVersionUID = 1L;
-    
-    public TargetException(String message, Object... args)
-    {
-        super(message, args);
-    }
-    
-    public TargetException(String message, Exception cause, Object... args)
-    {
-        super(message, cause, args);
-    }    
+    void visit(Node<? extends AlkemyElement> e);
 }

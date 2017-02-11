@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.alkemy.methodhandle;
 
-import org.alkemy.general.Bar;
-import org.alkemy.general.Foo;
+import org.alkemy.util.PassThrough.Bar;
+import org.alkemy.util.PassThrough.Foo;
 
 public class TestClass
 {

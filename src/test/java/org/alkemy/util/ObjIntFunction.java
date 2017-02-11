@@ -13,24 +13,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parser.impl;
+package org.alkemy.util;
 
-import org.alkemy.general.Foo;
-
-public class TestClass
+@FunctionalInterface
+public interface ObjIntFunction<T>
 {
-    @Foo
-    int n1 = 1;
-    
-    @Foo
-    int n2 = 2; 
-    
-    @Foo
-    int n3 = 3;
-    
-    @Foo
-    int n4 = 4;
-    
-    @Foo
-    int n5 = 5;
+    int apply(T t);
 }

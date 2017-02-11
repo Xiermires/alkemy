@@ -15,40 +15,55 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.core.AlkemyTypeManager;
-import org.alkemy.core.AlkemyTypeManagerFactory;
-import org.alkemy.util.Arguments;
-import org.alkemy.util.SoftCacheWrapper;
+import java.util.function.Supplier;
+
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.core.Bound;
+import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class Alkemist
+public class ObjectCopier<T> implements AlkemyElementVisitor, Bound<Object>, Supplier<T>
 {
-    private SoftCacheWrapper<Class<?>, AlkemyTypeManager> cache;
-    
-    Alkemist()
+    private T t;
+    private Object origRef;
+    private Object destRef;
+
+    ObjectCopier(T t)
     {
-        cache = new SoftCacheWrapper<>();
+        this.destRef = this.t = t;
+    }
+
+    @Override
+    public T get()
+    {
+        return t;
+    }
+
+    @Override
+    public void visit(Node<? extends AlkemyElement> e)
+    {
+        e.data().bindTo(origRef);
+        final Object orig = e.data().get();
+        e.data().bindTo(destRef);
+        e.data().set(orig);
+        origRef = updateRef(e, origRef);
+        destRef = updateRef(e, destRef);
     }
     
-    // TODO: ThreadSafety among other options are to be supported by the AlkemistFactory.
-    public synchronized <T> void process(T t, AlkemyElementVisitor... aevs)
+    @Override
+    public void bindTo(Object t)
     {
-        Arguments.requireNonNull(t);
-        Arguments.requireArraySize(aevs, 1); // TODO: Temporary restriction.
-        
-        aevs[0].bindTo(t);
-        getOrCreate(t).process(aevs);
+        this.origRef = t;
     }
     
-    private AlkemyTypeManager getOrCreate(Object t)
+    // TODO: Test.
+    private Object updateRef(Node<? extends AlkemyElement> e, Object old)
     {
-        final Class<? extends Object> type = t.getClass();
-        AlkemyTypeManager atm = cache.get(type);
-        if (atm == null)
+        Object ref = null;
+        if (e.hasChildren())
         {
-            atm = AlkemyTypeManagerFactory.create(type);
+            ref = e.data().get();
         }
-        cache.put(type, atm);
-        return atm;
+        return ref == null ? old : ref;
     }
 }

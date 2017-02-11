@@ -13,37 +13,39 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.general;
+package org.alkemy.common;
 
-public class Helper
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.core.Bound;
+import org.alkemy.util.Node;
+import org.alkemy.visitor.AlkemyElementVisitor;
+
+public abstract class ObjectBindingReference implements AlkemyElementVisitor, Bound<Object>
 {
-    public static Class<?> loadClass(String className, byte[] b)
-    {
-        // override classDefine (as it is protected) and define the class.
-        Class<?> clazz = null;
-        try
-        {
-            ClassLoader loader = ClassLoader.getSystemClassLoader();
-            Class<?> cls = Class.forName("java.lang.ClassLoader");
-            java.lang.reflect.Method method = cls.getDeclaredMethod("defineClass", new Class[] { String.class, byte[].class, int.class, int.class });
+    protected Object ref; 
 
-            // protected method invocaton
-            method.setAccessible(true);
-            try
-            {
-                Object[] args = new Object[] { className, b, 0, b.length };
-                clazz = (Class<?>) method.invoke(loader, args);
-            }
-            finally
-            {
-                method.setAccessible(false);
-            }
-        }
-        catch (Exception e)
+    @Override
+    public void visit(Node<? extends AlkemyElement> e)
+    {
+        e.data().bindTo(ref);
+        visit(e.data());
+        updateRef(e);
+    }
+
+    protected abstract void visit(AlkemyElement e);
+
+    @Override
+    public void bindTo(Object o)
+    {
+        ref = o;
+    }
+
+    // FIXME: Buggy. Doesn't support all cases.
+    private void updateRef(Node<? extends AlkemyElement> e)
+    {
+        if (e.hasChildren())
         {
-            e.printStackTrace();
-            System.exit(1);
+            ref = e.data().get();
         }
-        return clazz;
     }
 }

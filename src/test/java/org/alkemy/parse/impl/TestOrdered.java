@@ -13,12 +13,32 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parser.impl;
+package org.alkemy.parse.impl;
 
-import org.alkemy.annotations.AlkemyNode;
+import org.alkemy.annotations.Order;
+import org.alkemy.util.PassThrough.Bar;
 
-public class TestNode
+@Order({ "s1", "s2", "s3", "s4", "s5", "s6", "s7" })
+public class TestOrdered
 {
-    @AlkemyNode
-    TestClass testClass;
+    @Bar
+    String s1 = "This";
+
+    @Bar
+    String s2 = "is";
+
+    @Bar
+    String s3 = "an";
+
+    @Bar
+    String s4 = "example";
+
+    @Bar
+    String s5 = "of";
+
+    @Bar
+    String s6 = "ordered";
+
+    @Bar
+    String s7 = "alkemyElements";
 }

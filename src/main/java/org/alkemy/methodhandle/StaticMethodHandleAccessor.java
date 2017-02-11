@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 import org.alkemy.core.AbstractValueAccessor;
 import org.alkemy.exception.AccessException;
-import org.alkemy.exception.TargetException;
+import org.alkemy.exception.AlkemyException;
 
 public class StaticMethodHandleAccessor extends AbstractValueAccessor
 {
@@ -40,7 +40,7 @@ public class StaticMethodHandleAccessor extends AbstractValueAccessor
     }
 
     @Override
-    public Class<?> getType() throws TargetException
+    public Class<?> type() throws AlkemyException
     {
         return type;
     }
@@ -58,7 +58,7 @@ public class StaticMethodHandleAccessor extends AbstractValueAccessor
     }
 
     @Override
-    public String getTargetName()
+    public String targetName()
     {
         return name;
     }

@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 import org.alkemy.core.AbstractValueAccessor;
 import org.alkemy.exception.AccessException;
-import org.alkemy.exception.TargetException;
+import org.alkemy.exception.AlkemyException;
 
 public class MemberMethodHandleAccessor extends AbstractValueAccessor
 {
@@ -41,7 +41,7 @@ public class MemberMethodHandleAccessor extends AbstractValueAccessor
     }
 
     @Override
-    public Class<?> getType() throws TargetException
+    public Class<?> type() throws AlkemyException
     {
         return type;
     }
@@ -62,7 +62,7 @@ public class MemberMethodHandleAccessor extends AbstractValueAccessor
     }
 
     @Override
-    public String getTargetName()
+    public String targetName()
     {
         return name;
     }

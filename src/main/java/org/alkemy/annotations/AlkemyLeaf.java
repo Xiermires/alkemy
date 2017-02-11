@@ -20,11 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.alkemy.provider.AlkemyProvider;
+import org.alkemy.visitor.AlkemyElementVisitor;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface AlkemyLeaf
 {
-    Class<? extends AlkemyProvider> value();
+    Class<? extends AlkemyElementVisitor> value();
 }

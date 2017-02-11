@@ -13,19 +13,25 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.general;
+package org.alkemy.parse.impl;
 
-public class Measure
+import java.lang.reflect.AnnotatedElement;
+
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.core.AlkemyElementFactory;
+import org.alkemy.parse.AlkemyLexer;
+import org.alkemy.parse.AlkemyParser;
+
+public class AlkemyParsers
 {
-    public static long measure(Measurable measurable) throws Throwable
-    {
-        final long i = System.nanoTime();
-        measurable.start();
-        return System.nanoTime() - i;
+    private AlkemyParsers()
+    {   
     }
     
-    public static interface Measurable
+    public static AlkemyParser<AlkemyElement> defaultParser()
     {
-        void start() throws Throwable;
+        final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = TypeFieldAlkemyElementFactory.create();
+        final AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = TypeFieldLexer.create(elementFactory);
+        return TypeFieldParser.create(lexer);
     }
 }

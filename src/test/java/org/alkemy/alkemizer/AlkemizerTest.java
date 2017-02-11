@@ -31,9 +31,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.alkemy.general.Measure;
-import org.alkemy.general.ObjIntFunction;
 import org.alkemy.methodhandle.MethodHandleAccessorFactory;
+import org.alkemy.util.Measure;
+import org.alkemy.util.ObjIntFunction;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -51,7 +51,6 @@ public class AlkemizerTest
     public void alkemizeIsInstrumented() throws IllegalAccessException, NoSuchMethodException, SecurityException, Throwable
     {
         final Supplier<Boolean> s = MethodHandleAccessorFactory.ref2StaticGetter(methodHandle(clazz, "is$$instrumented"), clazz, boolean.class);
-
         assertThat(s.get(), is(true));
     }
 

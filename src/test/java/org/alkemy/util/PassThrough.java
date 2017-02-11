@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.general;
+package org.alkemy.util;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,11 +21,33 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.core.AlkemyElement;
+import org.alkemy.util.Node;
+import org.alkemy.visitor.AlkemyElementVisitor;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@AlkemyLeaf(PassThrough.class)
-public @interface Bar
+public class PassThrough implements AlkemyElementVisitor
 {
+    @Override
+    public void visit(Node<? extends AlkemyElement> data)
+    {
+    }
 
+    @Override
+    public void bindTo(Object t)
+    {
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD, ElementType.PARAMETER })
+    @AlkemyLeaf(PassThrough.class)
+    public @interface Bar
+    {
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD, ElementType.PARAMETER })
+    @AlkemyLeaf(PassThrough.class)
+    public @interface Foo
+    {
+    }
 }

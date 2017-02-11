@@ -13,24 +13,12 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parser.impl;
+package org.alkemy.parse.impl;
 
-import org.alkemy.general.Bar;
+import org.alkemy.annotations.AlkemyNode;
 
-public class TestUnordered
+public class TestNode
 {
-    @Bar
-    String s1 = "Hello";
-    
-    @Bar
-    int i2 = 0;
-    
-    @Bar
-    String s3 = "World";
-    
-    @Bar
-    long l4 = 1l;
-    
-    @Bar
-    Boolean s5 = Boolean.TRUE;
+    @AlkemyNode
+    TestClass testClass;
 }

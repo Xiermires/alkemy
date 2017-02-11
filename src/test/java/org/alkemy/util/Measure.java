@@ -13,16 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.util;
 
-public class AlkemistFactory
+public class Measure
 {
-    private AlkemistFactory()
-    {   
+    public static long measure(Measurable measurable) throws Throwable
+    {
+        final long i = System.nanoTime();
+        measurable.start();
+        return System.nanoTime() - i;
     }
     
-    public static Alkemist create()
+    public static interface Measurable
     {
-        return new Alkemist();
+        void start() throws Throwable;
     }
 }

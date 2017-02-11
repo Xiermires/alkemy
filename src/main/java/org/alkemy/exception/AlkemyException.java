@@ -13,11 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.general;
+package org.alkemy.exception;
 
-import org.alkemy.provider.AlkemyProvider;
-
-public class PassThrough extends AlkemyProvider
+public class AlkemyException extends FormattedException
 {
-
+    private static final long serialVersionUID = 1L;
+    
+    public AlkemyException(String message, Object... args)
+    {
+        super(message, args);
+    }
+    
+    public AlkemyException(String message, Exception cause, Object... args)
+    {
+        super(message, cause, args);
+    }    
 }

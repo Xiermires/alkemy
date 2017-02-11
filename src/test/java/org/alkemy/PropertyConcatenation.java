@@ -13,32 +13,38 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parser.impl;
+package org.alkemy;
 
-import org.alkemy.annotations.Order;
-import org.alkemy.general.Bar;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.function.Supplier;
 
-@Order({ "s1", "s2", "s3", "s4", "s5", "s6", "s7" })
-public class TestOrdered
+import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.common.ObjectBindingReference;
+import org.alkemy.core.AlkemyElement;
+
+public class PropertyConcatenation extends ObjectBindingReference implements Supplier<String>
 {
-    @Bar
-    String s1 = "This";
+    private StringBuilder sb = new StringBuilder();
 
-    @Bar
-    String s2 = "is";
+    @Override
+    public String get()
+    {
+        return sb.toString();
+    }
 
-    @Bar
-    String s3 = "an";
+    @Override
+    public void visit(AlkemyElement e)
+    {
+        sb.append(e.get());
+    }
 
-    @Bar
-    String s4 = "example";
-
-    @Bar
-    String s5 = "of";
-
-    @Bar
-    String s6 = "ordered";
-
-    @Bar
-    String s7 = "alkemyElements";
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD, ElementType.PARAMETER })
+    @AlkemyLeaf(PropertyConcatenation.class)
+    public @interface Foo
+    {
+    }
 }

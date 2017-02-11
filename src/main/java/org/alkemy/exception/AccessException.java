@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.exception;
 
-public class AccessException extends TargetException
+public class AccessException extends AlkemyException
 {
     private static final long serialVersionUID = 1L;
     

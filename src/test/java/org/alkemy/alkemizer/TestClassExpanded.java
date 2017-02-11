@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.alkemizer;
 
-import org.alkemy.general.Foo;
+import org.alkemy.util.PassThrough.Foo;
 
 public class TestClassExpanded
 {

@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -78,7 +77,7 @@ public class Nodes
                 parent.children = children.stream().map(b -> b.drainTo(new NodeImpl<E>(), false)).collect(Collectors.toList());
             }
             else
-            { 
+            {
                 parent.children = Collections.emptyList();
             }
             return parent;
@@ -91,62 +90,62 @@ public class Nodes
         private Node<E> parent;
         private List<Node<E>> children;
 
+        @Override
         public Node<E> parent()
         {
             return parent;
         }
 
+        @Override
         public E data()
         {
             return data;
         }
 
+        @Override
         public List<Node<E>> children()
         {
             return children;
         }
 
         @Override
+        public boolean hasChildren()
+        {
+            return !children.isEmpty();
+        }
+
+        @Override
+        public void traverse(Consumer<Node<? extends E>> c)
+        {
+            traverse(c, p -> true, true);
+        }
+
+        @Override
+        public void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
+        {
+            children().forEach(e ->
+            {
+                if (p.test(e.data()))
+                {
+                    c.accept(e);
+                    if (keepProcessingOnFailure && e.hasChildren())
+                    {
+                        e.traverse(c, p, keepProcessingOnFailure);
+                    }
+                }
+            });
+        }
+        
+        @Override
         public void drainTo(Collection<? super E> c)
         {
-            traverse(e -> c.add(e), p -> true);
-        }
-        
-        @Override
-        public void drainTo(Collection<? super E> c, Predicate<? super E> p)
-        {
-            traverse(e -> c.add(e));
+            drainTo(c, p -> true, true);
         }
 
         @Override
-        public void traverse(Consumer<? super E> c)
+        public void drainTo(Collection<? super E> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
         {
-            children().forEach(e -> process(e, c, p -> true));
-        }
-        
-        @Override
-        public void traverse(Consumer<? super E> c, Predicate<? super E> p)
-        {
-            children().forEach(e -> process(e, c, p));
-        }
-
-        private void process(Node<E> e, Consumer<? super E> c, Predicate<? super E> p)
-        {
-            if (p.test(e.data()))
-            {
-                c.accept(e.data());
-            }
-            
-            if (!e.children().isEmpty())
-            {
-                e.children().forEach(ec -> process(ec, c, p));
-            }
-        }
-
-        @Override
-        public <R> R map(Function<E, R> f)
-        {
-            return f.apply(data);
+            traverse(e -> c.add(e.data()), p, keepProcessingOnFailure);
         }
     }
 }

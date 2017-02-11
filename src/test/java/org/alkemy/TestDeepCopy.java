@@ -13,19 +13,12 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.general;
+package org.alkemy;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.alkemy.annotations.AlkemyNode;
 
-import org.alkemy.annotations.AlkemyLeaf;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@AlkemyLeaf(PassThrough.class)
-public @interface Foo
+public class TestDeepCopy
 {
-
+    @AlkemyNode
+    TestClass testClass;
 }

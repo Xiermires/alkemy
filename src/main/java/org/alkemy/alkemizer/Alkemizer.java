@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.AlkemyNode;
-import org.alkemy.general.Helper;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -72,14 +71,6 @@ public class Alkemizer extends ClassVisitor
         final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         cr.accept(new Alkemizer(cr.getClassName(), cw), ClassReader.SKIP_FRAMES);
         return cw.toByteArray();
-    }
-    
-    static Class<?> alkemize(String className) throws IOException
-    {
-        final ClassReader cr = new ClassReader(className);
-        final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        cr.accept(cw, ClassReader.SKIP_FRAMES);
-        return Helper.loadClass(className, alkemize(className, cw.toByteArray()));
     }
 
     public static String getGetterName(String fieldName)
@@ -213,13 +204,19 @@ public class Alkemizer extends ClassVisitor
             try
             {
                 final ClassReader cr = new ClassReader(qualifiedName);
-                final FindAnnotation cv = new FindAnnotation(clazz, alkemizableAnnotations, nonAlkemizableAnnotations);
+                final FindAnnotation cv = new FindAnnotation(clazz, nonAlkemizableAnnotations);
                 cr.accept(cv, ClassReader.SKIP_CODE);
+                
+                if (cv.annotated)
+                {
+                    alkemizableAnnotations.add(desc);
+                }
                 return cv.annotated;
             }
             catch (IOException e)
             {
-                log.debug("Cannot read the annotation. Ignore.", e);
+                nonAlkemizableAnnotations.add(desc);
+                log.trace("Cannot read the annotation '%s'. Ignore.", desc);
             }
             return false;
         }
@@ -229,16 +226,14 @@ public class Alkemizer extends ClassVisitor
     {
         private final Class<? extends Annotation> annotation;
         private boolean annotated = false;
-        private final Set<String> alkemizableAnnotations;
         private final Set<String> nonAlkemizableAnnotations;
 
-        FindAnnotation(Class<? extends Annotation> annotation, Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations)
+        FindAnnotation(Class<? extends Annotation> annotation, Set<String> nonAlkemizableAnnotations)
         {
             super(Opcodes.ASM5);
 
             assert annotation.isAnnotation() : "Provided class isn't an annotation.";
             this.annotation = annotation;
-            this.alkemizableAnnotations = alkemizableAnnotations;
             this.nonAlkemizableAnnotations = nonAlkemizableAnnotations;
         }
 
@@ -248,7 +243,6 @@ public class Alkemizer extends ClassVisitor
             if (annotation.getName().equals(FieldAnnotationVisitor.getAnnotationQualifiedName(desc)))
             {
                 annotated = true;
-                alkemizableAnnotations.add(desc);
             }
             else
             {

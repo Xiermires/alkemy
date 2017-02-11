@@ -13,9 +13,33 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.provider;
+package org.alkemy.core;
 
-public abstract class AlkemyProvider
+import java.util.Arrays;
+
+import org.alkemy.util.Arguments;
+import org.alkemy.util.Node;
+import org.alkemy.util.Nodes;
+import org.alkemy.visitor.AlkemyElementVisitor;
+
+public class AlkemyTypeManager implements Cloneable
 {
+    private final Node<AlkemyElement> root;
 
+    public AlkemyTypeManager(Node<AlkemyElement> root)
+    {
+        this.root = root;
+    }
+
+    public void process(AlkemyElementVisitor... aev)
+    {
+        Arguments.requireNotEmpty(aev);
+        Arrays.asList(aev).forEach(_aev -> root.traverse(e -> _aev.visit(e)));
+    }
+
+    @Override
+    public AlkemyTypeManager clone()
+    {
+        return new AlkemyTypeManager(Node.copy(root, Nodes.arborescence(root.data())).build());
+    }
 }

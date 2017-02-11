@@ -16,7 +16,7 @@
 package org.alkemy.core;
 
 import org.alkemy.exception.AccessException;
-import org.alkemy.exception.TargetException;
+import org.alkemy.exception.AlkemyException;
 
 public interface ValueAccessor extends Bound<Object>
 {
@@ -26,7 +26,7 @@ public interface ValueAccessor extends Bound<Object>
      * @throws AccessException
      *             If an error occurs while recovering the value type.
      */
-    Class<?> getType() throws TargetException;
+    Class<?> type() throws AlkemyException;
 
     /**
      * Returns the value.
@@ -47,5 +47,5 @@ public interface ValueAccessor extends Bound<Object>
     /**
      * Returns the target name. Each target name is unique in the owner context.
      */
-    String getTargetName();
+    String targetName();
 }

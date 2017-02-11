@@ -13,10 +13,17 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.general;
+package org.alkemy;
 
-@FunctionalInterface
-public interface ObjIntFunction<T>
+import org.alkemy.PropertyConcatenation.Foo;
+import org.alkemy.annotations.Order;
+
+@Order({ "s1", "s2" })
+public class TestClass
 {
-    int apply(T t);
+    @Foo
+    String s1 = "Hello";
+
+    @Foo
+    String s2 = "World";
 }

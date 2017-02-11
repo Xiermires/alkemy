@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.exception;
 
-public class InvalidBound extends TargetException
+public class InvalidBound extends AlkemyException
 {
     private static final long serialVersionUID = 1L;
 
