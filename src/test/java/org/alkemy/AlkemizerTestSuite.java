@@ -17,20 +17,19 @@ package org.alkemy;
 
 import org.alkemy.InstrumentableLambdaClassSuite.Instr;
 import org.alkemy.InstrumentableLambdaClassSuite.InstrumentableLambdaClasses;
-import org.alkemy.alkemizer.AlkemizerCTF;
+import org.alkemy.parse.impl.AlkemizerCTF;
 import org.junit.runner.RunWith;
 
 @RunWith(InstrumentableLambdaClassSuite.class)
 @InstrumentableLambdaClasses(//
-testClassNames = { "org.alkemy.alkemizer.AlkemizerTest", //
-        "org.alkemy.parse.impl.TypeFieldParserTest", //
-        "org.alkemy.methodhandle.MethodHandleAccessorFactoryTest" }, //
-instrs = @Instr(classNames = { "org.alkemy.alkemizer.TestClass", //
+testClassNames = { "org.alkemy.parse.impl.AlkemizerTest", //
+        "org.alkemy.parse.impl.TypeFieldParserTest" }, //
+instrs = @Instr(classNames = { "org.alkemy.TestClass", //
+        "org.alkemy.parse.impl.TestAlkemizer", //
         "org.alkemy.parse.impl.TestClass", //
         "org.alkemy.parse.impl.TestNode", //
         "org.alkemy.parse.impl.TestOrdered", //
-        "org.alkemy.parse.impl.TestUnordered", //
-        "org.alkemy.methodhandle.TestClass"}, ctf = AlkemizerCTF.class))
+        "org.alkemy.parse.impl.TestUnordered" }, ctf = AlkemizerCTF.class))
 public class AlkemizerTestSuite
 {
 }

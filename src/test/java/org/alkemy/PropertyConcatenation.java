@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.common.BindParentReference;
-import org.alkemy.core.AlkemyElement;
 
 public class PropertyConcatenation extends BindParentReference implements Supplier<String>
 {

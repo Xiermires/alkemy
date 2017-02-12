@@ -13,26 +13,26 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.core;
+package org.alkemy.parse.impl;
 
 import java.lang.reflect.Field;
 
+import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.methodhandle.MethodHandleAccessorFactory;
 
-public class AccessorFactory
+class AccessorFactory
 {
     private AccessorFactory()
     {
     }
 
-    public static ValueAccessor createSelfAccessor()
+    static ValueAccessor createSelfAccessor()
     {
         return new SelfAccessor();
     }
     
-    public static ValueAccessor createAccessor(Field f)
+    static ValueAccessor createAccessor(Field f)
     {
         try
         {

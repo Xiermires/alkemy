@@ -13,39 +13,16 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.core;
+package org.alkemy.parse.impl;
 
-import org.alkemy.exception.AccessException;
-import org.alkemy.exception.AlkemyException;
+import org.alkemy.util.PassThrough.Bar;
+import org.alkemy.util.PassThrough.Foo;
 
-public interface ValueAccessor
+public class TestAlkemizer
 {
-    /**
-     * Returns the value type.
-     * 
-     * @throws AccessException
-     *             If an error occurs while recovering the value type.
-     */
-    Class<?> type() throws AlkemyException;
-
-    /**
-     * Returns the value.
-     * 
-     * @throws AccessException
-     *             If an error occurs while recovering the value.
-     */
-    Object get(Object parent) throws AccessException;
-
-    /**
-     * Sets a value.
-     * 
-     * @throws AccessException
-     *             If an error occurs while setting the value.
-     */
-    void set(Object value, Object parent) throws AccessException;
-
-    /**
-     * Returns the target name. Each target name is unique in the owner context.
-     */
-    String targetName();
+    @Foo
+    private int foo = -1;
+    
+    @Bar
+    private String bar = "baz";
 }

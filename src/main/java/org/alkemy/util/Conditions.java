@@ -19,7 +19,7 @@ import java.util.Objects;
 
 import org.alkemy.exception.InvalidArgument;
 
-public class Arguments
+public class Conditions
 {
     public static void requireNonNull(Object o)
     {

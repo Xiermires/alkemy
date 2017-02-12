@@ -23,9 +23,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alkemy.AlkemyElement;
 import org.alkemy.annotations.Order;
-import org.alkemy.core.AccessorFactory;
-import org.alkemy.core.AlkemyElement;
 import org.alkemy.exception.InvalidOrder;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;

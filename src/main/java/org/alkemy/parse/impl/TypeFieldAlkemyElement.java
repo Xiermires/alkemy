@@ -13,32 +13,18 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.transform;
+package org.alkemy.parse.impl;
 
-import java.util.function.Function;
+import java.lang.reflect.AnnotatedElement;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
+import org.alkemy.AlkemyElement;
+import org.alkemy.ValueAccessor;
+import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class FunctionTable
+public class TypeFieldAlkemyElement extends AlkemyElement
 {
-    private final Table<Class<?>, Class<?>, Function<?, ?>> table = HashBasedTable.create();
-    
-    @SuppressWarnings("unchecked")
-    public <R, C> Function<R, C> get(Class<?> r, Class<?> c)
+    protected TypeFieldAlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor> visitorType)
     {
-        return (Function<R, C>) table.get(r, c);
-    }
-    
-    public <R, C> Function<R, C> put(Class<R> r, Class<C> c, Function<R, C> f)
-    {
-        final Function<R, C> overwritten = get(r, c);
-        table.put(r, c, f);
-        return overwritten;
-    }
-    
-    public boolean contains(Class<?> r, Class<?> c)
-    {
-        return table.contains(r, c);
+        super(desc, valueAccessor, visitorType);
     }
 }

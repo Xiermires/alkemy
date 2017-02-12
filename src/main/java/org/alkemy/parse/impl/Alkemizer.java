@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.parse.impl;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 public class Alkemizer extends ClassVisitor 
 {
-    public static final String IS_INSTRUMENTED = "is$$instrumented";
+    static final String IS_INSTRUMENTED = "is$$instrumented";
 
     private static final Logger log = LoggerFactory.getLogger(Alkemizer.class);
 
@@ -73,12 +73,12 @@ public class Alkemizer extends ClassVisitor
         return cw.toByteArray();
     }
 
-    public static String getGetterName(String fieldName)
+    static String getGetterName(String fieldName)
     {
         return "get$$" + fieldName;
     }
 
-    public static String getSetterName(String fieldName)
+    static String getSetterName(String fieldName)
     {
         return "set$$" + fieldName;
     }

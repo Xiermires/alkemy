@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.alkemy.visitor;
 
-import org.alkemy.core.AlkemyElement;
-import org.alkemy.core.Bound;
+import org.alkemy.AlkemyElement;
+import org.alkemy.Bound;
 import org.alkemy.util.Node;
 
 public interface AlkemyElementVisitor extends Bound<Object>

@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.core;
+package org.alkemy;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,37 +26,37 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-public class AlkemyTypeManagerFactory
+class AlkemyParsedTypeFactoryCache
 {
     // TODO: Allow external configuration
     private static final int MAXIMUM_BYTE_SIZE = 2 * 1024 * 1024;
 
     // Keep a cached version of created AlkemyTypeVisitor to enhance performance.
-    private static LoadingCache<Class<?>, AlkemyTypeManager> cache;
+    private static LoadingCache<Class<?>, AlkemyParsedType> cache;
 
     static
     {
         cache = CacheBuilder.newBuilder().maximumWeight(MAXIMUM_BYTE_SIZE).weigher((k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue())
-                .expireAfterAccess(15, TimeUnit.MINUTES).build(new CacheLoader<Class<?>, AlkemyTypeManager>()
+                .expireAfterAccess(15, TimeUnit.MINUTES).build(new CacheLoader<Class<?>, AlkemyParsedType>()
                 {
                     @Override
-                    public AlkemyTypeManager load(Class<?> key) throws AlkemyException
+                    public AlkemyParsedType load(Class<?> key) throws AlkemyException
                     {
                         return _create(key);
                     }
                 });
     }
 
-    private AlkemyTypeManagerFactory()
+    private AlkemyParsedTypeFactoryCache()
     {
     }
 
-    private static final AlkemyTypeManager _create(Class<?> type)
+    private static final AlkemyParsedType _create(Class<?> type)
     {
-        return new AlkemyTypeManager(AlkemyParsers.defaultParser().parse(type));
+        return new AlkemyParsedType(AlkemyParsers.defaultParser().parse(type));
     }
 
-    public static AlkemyTypeManager create(Class<?> type)
+    static AlkemyParsedType create(Class<?> type)
     {
         try
         {

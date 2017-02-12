@@ -17,66 +17,66 @@ package org.alkemy.util;
 
 import org.junit.Test;
 
-public class ArgumentsTest
+public class ConditionsTest
 {
     @Test(expected = NullPointerException.class)
     public void requiresNonNull()
     {
         Object o = null;
-        Arguments.requireNonNull(o);
+        Conditions.requireNonNull(o);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyBoolean()
     {
-        Arguments.requireNotEmpty(new boolean[0]);
+        Conditions.requireNotEmpty(new boolean[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyChar()
     {
-        Arguments.requireNotEmpty(new char[0]);
+        Conditions.requireNotEmpty(new char[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyByte()
     {
-        Arguments.requireNotEmpty(new byte[0]);
+        Conditions.requireNotEmpty(new byte[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyShort()
     {
-        Arguments.requireNotEmpty(new short[0]);
+        Conditions.requireNotEmpty(new short[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyInt()
     {
-        Arguments.requireNotEmpty(new int[0]);
+        Conditions.requireNotEmpty(new int[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyLong()
     {
-        Arguments.requireNotEmpty(new long[0]);
+        Conditions.requireNotEmpty(new long[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyFloat()
     {
-        Arguments.requireNotEmpty(new float[0]);
+        Conditions.requireNotEmpty(new float[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyDouble()
     {
-        Arguments.requireNotEmpty(new double[0]);
+        Conditions.requireNotEmpty(new double[0]);
     }   
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyObjArray()
     {
-        Arguments.requireNotEmpty(new Object[0]);
+        Conditions.requireNotEmpty(new Object[0]);
     }
 }

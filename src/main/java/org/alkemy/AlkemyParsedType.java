@@ -13,16 +13,30 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy;
 
-import org.alkemy.util.PassThrough.Bar;
-import org.alkemy.util.PassThrough.Foo;
+import org.alkemy.util.Node;
+import org.alkemy.util.Nodes;
+import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class TestClass
+class AlkemyParsedType implements Cloneable
 {
-    @Foo
-    private int foo = -1;
-    
-    @Bar
-    private String bar = "baz";
+    private final Node<AlkemyElement> root;
+
+    AlkemyParsedType(Node<AlkemyElement> root)
+    {
+        this.root = root;
+    }
+
+    <T> void process(AlkemyElementVisitor aev)
+    {
+        aev.visit(root);
+    }
+
+    @Override
+    @Deprecated
+    public AlkemyParsedType clone()
+    {
+        return new AlkemyParsedType(Node.copy(root, Nodes.arborescence(root.data())).build());
+    }
 }

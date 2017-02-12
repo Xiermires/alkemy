@@ -21,7 +21,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.agenttools.AgentTools;
-import org.alkemy.alkemizer.AlkemizerCTF;
+import org.alkemy.parse.impl.AlkemizerCTF;
+import org.alkemy.util.Measure;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -61,5 +62,22 @@ public class AlkemistTest
         assertThat(copier.get().testClass, is(not(nullValue())));
         assertThat(copier.get().testClass.s1, is("foo"));
         assertThat(copier.get().testClass.s2, is("bar"));
+    }
+    
+    @Test
+    public void peformance() throws Throwable
+    {
+        final AssignConstant<String> assign = new AssignConstant<String>("foo"); 
+
+        final TestClass tc = new TestClass();
+        final Alkemist alkemist = AlkemistFactory.create();
+        
+        System.out.println("Assign 2e7 strings: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 10000000; i++)
+            {
+                alkemist.process(tc, assign);
+            }
+        }) / 1000000 + " ms");
     }
 }

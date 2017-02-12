@@ -13,23 +13,24 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.methodhandle;
+package org.alkemy.parse.impl;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
-import org.alkemy.core.ValueAccessor;
+import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public class StaticMethodHandleAccessor implements ValueAccessor
+public class MemberMethodHandleAccessor implements ValueAccessor
 {
     private final String name;
     private final Class<?> type;
-    private final Supplier<?> getter;
-    private final Consumer<Object> setter;
-
-    StaticMethodHandleAccessor(String name, Class<?> type, Supplier<?> getter, Consumer<Object> setter)
+    private final Function<Object, ?> getter;
+    private final BiConsumer<Object, Object> setter;
+    
+    MemberMethodHandleAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
         this.name = name;
         this.type = type;
@@ -44,15 +45,18 @@ public class StaticMethodHandleAccessor implements ValueAccessor
     }
 
     @Override
-    public Object get(Object unused) throws AccessException
+    public Object get(Object parent) throws AccessException
     {
-        return getter.get();
+        return Objects.nonNull(parent) ? getter.apply(parent) : null;
     }
 
     @Override
-    public void set(Object value, Object unused) throws AccessException
+    public void set(Object value, Object parent) throws AccessException
     {
-        setter.accept(value);
+        if (Objects.nonNull(parent))
+        {
+            setter.accept(parent, value);
+        }
     }
 
     @Override

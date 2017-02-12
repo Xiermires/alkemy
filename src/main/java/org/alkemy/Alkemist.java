@@ -15,19 +15,22 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.core.AlkemyTypeManagerFactory;
-import org.alkemy.util.Arguments;
+import org.alkemy.util.Conditions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class Alkemist
 {
+    Alkemist()
+    {   
+    }
+    
     public <T> void process(T t, AlkemyElementVisitor... aevs)
     {
-        Arguments.requireNonNull(t);
-        Arguments.requireArraySize(aevs, 1); // TODO: Temporary restriction.
+        Conditions.requireNonNull(t);
+        Conditions.requireArraySize(aevs, 1); // TODO: Temporary restriction.
         
         final AlkemyElementVisitor aev = aevs[0];
         aev.bind(t);
-        AlkemyTypeManagerFactory.create(t.getClass()).process(aev);
+        AlkemyParsedTypeFactoryCache.create(t.getClass()).process(aev);
     }
 }

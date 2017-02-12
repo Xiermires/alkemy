@@ -13,55 +13,58 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.methodhandle;
+package org.alkemy;
 
-import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.core.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class MemberMethodHandleAccessor implements ValueAccessor
+public abstract class AlkemyElement implements ValueAccessor
 {
-    private final String name;
-    private final Class<?> type;
-    private final Function<Object, ?> getter;
-    private final BiConsumer<Object, Object> setter;
-    
-    MemberMethodHandleAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
+    private final AnnotatedElement desc;
+    private final ValueAccessor valueAccessor;
+    private final Class<? extends AlkemyElementVisitor> visitorType;
+
+    protected AlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor> visitorType)
     {
-        this.name = name;
-        this.type = type;
-        this.getter = getter;
-        this.setter = setter;
+        this.desc = desc;
+        this.valueAccessor = valueAccessor;
+        this.visitorType = visitorType;
+    }
+    
+    public AnnotatedElement desc()
+    {
+        return desc;
+    }
+    
+    public Class<? extends AlkemyElementVisitor> visitorType()
+    {
+        return visitorType;
     }
 
     @Override
     public Class<?> type() throws AlkemyException
     {
-        return type;
+        return valueAccessor.type();
     }
 
     @Override
     public Object get(Object parent) throws AccessException
     {
-        return Objects.nonNull(parent) ? getter.apply(parent) : null;
+        return valueAccessor.get(parent);
     }
 
     @Override
     public void set(Object value, Object parent) throws AccessException
     {
-        if (Objects.nonNull(parent))
-        {
-            setter.accept(parent, value);
-        }
+        valueAccessor.set(value, parent);
     }
 
     @Override
     public String targetName()
     {
-        return name;
+        return valueAccessor.targetName();
     }
 }

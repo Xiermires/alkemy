@@ -20,8 +20,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.alkemy.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.core.AlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 

@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.methodhandle;
+package org.alkemy.parse.impl;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaMetafactory;
@@ -30,8 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.alkemy.alkemizer.Alkemizer;
-import org.alkemy.core.ValueAccessor;
+import org.alkemy.ValueAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class MethodHandleAccessorFactory
 {
     private static final Logger log = LoggerFactory.getLogger(MethodHandleAccessorFactory.class);
 
-    public static boolean isInstrumented(Field f) throws IllegalAccessException, SecurityException
+    static boolean isInstrumented(Field f) throws IllegalAccessException, SecurityException
     {
         final Class<?> clazz = f.getDeclaringClass();
         final Supplier<Boolean> ref = ref2StaticGetter(methodHandle(clazz, Alkemizer.IS_INSTRUMENTED), clazz, boolean.class);
@@ -48,7 +47,7 @@ public class MethodHandleAccessorFactory
 
     @SuppressWarnings("unchecked") 
     // This method provides accessors for any types, except primitives. Uses functions with obj. references only.
-    public static ValueAccessor createAccessor(Field f) throws IllegalAccessException, SecurityException
+    static ValueAccessor createAccessor(Field f) throws IllegalAccessException, SecurityException
     {
         final ValueAccessor mha;
         final Class<?> clazz = f.getDeclaringClass(); // TODO: Check inner classes.
@@ -71,7 +70,7 @@ public class MethodHandleAccessorFactory
     }
 
     @SuppressWarnings("unchecked") // safe
-    public static <T, R> Function<T, R> ref2MemberGetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
+    static <T, R> Function<T, R> ref2MemberGetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
     {
         if (Objects.nonNull(handle))
         {
@@ -92,7 +91,7 @@ public class MethodHandleAccessorFactory
     }
 
     @SuppressWarnings("unchecked") // safe
-    public static <T, R> Supplier<R> ref2StaticGetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
+    static <T, R> Supplier<R> ref2StaticGetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
     {
         if (Objects.nonNull(handle))
         {
@@ -113,7 +112,7 @@ public class MethodHandleAccessorFactory
     }
 
     @SuppressWarnings("unchecked") // safe
-    public static <T, R> BiConsumer<T, R> ref2MemberSetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
+    static <T, R> BiConsumer<T, R> ref2MemberSetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
     {
         if (Objects.nonNull(handle))
         {
@@ -135,7 +134,7 @@ public class MethodHandleAccessorFactory
     }
 
     @SuppressWarnings("unchecked") // safe
-    public static <T, R> Consumer<R> ref2StaticSetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
+    static <T, R> Consumer<R> ref2StaticSetter(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException
     {
         if (Objects.nonNull(handle))
         {
@@ -166,7 +165,7 @@ public class MethodHandleAccessorFactory
         return (T) metafactory.getTarget().invoke();
     }
 
-    public static MethodHandle methodHandle(Class<?> clazz, String name, Class<?>... params) throws IllegalAccessException, SecurityException
+    static MethodHandle methodHandle(Class<?> clazz, String name, Class<?>... params) throws IllegalAccessException, SecurityException
     {
         try
         {

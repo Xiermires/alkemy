@@ -17,8 +17,8 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.core.AlkemyElement;
-import org.alkemy.core.AlkemyElementFactory;
+import org.alkemy.AlkemyElement;
+import org.alkemy.AlkemyElementFactory;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 

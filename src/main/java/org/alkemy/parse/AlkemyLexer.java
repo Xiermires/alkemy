@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
-import org.alkemy.core.AlkemyElement;
-import org.alkemy.core.ValueAccessor;
+import org.alkemy.AlkemyElement;
+import org.alkemy.ValueAccessor;
 
 public interface AlkemyLexer<E extends AlkemyElement, T>
 {

@@ -13,19 +13,11 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.core;
+package org.alkemy;
 
-public interface AlkemyElementFactory<E, T>
+public interface Bound<T>
 {
-    /**
-     * Creates an unbound mapping for this target.
-     * @param valueAccessor 
-     */
-    E createLeaf(T desc, ValueAccessor valueAccessor);
-
-    /**
-     * Creates an unbound mapping node for this target.
-     * @param valueAccessor 
-     */
-    E createNode(T desc, ValueAccessor valueAccessor, Class<?> nodeType);
+    void bind(T t);
+    
+    T bound();
 }

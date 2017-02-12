@@ -13,32 +13,39 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.core;
+package org.alkemy;
 
-import org.alkemy.util.Arguments;
-import org.alkemy.util.Node;
-import org.alkemy.util.Nodes;
-import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.exception.AccessException;
+import org.alkemy.exception.AlkemyException;
 
-public class AlkemyTypeManager implements Cloneable
+public interface ValueAccessor
 {
-    private final Node<AlkemyElement> root;
+    /**
+     * Returns the value type.
+     * 
+     * @throws AccessException
+     *             If an error occurs while recovering the value type.
+     */
+    Class<?> type() throws AlkemyException;
 
-    public AlkemyTypeManager(Node<AlkemyElement> root)
-    {
-        this.root = root;
-    }
+    /**
+     * Returns the value.
+     * 
+     * @throws AccessException
+     *             If an error occurs while recovering the value.
+     */
+    Object get(Object parent) throws AccessException;
 
-    public <T> void process(AlkemyElementVisitor aev)
-    {
-        Arguments.requireNonNull(aev);
-        aev.visit(root);
-    }
+    /**
+     * Sets a value.
+     * 
+     * @throws AccessException
+     *             If an error occurs while setting the value.
+     */
+    void set(Object value, Object parent) throws AccessException;
 
-    @Override
-    @Deprecated
-    public AlkemyTypeManager clone()
-    {
-        return new AlkemyTypeManager(Node.copy(root, Nodes.arborescence(root.data())).build());
-    }
+    /**
+     * Returns the target name. Each target name is unique in the owner context.
+     */
+    String targetName();
 }

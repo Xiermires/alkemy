@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.alkemizer;
+package org.alkemy.parse.impl;
 
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -24,14 +24,14 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.alkemy.methodhandle.MethodHandleAccessorFactory;
+import org.alkemy.ValueAccessor;
 import org.alkemy.util.Measure;
 import org.alkemy.util.ObjIntFunction;
 import org.junit.BeforeClass;
@@ -44,7 +44,7 @@ public class AlkemizerTest
     @BeforeClass
     public static void pre() throws IOException, ClassNotFoundException
     {
-        clazz = TestClass.class;
+        clazz = TestAlkemizer.class;
     }
 
     @Test
@@ -66,56 +66,35 @@ public class AlkemizerTest
     }
 
     @Test
-    public void tryMethodhandle() throws Throwable
+    public void testAccessorGetter() throws NoSuchFieldException, SecurityException, IllegalAccessException 
     {
-        final MethodHandle handle = methodHandle(clazz, "get$$foo");
+        final Field f = clazz.getDeclaredField("foo");
+        final ValueAccessor accessor = MethodHandleAccessorFactory.createAccessor(f);
 
-        final TestClass tc = new TestClass();
-        assertThat(-1, is((int) handle.invokeExact(tc)));
-        assertThat(-1, is(handle.invoke(tc)));
+        final TestAlkemizer tc = new TestAlkemizer();
+        assertThat(-1, is(accessor.get(tc)));
     }
-
+    
     @Test
-    public void tryLambdaMetaFactoryGetter() throws Throwable
+    public void testAccessorSetter() throws Throwable
     {
-        final MethodHandle methodHandle = MethodHandleAccessorFactory.methodHandle(clazz, "get$$foo");
-        final Function<Object, Integer> f = MethodHandleAccessorFactory.ref2MemberGetter(methodHandle, Object.class, int.class);
+        final Field f = clazz.getDeclaredField("foo");
+        final ValueAccessor accessor = MethodHandleAccessorFactory.createAccessor(f);
 
-        final TestClass tc = new TestClass();
-        assertThat(-1, is(f.apply(tc)));
-    }
-
-    @Test
-    public void tryLambdaMetaFactoryStaticGetter() throws Throwable
-    {
-        final MethodHandle methodHandle = MethodHandleAccessorFactory.methodHandle(clazz, Alkemizer.IS_INSTRUMENTED);
-        final Supplier<Boolean> f = MethodHandleAccessorFactory.ref2StaticGetter(methodHandle, Object.class, boolean.class);
-
-        assertThat(true, is(f.get()));
-    }
-
-    @Test
-    public void tryLambdaMetaFactorySetter() throws Throwable
-    {
-        final MethodHandle getterHandle = MethodHandleAccessorFactory.methodHandle(clazz, Alkemizer.getGetterName("foo"));
-        final MethodHandle setterHandle = MethodHandleAccessorFactory.methodHandle(clazz, Alkemizer.getSetterName("foo"), int.class);
-        final Function<TestClass, Integer> getter = MethodHandleAccessorFactory.ref2MemberGetter(getterHandle, TestClass.class, int.class);
-        final BiConsumer<TestClass, Integer> setter = MethodHandleAccessorFactory.ref2MemberSetter(setterHandle, TestClass.class, int.class);
-
-        final TestClass tc = new TestClass();
-        setter.accept(tc, 1);
-
-        assertThat(1, is(getter.apply(tc)));
+        final TestAlkemizer tc = new TestAlkemizer();
+        accessor.set(1, tc);
+        assertThat(1, is(accessor.get(tc)));
     }
 
     @Test
     public void performanceMeasurements() throws Throwable
     {
-        final MethodHandle handle = methodHandle(clazz, "get$$bar");
         final Method method = clazz.getDeclaredMethod("get$$bar");
+        final MethodHandle handle = methodHandle(clazz, "get$$bar");
         final Function<Object, String> function = MethodHandleAccessorFactory.ref2MemberGetter(handle, Object.class, String.class);
-
-        final TestClass tc = new TestClass();
+        final ValueAccessor accessor = MethodHandleAccessorFactory.createAccessor(clazz.getDeclaredField("bar"));
+        
+        final TestAlkemizer tc = new TestAlkemizer();
 
         // warm up
         for (int i = 0; i < 1000000; i++)
@@ -125,6 +104,7 @@ public class AlkemizerTest
             bar = (String) handle.invoke(tc);
             bar = function.apply(tc);
             bar = (String) method.invoke(tc);
+            bar = (String) accessor.get(tc);
         }
 
         System.out.println("MethodHandle#invokeExact(): " + Measure.measure(() ->
@@ -152,6 +132,14 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
+        System.out.println("Accessor (TestClass)String: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 10000000; i++)
+            {
+                accessor.get(tc);
+            }
+        }) / 1000000 + " ms");
+        
         System.out.println("Reflection: " + Measure.measure(() ->
         {
             for (int i = 0; i < 10000000; i++)
@@ -160,7 +148,7 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
-        final TestClassExpanded tce = new TestClassExpanded(-1, "baz");
+        final TestAlkemizerCompiledVersion tce = new TestAlkemizerCompiledVersion(-1, "baz");
         System.out.println("Direct access: " + Measure.measure(() ->
         {
             for (int i = 0; i < 10000000; i++)
@@ -174,10 +162,10 @@ public class AlkemizerTest
     public void compareLambdaRefObjectvsRefPrimitive() throws Throwable
     {
         final MethodHandle handle = methodHandle(clazz, "get$$foo");
-        final Function<TestClass, Integer> f1 = MethodHandleAccessorFactory.ref2MemberGetter(handle, TestClass.class, Integer.class);
-        final ObjIntFunction<TestClass> f2 = objIntLambdaRef(handle, TestClass.class);
+        final Function<TestAlkemizer, Integer> f1 = MethodHandleAccessorFactory.ref2MemberGetter(handle, TestAlkemizer.class, Integer.class);
+        final ObjIntFunction<TestAlkemizer> f2 = objIntLambdaRef(handle, TestAlkemizer.class);
 
-        final TestClass tc = new TestClass();
+        final TestAlkemizer tc = new TestAlkemizer();
 
         // warm up
         for (int i = 0; i < 1000000; i++)

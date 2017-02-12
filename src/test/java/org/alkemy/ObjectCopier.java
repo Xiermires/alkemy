@@ -17,7 +17,6 @@ package org.alkemy;
 
 import java.util.function.Supplier;
 
-import org.alkemy.core.AlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.objenesis.Objenesis;

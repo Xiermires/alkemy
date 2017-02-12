@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
-import org.alkemy.core.AlkemyElement;
+import org.alkemy.AlkemyElement;
 import org.alkemy.util.Node;
 
 public interface AlkemyParser<E extends AlkemyElement>
