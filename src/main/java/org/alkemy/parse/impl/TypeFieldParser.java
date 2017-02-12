@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,38 +88,33 @@ class TypeFieldParser<E extends AlkemyElement> implements AlkemyParser<E>
             {
                 nameOrder.put(names[i], i);
             }
-            Arrays.sort(fields, new Comparator<Field>()
+            Arrays.sort(fields, (o1, o2) ->
             {
-                @Override
-                public int compare(Field o1, Field o2)
+                if (lexer.isLeaf(o1) || lexer.isNode(o1) && lexer.isLeaf(o2) || lexer.isNode(o2))
                 {
-                    if (lexer.isLeaf(o1) || lexer.isNode(o1) && lexer.isLeaf(o2) || lexer.isNode(o2))
-                    {
 
-                        final Integer lhs = nameOrder.get(o1.getName());
-                        final Integer rhs = nameOrder.get(o2.getName());
+                    final Integer lhs = nameOrder.get(o1.getName());
+                    final Integer rhs = nameOrder.get(o2.getName());
 
-                        if (lhs == null)
-                        {
-                            throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type.getSimpleName());
-                        }
-                        else if (rhs == null) { throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type.getSimpleName()); }
+                    if (lhs == null)
+                    {
+                        throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type.getSimpleName());
+                    }
+                    else if (rhs == null) { throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type.getSimpleName()); }
 
-                        return lhs < rhs ? -1 : rhs == lhs ? 0 : 1;
-                    }
-                    // Keep non mappings to the right.
-                    else if (lexer.isLeaf(o1) || lexer.isNode(o1))
-                    {
-                        return 1;
-                    }
-                    else if (lexer.isLeaf(o2) || lexer.isNode(o2))
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
+                    return lhs < rhs ? -1 : rhs == lhs ? 0 : 1;
+                }
+                else if (lexer.isLeaf(o1) || lexer.isNode(o1)) // Keep non mappings to the right.
+                {
+                    return 1;
+                }
+                else if (lexer.isLeaf(o2) || lexer.isNode(o2))
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 0;
                 }
             });
         }

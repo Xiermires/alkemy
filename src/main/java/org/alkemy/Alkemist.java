@@ -21,16 +21,17 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 public class Alkemist
 {
     Alkemist()
-    {   
+    {
     }
-    
-    public <T> void process(T t, AlkemyElementVisitor... aevs)
+
+    public <T> T process(T t, AlkemyElementVisitor... aevs)
     {
         Conditions.requireNonNull(t);
         Conditions.requireArraySize(aevs, 1); // TODO: Temporary restriction.
-        
+
         final AlkemyElementVisitor aev = aevs[0];
         aev.bind(t);
         AlkemyParsedTypeFactoryCache.create(t.getClass()).process(aev);
+        return t;
     }
 }

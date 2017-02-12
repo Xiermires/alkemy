@@ -18,12 +18,36 @@ package org.alkemy;
 import org.alkemy.PropertyConcatenation.Foo;
 import org.alkemy.annotations.Order;
 
-@Order({ "s1", "s2" })
+@Order({ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9" })
 public class TestClass
 {
     @Foo
-    String s1 = "Hello";
+    String s0 = "0";
+    
+    @Foo
+    String s1 = "1";
 
     @Foo
-    String s2 = "World";
+    String s2 = "2";
+    
+    @Foo
+    String s3 = "3";
+
+    @Foo
+    String s4 = "4";
+    
+    @Foo
+    String s5 = "5";
+
+    @Foo
+    String s6 = "6";
+    
+    @Foo
+    String s7 = "7";
+
+    @Foo
+    String s8 = "8";
+    
+    @Foo
+    String s9 = "9";
 }
