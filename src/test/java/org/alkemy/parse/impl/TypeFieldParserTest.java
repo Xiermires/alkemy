@@ -41,9 +41,7 @@ public class TypeFieldParserTest
         assertThat(result.size(), is(5));
 
         final TestClass tc = new TestClass();
-        result.forEach(e -> e.bind(tc));
-
-        assertThat(1 + 2 + 3 + 4 + 5, is(result.stream().mapToInt(d -> (int) d.get()).sum()));
+        assertThat(1 + 2 + 3 + 4 + 5, is(result.stream().mapToInt(d -> (int) d.get(tc)).sum()));
     }
 
     @Test
@@ -69,8 +67,7 @@ public class TypeFieldParserTest
         final TestOrdered to = new TestOrdered();
         result.forEach(e ->
         {
-            e.bind(to);
-            sb.append(e.get()).append(" ");
+            sb.append(e.get(to)).append(" ");
         });
 
         assertThat("This is an example of ordered alkemyElements ", is(sb.toString()));
@@ -93,8 +90,7 @@ public class TypeFieldParserTest
         final TestUnordered tu = new TestUnordered();
         result.forEach(e ->
         {
-            e.bind(tu);
-            sb.append(e.get()).append(" ");
+            sb.append(e.get(tu)).append(" ");
         });
         assertThat("Hello 0 World 1 true ", is(not(sb.toString())));
     }

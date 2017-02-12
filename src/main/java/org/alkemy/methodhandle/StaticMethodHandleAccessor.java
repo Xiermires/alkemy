@@ -18,21 +18,19 @@ package org.alkemy.methodhandle;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.alkemy.core.AbstractValueAccessor;
+import org.alkemy.core.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public class StaticMethodHandleAccessor extends AbstractValueAccessor
+public class StaticMethodHandleAccessor implements ValueAccessor
 {
-    private final Class<?> declaringClass;
     private final String name;
     private final Class<?> type;
     private final Supplier<?> getter;
     private final Consumer<Object> setter;
 
-    StaticMethodHandleAccessor(Class<?> clazz, String name, Class<?> type, Supplier<?> getter, Consumer<Object> setter)
+    StaticMethodHandleAccessor(String name, Class<?> type, Supplier<?> getter, Consumer<Object> setter)
     {
-        this.declaringClass = clazz;
         this.name = name;
         this.type = type;
         this.getter = getter;
@@ -46,13 +44,13 @@ public class StaticMethodHandleAccessor extends AbstractValueAccessor
     }
 
     @Override
-    public Object get() throws AccessException
+    public Object get(Object unused) throws AccessException
     {
         return getter.get();
     }
 
     @Override
-    public void set(Object value) throws AccessException
+    public void set(Object value, Object unused) throws AccessException
     {
         setter.accept(value);
     }
@@ -61,11 +59,5 @@ public class StaticMethodHandleAccessor extends AbstractValueAccessor
     public String targetName()
     {
         return name;
-    }
-
-    @Override
-    protected Class<?> getDeclaringClass()
-    {
-        return declaringClass;
     }
 }

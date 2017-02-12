@@ -57,33 +57,21 @@ public class AccessorFactory
         Object ref;
                 
         @Override
-        public void bind(Object t)
-        {
-            ref = t;
-        }
-
-        @Override
-        public Object bound()
-        {
-            return ref;
-        }
-
-        @Override
         public Class<?> type() throws AlkemyException
         {
             return ref.getClass();
         }
 
         @Override
-        public Object get() throws AccessException
+        public Object get(Object unused) throws AccessException
         {
-            return bound();
+            return ref;
         }
 
         @Override
-        public void set(Object value) throws AccessException
+        public void set(Object value, Object unused) throws AccessException
         {
-            bind(value);
+            ref = value;
         }
 
         @Override

@@ -18,22 +18,21 @@ package org.alkemy;
 import java.util.function.Supplier;
 
 import org.alkemy.core.AlkemyElement;
-import org.alkemy.core.Bound;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements AlkemyElementVisitor, Bound<Object>, Supplier<T>
+public class ObjectCopier<T> implements AlkemyElementVisitor, Supplier<T>
 {
     private T t;
-    private Object origRef;
-    private Object destRef;
+    private Object orig;
+    private Object dest;
     private Objenesis objenesis = new ObjenesisStd();
 
     ObjectCopier(T t)
     {
-        this.destRef = this.t = t;
+        this.dest = this.t = t;
     }
 
     @Override
@@ -45,38 +44,35 @@ public class ObjectCopier<T> implements AlkemyElementVisitor, Bound<Object>, Sup
     @Override
     public void bind(Object t)
     {
-        origRef = t;
+        orig = t;
     }
 
     @Override
     public Object bound()
     {
-        return origRef;
+        return orig;
     }
 
     @Override
     public void visit(Node<? extends AlkemyElement> e)
     {
-        visit(e, origRef, destRef);
+        visit(e, orig, dest);
     }
 
-    private void visit(Node<? extends AlkemyElement> e, Object origRef, Object destRef)
+    private void visit(Node<? extends AlkemyElement> e, Object orig, Object dest)
     {
         e.children().forEach(n ->
         {
-            n.data().bind(origRef);
-            final Object orig = n.data().get();
+            final Object vo = n.data().get(orig);
             if (n.hasChildren())
             {
-                n.data().bind(destRef);
-                final Object dest = objenesis.newInstance(n.data().type());
-                n.data().set(dest);
-                visit(n, orig, dest);
+                final Object vd = objenesis.newInstance(n.data().type());
+                n.data().set(vd, dest);
+                visit(n, vo, vd);
             }
             else
             {
-                n.data().bind(destRef);
-                n.data().set(orig);
+                n.data().set(vo, dest);
             }
         });
     }

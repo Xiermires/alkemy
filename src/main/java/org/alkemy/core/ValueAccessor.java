@@ -18,7 +18,7 @@ package org.alkemy.core;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public interface ValueAccessor extends Bound<Object>
+public interface ValueAccessor
 {
     /**
      * Returns the value type.
@@ -34,7 +34,7 @@ public interface ValueAccessor extends Bound<Object>
      * @throws AccessException
      *             If an error occurs while recovering the value.
      */
-    Object get() throws AccessException;
+    Object get(Object parent) throws AccessException;
 
     /**
      * Sets a value.
@@ -42,7 +42,7 @@ public interface ValueAccessor extends Bound<Object>
      * @throws AccessException
      *             If an error occurs while setting the value.
      */
-    void set(Object value) throws AccessException;
+    void set(Object value, Object parent) throws AccessException;
 
     /**
      * Returns the target name. Each target name is unique in the owner context.

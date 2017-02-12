@@ -58,14 +58,14 @@ public class MethodHandleAccessorFactory
             final Supplier<?> getter = ref2StaticGetter(methodHandle(clazz, Alkemizer.getGetterName(f.getName())), clazz, f.getType());
             final Consumer<Object> setter = (Consumer<Object>) ref2StaticSetter(methodHandle(clazz, Alkemizer.getSetterName(f.getName()), f.getType()), clazz, f.getType());
 
-            mha = new StaticMethodHandleAccessor(clazz, f.getName(), f.getType(), getter, setter);
+            mha = new StaticMethodHandleAccessor(f.getName(), f.getType(), getter, setter);
         }
         else
         {
             final Function<Object, ?> getter = (Function<Object, ?>) ref2MemberGetter(methodHandle(clazz, Alkemizer.getGetterName(f.getName())), clazz, f.getType());
             final BiConsumer<Object, Object> setter = (BiConsumer<Object, Object>) ref2MemberSetter(methodHandle(clazz, Alkemizer.getSetterName(f.getName()), f.getType()), clazz, f.getType());
 
-            mha = new MemberMethodHandleAccessor(clazz, f.getName(), f.getType(), getter, setter);
+            mha = new MemberMethodHandleAccessor(f.getName(), f.getType(), getter, setter);
         }
         return mha;
     }
@@ -98,7 +98,7 @@ public class MethodHandleAccessorFactory
         {
             try
             {
-                return (Supplier<R>) createLambdaRef(MethodHandles.lookup(), Supplier.class, Supplier.class.getMethod("get"), handle);
+                return createLambdaRef(MethodHandles.lookup(), Supplier.class, Supplier.class.getMethod("get"), handle);
             }
             catch (IllegalAccessException | SecurityException e)
             {
@@ -119,7 +119,7 @@ public class MethodHandleAccessorFactory
         {
             try
             {
-                return (BiConsumer<T, R>) createLambdaRef(MethodHandles.lookup(), BiConsumer.class, BiConsumer.class.getMethod("accept", Object.class, Object.class),
+                return createLambdaRef(MethodHandles.lookup(), BiConsumer.class, BiConsumer.class.getMethod("accept", Object.class, Object.class),
                         handle);
             }
             catch (IllegalAccessException | SecurityException e)
@@ -141,7 +141,7 @@ public class MethodHandleAccessorFactory
         {
             try
             {
-                return (Consumer<R>) createLambdaRef(MethodHandles.lookup(), Consumer.class, Consumer.class.getMethod("accept", Object.class), handle);
+                return createLambdaRef(MethodHandles.lookup(), Consumer.class, Consumer.class.getMethod("accept", Object.class), handle);
             }
             catch (IllegalAccessException | SecurityException e)
             {

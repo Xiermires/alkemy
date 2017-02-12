@@ -36,9 +36,8 @@ public class MethodHandleAccessorFactoryTest
         
         assertThat(f.get(tc), is(-1));
         
-        accessor.bind(tc);
-        accessor.set(1);
+        accessor.set(1, tc);
         assertThat(f.get(tc), is(1));
-        assertThat(accessor.get(), is(1));
+        assertThat(accessor.get(tc), is(1));
     }
 }

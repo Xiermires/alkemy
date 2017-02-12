@@ -29,13 +29,14 @@ public class AlkemyTypeManager implements Cloneable
         this.root = root;
     }
 
-    public void process(AlkemyElementVisitor aev)
+    public <T> void process(AlkemyElementVisitor aev)
     {
         Arguments.requireNonNull(aev);
         aev.visit(root);
     }
 
     @Override
+    @Deprecated
     public AlkemyTypeManager clone()
     {
         return new AlkemyTypeManager(Node.copy(root, Nodes.arborescence(root.data())).build());

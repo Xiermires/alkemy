@@ -19,21 +19,19 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.alkemy.core.AbstractValueAccessor;
+import org.alkemy.core.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public class MemberMethodHandleAccessor extends AbstractValueAccessor
+public class MemberMethodHandleAccessor implements ValueAccessor
 {
-    private final Class<?> declaringClass;
     private final String name;
     private final Class<?> type;
     private final Function<Object, ?> getter;
     private final BiConsumer<Object, Object> setter;
     
-    MemberMethodHandleAccessor(Class<?> clazz, String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
+    MemberMethodHandleAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
-        this.declaringClass = clazz;
         this.name = name;
         this.type = type;
         this.getter = getter;
@@ -47,17 +45,17 @@ public class MemberMethodHandleAccessor extends AbstractValueAccessor
     }
 
     @Override
-    public Object get() throws AccessException
+    public Object get(Object parent) throws AccessException
     {
-        return Objects.nonNull(bound) ? getter.apply(bound) : null;
+        return Objects.nonNull(parent) ? getter.apply(parent) : null;
     }
 
     @Override
-    public void set(Object value) throws AccessException
+    public void set(Object value, Object parent) throws AccessException
     {
-        if (Objects.nonNull(bound))
+        if (Objects.nonNull(parent))
         {
-            setter.accept(bound, value);
+            setter.accept(parent, value);
         }
     }
 
@@ -65,11 +63,5 @@ public class MemberMethodHandleAccessor extends AbstractValueAccessor
     public String targetName()
     {
         return name;
-    }
-    
-    @Override
-    protected Class<?> getDeclaringClass()
-    {
-        return declaringClass;
     }
 }

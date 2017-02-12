@@ -31,14 +31,13 @@ public abstract class BindParentReference implements AlkemyElementVisitor
     {
         e.children().forEach(n ->
         {
-            n.data().bind(ref);
-            visit(n.data());
+            visit(n.data(), ref);
             if (n.hasChildren())
             {
-                n.children().forEach(nn -> visit(nn, n.data().get()));
+                n.children().forEach(nn -> visit(nn, n.data().get(ref)));
             }
         });
     }
     
-    protected abstract void visit(AlkemyElement e);
+    protected abstract void visit(AlkemyElement e, Object parent);
 }

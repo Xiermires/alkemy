@@ -15,41 +15,19 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.core.AlkemyTypeManager;
 import org.alkemy.core.AlkemyTypeManagerFactory;
 import org.alkemy.util.Arguments;
-import org.alkemy.util.SoftCacheWrapper;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class Alkemist
 {
-    private SoftCacheWrapper<Class<?>, AlkemyTypeManager> cache;
-    
-    Alkemist()
-    {
-        cache = new SoftCacheWrapper<>();
-    }
-    
-    // TODO: ThreadSafety among other options are to be supported by the AlkemistFactory.
-    public synchronized <T> void process(T t, AlkemyElementVisitor... aevs)
+    public <T> void process(T t, AlkemyElementVisitor... aevs)
     {
         Arguments.requireNonNull(t);
         Arguments.requireArraySize(aevs, 1); // TODO: Temporary restriction.
         
-        AlkemyElementVisitor aev = aevs[0];
+        final AlkemyElementVisitor aev = aevs[0];
         aev.bind(t);
-        getOrCreate(t).process(aev);
-    }
-    
-    private AlkemyTypeManager getOrCreate(Object t)
-    {
-        final Class<? extends Object> type = t.getClass();
-        AlkemyTypeManager atm = cache.get(type);
-        if (atm == null)
-        {
-            atm = AlkemyTypeManagerFactory.create(type);
-        }
-        cache.put(type, atm);
-        return atm;
+        AlkemyTypeManagerFactory.create(t.getClass()).process(aev);
     }
 }

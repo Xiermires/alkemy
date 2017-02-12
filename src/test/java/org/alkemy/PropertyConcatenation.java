@@ -36,9 +36,9 @@ public class PropertyConcatenation extends BindParentReference implements Suppli
     }
 
     @Override
-    public void visit(AlkemyElement e)
+    public void visit(AlkemyElement e, Object parent)
     {
-        sb.append(e.get());
+        sb.append(e.get(parent));
     }
 
     @Retention(RetentionPolicy.RUNTIME)

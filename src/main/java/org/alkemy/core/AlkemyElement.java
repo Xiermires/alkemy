@@ -45,33 +45,21 @@ public class AlkemyElement implements ValueAccessor
     }
 
     @Override
-    public void bind(Object t)
-    {
-        valueAccessor.bind(t);
-    }
-    
-    @Override
-    public Object bound()
-    {
-        return valueAccessor.bound();
-    }
-
-    @Override
     public Class<?> type() throws AlkemyException
     {
         return valueAccessor.type();
     }
 
     @Override
-    public Object get() throws AccessException
+    public Object get(Object parent) throws AccessException
     {
-        return valueAccessor.get();
+        return valueAccessor.get(parent);
     }
 
     @Override
-    public void set(Object value) throws AccessException
+    public void set(Object value, Object parent) throws AccessException
     {
-        valueAccessor.set(value);
+        valueAccessor.set(value, parent);
     }
 
     @Override
