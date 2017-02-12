@@ -49,7 +49,7 @@ class TypeFieldParser<E extends AlkemyElement> implements AlkemyParser<E>
     @Override
     public Node<E> parse(Class<?> type)
     {
-        return _parse(type, Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]), null, type))).build();
+        return _parse(type, Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]), AccessorFactory.createSelfAccessor(), type))).build();
     }
 
     private Node.Builder<E> _parse(Class<?> type, Node.Builder<E> parent)

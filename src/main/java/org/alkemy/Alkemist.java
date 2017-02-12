@@ -36,8 +36,9 @@ public class Alkemist
         Arguments.requireNonNull(t);
         Arguments.requireArraySize(aevs, 1); // TODO: Temporary restriction.
         
-        aevs[0].bindTo(t);
-        getOrCreate(t).process(aevs);
+        AlkemyElementVisitor aev = aevs[0];
+        aev.bind(t);
+        getOrCreate(t).process(aev);
     }
     
     private AlkemyTypeManager getOrCreate(Object t)

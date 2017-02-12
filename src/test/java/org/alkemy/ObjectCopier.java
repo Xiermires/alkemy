@@ -21,12 +21,15 @@ import org.alkemy.core.AlkemyElement;
 import org.alkemy.core.Bound;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
+import org.objenesis.Objenesis;
+import org.objenesis.ObjenesisStd;
 
 public class ObjectCopier<T> implements AlkemyElementVisitor, Bound<Object>, Supplier<T>
 {
     private T t;
     private Object origRef;
     private Object destRef;
+    private Objenesis objenesis = new ObjenesisStd();
 
     ObjectCopier(T t)
     {
@@ -40,30 +43,41 @@ public class ObjectCopier<T> implements AlkemyElementVisitor, Bound<Object>, Sup
     }
 
     @Override
+    public void bind(Object t)
+    {
+        origRef = t;
+    }
+
+    @Override
+    public Object bound()
+    {
+        return origRef;
+    }
+
+    @Override
     public void visit(Node<? extends AlkemyElement> e)
     {
-        e.data().bindTo(origRef);
-        final Object orig = e.data().get();
-        e.data().bindTo(destRef);
-        e.data().set(orig);
-        origRef = updateRef(e, origRef);
-        destRef = updateRef(e, destRef);
+        visit(e, origRef, destRef);
     }
-    
-    @Override
-    public void bindTo(Object t)
+
+    private void visit(Node<? extends AlkemyElement> e, Object origRef, Object destRef)
     {
-        this.origRef = t;
-    }
-    
-    // TODO: Test.
-    private Object updateRef(Node<? extends AlkemyElement> e, Object old)
-    {
-        Object ref = null;
-        if (e.hasChildren())
+        e.children().forEach(n ->
         {
-            ref = e.data().get();
-        }
-        return ref == null ? old : ref;
+            n.data().bind(origRef);
+            final Object orig = n.data().get();
+            if (n.hasChildren())
+            {
+                n.data().bind(destRef);
+                final Object dest = objenesis.newInstance(n.data().type());
+                n.data().set(dest);
+                visit(n, orig, dest);
+            }
+            else
+            {
+                n.data().bind(destRef);
+                n.data().set(orig);
+            }
+        });
     }
 }

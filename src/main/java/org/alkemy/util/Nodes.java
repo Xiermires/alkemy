@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -64,17 +65,17 @@ public class Nodes
             {
                 node = node.parent;
             }
-            return node.drainTo(new NodeImpl<>(), true);
+            return node.drainTo(new ArborescenceNodeImpl<>(), true);
         }
 
-        private Node<E> drainTo(NodeImpl<E> parent, boolean isRoot)
+        private Node<E> drainTo(ArborescenceNodeImpl<E> parent, boolean isRoot)
         {
             parent.data = data;
             parent.parent = isRoot ? null : parent;
 
             if (children != null)
             {
-                parent.children = children.stream().map(b -> b.drainTo(new NodeImpl<E>(), false)).collect(Collectors.toList());
+                parent.children = children.stream().map(b -> b.drainTo(new ArborescenceNodeImpl<E>(), false)).collect(Collectors.toList());
             }
             else
             {
@@ -84,7 +85,7 @@ public class Nodes
         }
     }
 
-    static class NodeImpl<E> implements Node<E>
+    static class ArborescenceNodeImpl<E> implements Node<E>
     {
         private E data;
         private Node<E> parent;
@@ -114,12 +115,54 @@ public class Nodes
             return !children.isEmpty();
         }
 
+
         @Override
         public void traverse(Consumer<Node<? extends E>> c)
         {
             traverse(c, p -> true, true);
         }
 
+        /**
+         * Consumption order is children first, in order of appearance.
+         * <p>
+         * Example: children = { c1 = { c1.c1, c1.c2, c1.c3 }, c2, c3 = { c3.c1 } }, test(c1.c2) & test(c3) fail, rest succeed. 
+         * <p>
+         * <code>keepProcessingOnFailure = true</code>
+         * <ol>
+         * <li>c1
+         * <ol>
+         * <li>c1.c1
+         * <li><del>c1.c2</del>
+         * <li>c1.c3
+         * </ol>
+         * <li>c2
+         * <li><del>c3</del>
+         * <ol>
+         * <li>c3.c1
+         * </ol>
+         * </ol>
+         * <code>keepProcessingOnFailure = false</code>
+         * <ol>
+         * <li>c1
+         * <ol>
+         * <li>c1.c1
+         * <li><del>c1.c2</del>
+         * <li>c1.c3
+         * </ol>
+         * <li>c2
+         * <li><del>c3</del>
+         * <ol>
+         * <li><del>c3.c1</del>
+         * </ol>
+         * </ol>
+         * 
+         * @param c
+         *            node consumer
+         * @param p
+         *            consumption condition
+         * @param keepProcessingOnFailure
+         *            process subnodes of a node failing p.
+         */
         @Override
         public void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
         {
@@ -139,7 +182,13 @@ public class Nodes
                 }
             });
         }
-        
+
+        @Override
+        public Optional<Node<E>> traverseUntil(Consumer<Node<? extends E>> c, Predicate<Node<? extends E>> p)
+        {
+            return children().stream().filter(p).findFirst();
+        }
+
         @Override
         public void drainTo(Collection<? super E> c)
         {
@@ -150,6 +199,25 @@ public class Nodes
         public void drainTo(Collection<? super E> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
         {
             traverse(e -> c.add(e.data()), p, keepProcessingOnFailure);
+        }
+    }
+
+    static class KeepLast<E> implements Consumer<Node<? extends E>>
+    {
+        Node<? extends E> last;
+        Consumer<Node<? extends E>> c;
+
+        KeepLast(Consumer<Node<? extends E>> c, Node<? extends E> first)
+        {
+            this.c = c;
+            last = first;
+        }
+
+        @Override
+        public void accept(Node<? extends E> t)
+        {
+            last = t;
+            c.accept(t);
         }
     }
 }

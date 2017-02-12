@@ -17,6 +17,8 @@ package org.alkemy.core;
 
 import java.lang.reflect.Field;
 
+import org.alkemy.exception.AccessException;
+import org.alkemy.exception.AlkemyException;
 import org.alkemy.methodhandle.MethodHandleAccessorFactory;
 
 public class AccessorFactory
@@ -25,6 +27,11 @@ public class AccessorFactory
     {
     }
 
+    public static ValueAccessor createSelfAccessor()
+    {
+        return new SelfAccessor();
+    }
+    
     public static ValueAccessor createAccessor(Field f)
     {
         try
@@ -42,6 +49,47 @@ public class AccessorFactory
         {
             // TODO
             throw new RuntimeException("TODO");
+        }
+    }
+    
+    static class SelfAccessor implements ValueAccessor
+    {
+        Object ref;
+                
+        @Override
+        public void bind(Object t)
+        {
+            ref = t;
+        }
+
+        @Override
+        public Object bound()
+        {
+            return ref;
+        }
+
+        @Override
+        public Class<?> type() throws AlkemyException
+        {
+            return ref.getClass();
+        }
+
+        @Override
+        public Object get() throws AccessException
+        {
+            return bound();
+        }
+
+        @Override
+        public void set(Object value) throws AccessException
+        {
+            bind(value);
+        }
+
+        @Override
+        public String targetName()
+        {
+            throw new AlkemyException(""); // TODO (??)
         }
     }
 }

@@ -25,6 +25,7 @@ import org.alkemy.alkemizer.AlkemizerCTF;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+// Alkemist usage examples.
 public class AlkemistTest
 {
     @BeforeClass
@@ -34,7 +35,7 @@ public class AlkemistTest
     }
     
     @Test
-    public void testProcess()
+    public void testConcat()
     {
         final Alkemist alkemist = AlkemistFactory.create();
         final TestClass tc = new TestClass();

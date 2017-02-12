@@ -24,7 +24,7 @@ public abstract class AbstractValueAccessor implements ValueAccessor
     protected Object bound;
 
     @Override
-    public void bindTo(Object t)
+    public void bind(Object t)
     {
         if (Objects.nonNull(t))
         {
@@ -37,6 +37,12 @@ public abstract class AbstractValueAccessor implements ValueAccessor
                 throw new InvalidBound("Trying to bind class type '%s' with accessor class type '%s'", t.getClass(), getBoundClass());
             }
         }
+    }
+    
+    @Override
+    public Object bound()
+    {
+        return bound;
     }
 
     protected abstract Class<?> getDeclaringClass();

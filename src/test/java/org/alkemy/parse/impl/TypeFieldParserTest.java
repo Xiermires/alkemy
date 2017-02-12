@@ -41,7 +41,7 @@ public class TypeFieldParserTest
         assertThat(result.size(), is(5));
 
         final TestClass tc = new TestClass();
-        result.forEach(e -> e.bindTo(tc));
+        result.forEach(e -> e.bind(tc));
 
         assertThat(1 + 2 + 3 + 4 + 5, is(result.stream().mapToInt(d -> (int) d.get()).sum()));
     }
@@ -69,7 +69,7 @@ public class TypeFieldParserTest
         final TestOrdered to = new TestOrdered();
         result.forEach(e ->
         {
-            e.bindTo(to);
+            e.bind(to);
             sb.append(e.get()).append(" ");
         });
 
@@ -93,7 +93,7 @@ public class TypeFieldParserTest
         final TestUnordered tu = new TestUnordered();
         result.forEach(e ->
         {
-            e.bindTo(tu);
+            e.bind(tu);
             sb.append(e.get()).append(" ");
         });
         assertThat("Hello 0 World 1 true ", is(not(sb.toString())));

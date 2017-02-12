@@ -22,10 +22,10 @@ import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.common.ObjectBindingReference;
+import org.alkemy.common.BindParentReference;
 import org.alkemy.core.AlkemyElement;
 
-public class PropertyConcatenation extends ObjectBindingReference implements Supplier<String>
+public class PropertyConcatenation extends BindParentReference implements Supplier<String>
 {
     private StringBuilder sb = new StringBuilder();
 

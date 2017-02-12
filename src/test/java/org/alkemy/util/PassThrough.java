@@ -33,8 +33,14 @@ public class PassThrough implements AlkemyElementVisitor
     }
 
     @Override
-    public void bindTo(Object t)
+    public void bind(Object t)
     {
+    }
+
+    @Override
+    public Object bound()
+    {
+        return null;
     }
     
     @Retention(RetentionPolicy.RUNTIME)

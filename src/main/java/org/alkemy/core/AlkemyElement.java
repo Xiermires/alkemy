@@ -45,9 +45,15 @@ public class AlkemyElement implements ValueAccessor
     }
 
     @Override
-    public void bindTo(Object t)
+    public void bind(Object t)
     {
-        valueAccessor.bindTo(t);
+        valueAccessor.bind(t);
+    }
+    
+    @Override
+    public Object bound()
+    {
+        return valueAccessor.bound();
     }
 
     @Override

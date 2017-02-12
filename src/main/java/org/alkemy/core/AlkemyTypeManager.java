@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.alkemy.core;
 
-import java.util.Arrays;
-
 import org.alkemy.util.Arguments;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes;
@@ -31,10 +29,10 @@ public class AlkemyTypeManager implements Cloneable
         this.root = root;
     }
 
-    public void process(AlkemyElementVisitor... aev)
+    public void process(AlkemyElementVisitor aev)
     {
-        Arguments.requireNotEmpty(aev);
-        Arrays.asList(aev).forEach(_aev -> root.traverse(e -> _aev.visit(e)));
+        Arguments.requireNonNull(aev);
+        aev.visit(root);
     }
 
     @Override

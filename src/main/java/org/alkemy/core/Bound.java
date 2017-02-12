@@ -17,5 +17,7 @@ package org.alkemy.core;
 
 public interface Bound<T>
 {
-    void bindTo(T t);
+    void bind(T t);
+    
+    T bound();
 }

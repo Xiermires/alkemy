@@ -17,6 +17,7 @@ package org.alkemy.util;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -41,7 +42,7 @@ public interface Node<E>
     /**
      * Applies c to every node in the underlying branches satisfying p. 
      * <p>
-     * Consumption order is children first, in order of appearence.
+     * Traverse order is defined by each node implementation.
      * <p>
      * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not. 
      * <p>
@@ -49,37 +50,7 @@ public interface Node<E>
      * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be potentially consumed.
      * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be consumed.
      * </ul>
-     * Example: children = { c1 = { c1.c1, c1.c2, c1.c3 }, c2, c3 = { c3.c1 } }, test(c1.c2) & test(c3) fail, rest succeed. 
-     * <p>
-     * <code>keepProcessingOnFailure = true</code>
-     * <ol>
-     * <li>c1
-     * <ol>
-     * <li>c1.c1
-     * <li><del>c1.c2</del>
-     * <li>c1.c3
-     * </ol>
-     * <li>c2
-     * <li><del>c3</del>
-     * <ol>
-     * <li>c3.c1
-     * </ol>
-     * </ol>
-     * <code>keepProcessingOnFailure = false</code>
-     * <ol>
-     * <li>c1
-     * <ol>
-     * <li>c1.c1
-     * <li><del>c1.c2</del>
-     * <li>c1.c3
-     * </ol>
-     * <li>c2
-     * <li><del>c3</del>
-     * <ol>
-     * <li><del>c3.c1</del>
-     * </ol>
-     * </ol>
-     * 
+     *  
      * @param c
      *            node consumer
      * @param p
@@ -89,6 +60,20 @@ public interface Node<E>
      */
     void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure);
 
+    /**
+     * Applies c to every node until p is satisfied.
+     * <p>
+     * It returns last satisfying node.
+     * <p>
+     * Consumption order is children first, in order of appearance.
+     * 
+     * @param c
+     *            node consumer
+     * @param p
+     *            consumption condition
+     */
+    Optional<Node<E>> traverseUntil(Consumer<Node<? extends E>> c, Predicate<Node<? extends E>> p);
+    
     /**
      * As {@link #drainTo(Consumer, Predicate) adding all branch's subnodes.
      * 
