@@ -13,40 +13,20 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.common.annotations;
 
-import org.alkemy.util.Conditions;
-import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyTypeVisitor;
-import org.alkemy.visitor.impl.SingleElementVisitor;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class Alkemist
+import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.common.IndexedElementVisitor;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.FIELD })
+@AlkemyLeaf(IndexedElementVisitor.class)
+public @interface Index
 {
-    private AlkemyLoadingCache cache;
-
-    Alkemist(AlkemyLoadingCache cache)
-    {
-        this.cache = cache;
-    }
-
-    public <T> T process(T t, AlkemyElementVisitor aev)
-    {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(aev);
-
-        final SingleElementVisitor sev = new SingleElementVisitor(aev);
-        sev.bind(t);
-        sev.visit(cache.get(t.getClass()));
-        return t;
-    }
-
-    public <T> T process(T t, AlkemyTypeVisitor atv)
-    {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(atv);
-
-        atv.bind(t);
-        atv.visit(cache.get(t.getClass()));
-        return t;
-    }
+    int value();
 }

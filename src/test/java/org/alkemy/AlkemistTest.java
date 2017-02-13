@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import org.agenttools.AgentTools;
 import org.alkemy.parse.impl.AlkemizerCTF;
 import org.alkemy.util.Measure;
+import org.alkemy.util.PassThrough;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,18 +39,39 @@ public class AlkemistTest
     @Test
     public void testConcat()
     {
-        final Alkemist alkemist = AlkemistFactory.create();
+        final Alkemist alkemist = new AlkemistBuilder().build();
         final TestClass tc = new TestClass();
         final PropertyConcatenation concat = new PropertyConcatenation();
         alkemist.process(tc, concat);
 
-        assertThat("0123456789", is(concat.get()));
+        assertThat("01234", is(concat.get()));
+    }
+    
+    @Test
+    public void testAssign()
+    {
+        final Alkemist alkemist = new AlkemistBuilder().build();
+        final AssignConstant<String> assign = new AssignConstant<String>("bar");
+
+        final TestClass tc = new TestClass();
+        alkemist.process(tc, assign);
+
+        assertThat(tc.s0, is("0"));
+        assertThat(tc.s1, is("1"));
+        assertThat(tc.s2, is("2"));
+        assertThat(tc.s3, is("3"));
+        assertThat(tc.s4, is("4"));
+        assertThat(tc.s5, is("bar"));
+        assertThat(tc.s6, is("bar"));
+        assertThat(tc.s7, is("bar"));
+        assertThat(tc.s8, is("bar"));
+        assertThat(tc.s9, is("bar"));
     }
 
     @Test
     public void testObjectCopier()
     {
-        final Alkemist alkemist = AlkemistFactory.create();
+        final Alkemist alkemist = new AlkemistBuilder().build();
         final TestDeepCopy tdc = new TestDeepCopy();
         final TestClass tc = new TestClass();
         tc.s1 = "foo";
@@ -61,8 +83,8 @@ public class AlkemistTest
 
         assertThat(copier.get().testClass, is(not(nullValue())));
         assertThat(copier.get().testClass.s0, is("0"));
-        assertThat(copier.get().testClass.s2, is("bar"));
         assertThat(copier.get().testClass.s1, is("foo"));
+        assertThat(copier.get().testClass.s2, is("bar"));
         assertThat(copier.get().testClass.s3, is("3"));
         assertThat(copier.get().testClass.s4, is("4"));
         assertThat(copier.get().testClass.s5, is("5"));
@@ -73,18 +95,35 @@ public class AlkemistTest
     }
 
     @Test
-    public void peformance() throws Throwable
+    public void peformanceElementVisitor() throws Throwable
     {
-        final AssignConstant<String> assign = new AssignConstant<String>("foo");
+        final Alkemist alkemist = new AlkemistBuilder().build();
 
         final TestClass tc = new TestClass();
-        final Alkemist alkemist = AlkemistFactory.create();
+        final AssignConstant<String> assign = new AssignConstant<String>("foo");
 
-        System.out.println("Assign 1e7 strings: " + Measure.measure(() ->
+        System.out.println("Assign 5e6 strings: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
                 alkemist.process(tc, assign);
+            }
+        }) / 1000000 + " ms");
+    }
+    
+    @Test
+    public void peformanceTypeVisitor() throws Throwable
+    {
+        final Alkemist alkemist = new AlkemistBuilder().build();
+
+        final TestClass tc = new TestClass();
+        final PassThrough passthrough = new PassThrough();
+        
+        System.out.println("Visiting 1e6 types: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                alkemist.process(tc, passthrough);
             }
         }) / 1000000 + " ms");
     }

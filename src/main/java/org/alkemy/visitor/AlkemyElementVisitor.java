@@ -16,10 +16,8 @@
 package org.alkemy.visitor;
 
 import org.alkemy.AlkemyElement;
-import org.alkemy.Bound;
-import org.alkemy.util.Node;
 
-public interface AlkemyElementVisitor extends Bound<Object>
+public interface AlkemyElementVisitor
 {
-    void visit(Node<? extends AlkemyElement> e);
+    void visit(AlkemyElement e, Object parent);
 }

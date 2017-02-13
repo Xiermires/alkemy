@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy;
 
+import org.alkemy.AssignConstant.Bar;
 import org.alkemy.PropertyConcatenation.Foo;
 import org.alkemy.annotations.Order;
 
@@ -23,31 +24,31 @@ public class TestClass
 {
     @Foo
     String s0 = "0";
-    
+
     @Foo
     String s1 = "1";
 
     @Foo
     String s2 = "2";
-    
+
     @Foo
     String s3 = "3";
 
     @Foo
     String s4 = "4";
-    
-    @Foo
+
+    @Bar
     String s5 = "5";
 
-    @Foo
+    @Bar
     String s6 = "6";
-    
-    @Foo
+
+    @Bar
     String s7 = "7";
 
-    @Foo
+    @Bar
     String s8 = "8";
-    
-    @Foo
+
+    @Bar
     String s9 = "9";
 }

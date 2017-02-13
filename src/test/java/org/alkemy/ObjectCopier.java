@@ -18,11 +18,11 @@ package org.alkemy;
 import java.util.function.Supplier;
 
 import org.alkemy.util.Node;
-import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.AlkemyTypeVisitor;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements AlkemyElementVisitor, Supplier<T>
+public class ObjectCopier<T> implements AlkemyTypeVisitor, Supplier<T>
 {
     private T t;
     private Object orig;

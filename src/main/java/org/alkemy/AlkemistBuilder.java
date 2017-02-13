@@ -15,38 +15,27 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.util.Conditions;
-import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyTypeVisitor;
-import org.alkemy.visitor.impl.SingleElementVisitor;
+import java.lang.reflect.AnnotatedElement;
 
-public class Alkemist
+import org.alkemy.parse.AlkemyLexer;
+import org.alkemy.parse.AlkemyParser;
+import org.alkemy.parse.impl.AlkemyParsers;
+
+public class AlkemistBuilder
 {
-    private AlkemyLoadingCache cache;
-
-    Alkemist(AlkemyLoadingCache cache)
-    {
-        this.cache = cache;
+    private AlkemyLexer<AlkemyElement, AnnotatedElement> lexer = null;
+    private AlkemyParser<AlkemyElement> parser = null;
+    private AlkemyLoadingCache cache = null;
+    
+    public AlkemistBuilder()
+    {   
     }
-
-    public <T> T process(T t, AlkemyElementVisitor aev)
+    
+    public Alkemist build()
     {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(aev);
-
-        final SingleElementVisitor sev = new SingleElementVisitor(aev);
-        sev.bind(t);
-        sev.visit(cache.get(t.getClass()));
-        return t;
-    }
-
-    public <T> T process(T t, AlkemyTypeVisitor atv)
-    {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(atv);
-
-        atv.bind(t);
-        atv.visit(cache.get(t.getClass()));
-        return t;
+        lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
+        parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
+        cache = new AlkemyLoadingCache(parser);
+        return new Alkemist(cache);
     }
 }

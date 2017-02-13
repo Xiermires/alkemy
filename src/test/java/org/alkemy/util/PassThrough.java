@@ -22,34 +22,22 @@ import java.lang.annotation.Target;
 
 import org.alkemy.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class PassThrough implements AlkemyElementVisitor
 {
     @Override
-    public void visit(Node<? extends AlkemyElement> data)
+    public void visit(AlkemyElement e, Object parent)
     {
     }
 
-    @Override
-    public void bind(Object t)
-    {
-    }
-
-    @Override
-    public Object bound()
-    {
-        return null;
-    }
-    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD, ElementType.PARAMETER })
     @AlkemyLeaf(PassThrough.class)
     public @interface Bar
     {
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD, ElementType.PARAMETER })
     @AlkemyLeaf(PassThrough.class)

@@ -13,40 +13,24 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.common;
 
-import org.alkemy.util.Conditions;
-import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyTypeVisitor;
-import org.alkemy.visitor.impl.SingleElementVisitor;
+import org.alkemy.common.annotations.Index;
 
-public class Alkemist
+public class TestClass
 {
-    private AlkemyLoadingCache cache;
-
-    Alkemist(AlkemyLoadingCache cache)
-    {
-        this.cache = cache;
-    }
-
-    public <T> T process(T t, AlkemyElementVisitor aev)
-    {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(aev);
-
-        final SingleElementVisitor sev = new SingleElementVisitor(aev);
-        sev.bind(t);
-        sev.visit(cache.get(t.getClass()));
-        return t;
-    }
-
-    public <T> T process(T t, AlkemyTypeVisitor atv)
-    {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(atv);
-
-        atv.bind(t);
-        atv.visit(cache.get(t.getClass()));
-        return t;
-    }
+    @Index(0)
+    int i0 = 4;
+    
+    @Index(1)
+    int i1 = 3;
+    
+    @Index(2)
+    int i2 = 2;
+    
+    @Index(3)
+    int i3 = 1;
+    
+    @Index(4)
+    int i4 = 0;
 }

@@ -13,16 +13,20 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.visitor.impl;
 
-public class AlkemistFactory
+import org.alkemy.AlkemyElement;
+import org.alkemy.visitor.AlkemyElementVisitor;
+
+public abstract class MappedAlkemyElementVisitor<E extends AlkemyElement> implements AlkemyElementVisitor
 {
-    private AlkemistFactory()
-    {   
-    }
-    
-    public static Alkemist create()
+    @Override
+    public void visit(AlkemyElement e, Object parent)
     {
-        return new Alkemist();
-    }
+        visitMapped(map(e), parent);
+    }    
+    
+    protected abstract E map(AlkemyElement ae);
+
+    protected abstract void visitMapped(E e, Object parent);
 }

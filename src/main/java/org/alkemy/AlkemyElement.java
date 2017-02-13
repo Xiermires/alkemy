@@ -34,6 +34,13 @@ public abstract class AlkemyElement implements ValueAccessor
         this.visitorType = visitorType;
     }
     
+    protected AlkemyElement(AlkemyElement other)
+    {
+        this.desc = other.desc;
+        this.valueAccessor = other.valueAccessor;
+        this.visitorType = other.visitorType;
+    }
+    
     public AnnotatedElement desc()
     {
         return desc;

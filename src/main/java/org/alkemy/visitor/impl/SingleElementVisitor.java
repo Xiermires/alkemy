@@ -13,22 +13,29 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.common;
+package org.alkemy.visitor.impl;
 
 import org.alkemy.AlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.AlkemyTypeVisitor;
 
-public abstract class BindParentReference implements AlkemyElementVisitor
+public class SingleElementVisitor implements AlkemyTypeVisitor
 {
     private Object bound;
-    
+    private final AlkemyElementVisitor aev;
+
+    public SingleElementVisitor(AlkemyElementVisitor aev)
+    {
+        this.aev = aev;
+    }
+
     @Override
     public void bind(Object t)
     {
         this.bound = t;
     }
-    
+
     @Override
     public Object bound()
     {
@@ -38,21 +45,11 @@ public abstract class BindParentReference implements AlkemyElementVisitor
     @Override
     public void visit(Node<? extends AlkemyElement> e)
     {
-        visit(e, bound);        
+        visit(e, bound);
     }
-    
-    // TODO: Translate to traverse if possible.
+
     private void visit(Node<? extends AlkemyElement> e, Object ref)
     {
-        e.children().forEach(n ->
-        {
-            visit(n.data(), ref);
-            if (n.hasChildren())
-            {
-                n.children().forEach(nn -> visit(nn, n.data().get(ref)));
-            }
-        });
+        e.traverse(c -> aev.visit(c.data(), ref), p -> aev.getClass().equals(p.visitorType()), true);
     }
-    
-    protected abstract void visit(AlkemyElement e, Object parent);
 }

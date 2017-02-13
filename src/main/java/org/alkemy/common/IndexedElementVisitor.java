@@ -13,40 +13,45 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.common;
 
-import org.alkemy.util.Conditions;
-import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyTypeVisitor;
-import org.alkemy.visitor.impl.SingleElementVisitor;
+import java.util.function.BiFunction;
 
-public class Alkemist
+import org.alkemy.AlkemyElement;
+import org.alkemy.common.IndexedElementVisitor.IndexedElement;
+import org.alkemy.common.annotations.Index;
+import org.alkemy.visitor.impl.MappedAlkemyElementVisitor;
+
+public class IndexedElementVisitor extends MappedAlkemyElementVisitor<IndexedElement>
 {
-    private AlkemyLoadingCache cache;
-
-    Alkemist(AlkemyLoadingCache cache)
+    private BiFunction<Integer, Object, Object> f;
+    
+    public IndexedElementVisitor(BiFunction<Integer, Object, Object> f)
     {
-        this.cache = cache;
+        this.f = f;
+    }
+    
+    @Override
+    protected IndexedElement map(AlkemyElement ae)
+    {
+        return new IndexedElement(ae);
     }
 
-    public <T> T process(T t, AlkemyElementVisitor aev)
-    {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(aev);
-
-        final SingleElementVisitor sev = new SingleElementVisitor(aev);
-        sev.bind(t);
-        sev.visit(cache.get(t.getClass()));
-        return t;
+    @Override
+    protected void visitMapped(IndexedElement e, Object parent)
+    {   
+        f.apply(e.value, e.get(parent));
     }
-
-    public <T> T process(T t, AlkemyTypeVisitor atv)
+    
+    static class IndexedElement extends AlkemyElement
     {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(atv);
-
-        atv.bind(t);
-        atv.visit(cache.get(t.getClass()));
-        return t;
+        int value;
+        
+        protected IndexedElement(AlkemyElement ae)
+        {
+            super(ae);
+            
+            value = ae.desc().getAnnotation(Index.class).value();
+        }
     }
 }

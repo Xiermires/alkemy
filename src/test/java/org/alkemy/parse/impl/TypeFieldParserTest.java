@@ -34,7 +34,7 @@ public class TypeFieldParserTest
     @Test
     public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.fieldParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestClass.class).drainTo(result);
         
@@ -47,7 +47,7 @@ public class TypeFieldParserTest
     @Test
     public void parseTestNode() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.fieldParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestNode.class).drainTo(result);
 
@@ -57,7 +57,7 @@ public class TypeFieldParserTest
     @Test
     public void testOrdered() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.fieldParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestOrdered.class).drainTo(result);
 
@@ -78,7 +78,7 @@ public class TypeFieldParserTest
     // According to the spec Class#getFile, this test can succeed or fail.
     public void testUnordered() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.defaultParser();
+        final AlkemyParser<AlkemyElement> parser = AlkemyParsers.fieldParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         final Node<AlkemyElement> parsedElements = parser.parse(TestUnordered.class);
 
