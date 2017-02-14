@@ -18,7 +18,7 @@ package org.alkemy.parse;
 import org.alkemy.AlkemyElement;
 import org.alkemy.ValueAccessor;
 
-public interface AlkemyLexer<E extends AlkemyElement, T>
+public interface AlkemyLexer<E extends AlkemyElement<?>, T>
 {
     /**
      * Returns if the descriptor defines an element with additional nested alkemy elements.

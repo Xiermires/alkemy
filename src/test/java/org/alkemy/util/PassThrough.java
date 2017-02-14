@@ -22,12 +22,13 @@ import java.lang.annotation.Target;
 
 import org.alkemy.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.parse.impl.TypeFieldAlkemyElement;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class PassThrough implements AlkemyElementVisitor
+public class PassThrough implements AlkemyElementVisitor<TypeFieldAlkemyElement>
 {
     @Override
-    public void visit(AlkemyElement e, Object parent)
+    public void visit(TypeFieldAlkemyElement e, Object parent)
     {
     }
 
@@ -43,5 +44,11 @@ public class PassThrough implements AlkemyElementVisitor
     @AlkemyLeaf(PassThrough.class)
     public @interface Foo
     {
+    }
+
+    @Override
+    public TypeFieldAlkemyElement map(AlkemyElement<?> e)
+    {
+        return new TypeFieldAlkemyElement(e);
     }
 }

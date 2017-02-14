@@ -30,7 +30,7 @@ import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes;
 
-class TypeFieldParser<E extends AlkemyElement> implements AlkemyParser<E>
+class TypeFieldParser<E extends AlkemyElement<?>> implements AlkemyParser<E>
 {
     private final AlkemyLexer<E, AnnotatedElement> lexer;
 
@@ -39,7 +39,7 @@ class TypeFieldParser<E extends AlkemyElement> implements AlkemyParser<E>
         this.lexer = lexer;
     }
 
-    static <E extends AlkemyElement> AlkemyParser<E> create(AlkemyLexer<E, AnnotatedElement> lexer)
+    static <E extends AlkemyElement<?>> AlkemyParser<E> create(AlkemyLexer<E, AnnotatedElement> lexer)
     {
         return new TypeFieldParser<E>(lexer);
     }

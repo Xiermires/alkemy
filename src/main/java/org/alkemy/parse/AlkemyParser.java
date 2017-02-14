@@ -18,7 +18,7 @@ package org.alkemy.parse;
 import org.alkemy.AlkemyElement;
 import org.alkemy.util.Node;
 
-public interface AlkemyParser<E extends AlkemyElement>
+public interface AlkemyParser<E extends AlkemyElement<?>>
 {
     /**
      * Returns the {@link Node} root of a tree of <b>unbound</b> elements associated to the owner's type.

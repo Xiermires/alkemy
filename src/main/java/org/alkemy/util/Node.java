@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 // TODO @FunctionalInterface
@@ -94,9 +95,9 @@ public interface Node<E>
      */
     void drainTo(Collection<? super E> c, Predicate<? super E> p, boolean keepProcessingOnFailure);
 
-    static <E> Builder<E> copy(Node<E> orig, Builder<E> dest)
+    static <E, T> Builder<T> copy(Node<E> orig, Builder<T> dest, Function<E, T> f)
     {
-        orig.children().forEach(e -> copy(e, dest.addChild(e.data())));
+        orig.children().forEach(e -> copy(e, dest.addChild(f.apply(e.data())), f));
         return dest;
     }
 

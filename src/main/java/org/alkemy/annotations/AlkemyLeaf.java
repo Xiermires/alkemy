@@ -26,5 +26,6 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface AlkemyLeaf
 {
+    @SuppressWarnings("rawtypes")
     Class<? extends AlkemyElementVisitor> value();
 }

@@ -20,37 +20,37 @@ import java.util.function.BiFunction;
 import org.alkemy.AlkemyElement;
 import org.alkemy.common.IndexedElementVisitor.IndexedElement;
 import org.alkemy.common.annotations.Index;
-import org.alkemy.visitor.impl.MappedAlkemyElementVisitor;
+import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class IndexedElementVisitor extends MappedAlkemyElementVisitor<IndexedElement>
+public class IndexedElementVisitor implements AlkemyElementVisitor<IndexedElement>
 {
     private BiFunction<Integer, Object, Object> f;
-    
+
     public IndexedElementVisitor(BiFunction<Integer, Object, Object> f)
     {
         this.f = f;
     }
-    
+
     @Override
-    protected IndexedElement map(AlkemyElement ae)
+    public void visit(IndexedElement e, Object parent)
     {
-        return new IndexedElement(ae);
+        final IndexedElement ie = e;
+        f.apply(ie.value, ie.get(parent));
     }
 
     @Override
-    protected void visitMapped(IndexedElement e, Object parent)
-    {   
-        f.apply(e.value, e.get(parent));
+    public IndexedElement map(AlkemyElement<?> e)
+    {
+        return new IndexedElement(e);
     }
-    
-    static class IndexedElement extends AlkemyElement
+
+    static class IndexedElement extends AlkemyElement<IndexedElement>
     {
         int value;
-        
-        protected IndexedElement(AlkemyElement ae)
+
+        protected IndexedElement(AlkemyElement<?> ae)
         {
             super(ae);
-            
             value = ae.desc().getAnnotation(Index.class).value();
         }
     }

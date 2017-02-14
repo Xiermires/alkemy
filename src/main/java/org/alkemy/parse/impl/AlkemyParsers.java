@@ -28,18 +28,18 @@ public class AlkemyParsers
     {   
     }
     
-    public static AlkemyLexer<AlkemyElement, AnnotatedElement> fieldLexer()
+    public static AlkemyLexer<AlkemyElement<?>, AnnotatedElement> fieldLexer()
     {
-        final AlkemyElementFactory<AlkemyElement, AnnotatedElement> elementFactory = TypeFieldAlkemyElementFactory.create();
+        final AlkemyElementFactory<AlkemyElement<?>, AnnotatedElement> elementFactory = TypeFieldAlkemyElementFactory.create();
         return TypeFieldLexer.create(elementFactory);
     }
     
-    public static AlkemyParser<AlkemyElement> fieldParser()
+    public static AlkemyParser<AlkemyElement<?>> fieldParser()
     {
         return TypeFieldParser.create(fieldLexer());
     }
     
-    public static AlkemyParser<AlkemyElement> fieldParser(AlkemyLexer<AlkemyElement, AnnotatedElement> lexer)
+    public static AlkemyParser<AlkemyElement<?>> fieldParser(AlkemyLexer<AlkemyElement<?>, AnnotatedElement> lexer)
     {
         return TypeFieldParser.create(lexer);
     }

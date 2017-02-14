@@ -26,7 +26,8 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class AnnotationUtils
 {
-    public static Class<? extends AlkemyElementVisitor> findVisitorType(AnnotatedElement ae)
+    @SuppressWarnings("unchecked")
+    public static Class<? extends AlkemyElementVisitor<?>> findVisitorType(AnnotatedElement ae)
     {
         final List<Pair<Annotation, AlkemyLeaf>> visitors = AnnotationUtils.getAnnotationsQualifiedAs(ae, AlkemyLeaf.class);
         
@@ -35,7 +36,7 @@ public class AnnotationUtils
         {
             throw new AlkemyException("Invalid configuration. Multiple alkemy visitors defined for a single element.");
         }
-        return visitors.isEmpty() ? null : visitors.get(0).second.value(); 
+        return visitors.isEmpty() ? null : (Class<? extends AlkemyElementVisitor<?>>) visitors.get(0).second.value(); 
     }
     
     private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(AnnotatedElement target, Class<QualifyingType> type)

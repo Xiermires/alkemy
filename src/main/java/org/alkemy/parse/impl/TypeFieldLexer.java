@@ -24,7 +24,7 @@ import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.util.AnnotationUtils;
 
-class TypeFieldLexer<E extends AlkemyElement> implements AlkemyLexer<E, AnnotatedElement>
+class TypeFieldLexer<E extends AlkemyElement<?>> implements AlkemyLexer<E, AnnotatedElement>
 {
     private AlkemyElementFactory<E, AnnotatedElement> factory;
 
@@ -33,7 +33,7 @@ class TypeFieldLexer<E extends AlkemyElement> implements AlkemyLexer<E, Annotate
         this.factory = factory;
     }
     
-    static <E extends AlkemyElement> AlkemyLexer<E, AnnotatedElement> create(AlkemyElementFactory<E, AnnotatedElement> factory)
+    static <E extends AlkemyElement<?>> AlkemyLexer<E, AnnotatedElement> create(AlkemyElementFactory<E, AnnotatedElement> factory)
     {
         return new TypeFieldLexer<E>(factory);
     }

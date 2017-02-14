@@ -21,20 +21,20 @@ import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public abstract class AlkemyElement implements ValueAccessor
+public abstract class AlkemyElement<E extends AlkemyElement<E>> implements ValueAccessor
 {
-    private final AnnotatedElement desc;
-    private final ValueAccessor valueAccessor;
-    private final Class<? extends AlkemyElementVisitor> visitorType;
+    protected final AnnotatedElement desc;
+    protected final ValueAccessor valueAccessor;
+    protected final Class<? extends AlkemyElementVisitor<?>> visitorType;
 
-    protected AlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor> visitorType)
+    protected AlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
         this.visitorType = visitorType;
     }
     
-    protected AlkemyElement(AlkemyElement other)
+    protected AlkemyElement(AlkemyElement<?> other)
     {
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
@@ -46,7 +46,7 @@ public abstract class AlkemyElement implements ValueAccessor
         return desc;
     }
     
-    public Class<? extends AlkemyElementVisitor> visitorType()
+    public Class<? extends AlkemyElementVisitor<?>> visitorType()
     {
         return visitorType;
     }
@@ -73,5 +73,10 @@ public abstract class AlkemyElement implements ValueAccessor
     public String targetName()
     {
         return valueAccessor.targetName();
+    }
+    
+    public <T extends AlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent)
+    {
+        v.visit(v.map(this), parent);
     }
 }

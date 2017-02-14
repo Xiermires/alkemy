@@ -31,35 +31,31 @@ public class IndexedElementTest
     @Test
     public void testIndexedElement()
     {
-        final Alkemist alkemist = new AlkemistBuilder().build();
-        final TestClass tc = new TestClass();
-        
         final Map<Integer, Integer> m = new HashMap<Integer, Integer>();
-        final IndexedElementVisitor iev = new IndexedElementVisitor((a, b) -> m.put(a, (Integer) b));
-        
-        alkemist.process(tc, iev);
-        
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new IndexedElementVisitor((a, b) -> m.put(a, (Integer) b))).build();
+        final TestClass tc = new TestClass();
+
+        alkemist.process(tc);
+
         assertThat(m, hasEntry(0, 4));
         assertThat(m, hasEntry(1, 3));
         assertThat(m, hasEntry(2, 2));
         assertThat(m, hasEntry(3, 1));
         assertThat(m, hasEntry(4, 0));
     }
-    
+
     @Test
     public void performanceIndexed() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build();
-        final TestClass tc = new TestClass();
-        
         final Map<Integer, Integer> m = new HashMap<Integer, Integer>();
-        final IndexedElementVisitor iev = new IndexedElementVisitor((a, b) -> m.put(a, (Integer) b));
-        
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new IndexedElementVisitor((a, b) -> m.put(a, (Integer) b))).build();
+        final TestClass tc = new TestClass();
+
         System.out.println("Handle 5e6 indexed elements: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(tc, iev);
+                alkemist.process(tc);
             }
         }) / 1000000 + " ms");
     }

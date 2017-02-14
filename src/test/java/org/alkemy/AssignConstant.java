@@ -21,9 +21,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.parse.impl.TypeFieldAlkemyElement;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class AssignConstant<T> implements AlkemyElementVisitor
+public class AssignConstant<T> implements AlkemyElementVisitor<TypeFieldAlkemyElement>
 {
     private final T t;
     
@@ -33,9 +34,15 @@ public class AssignConstant<T> implements AlkemyElementVisitor
     }
     
     @Override
-    public void visit(AlkemyElement e, Object parent)
+    public void visit(TypeFieldAlkemyElement e, Object parent)
     {
         e.set(t, parent);
+    }
+
+    @Override
+    public TypeFieldAlkemyElement map(AlkemyElement<?> e)
+    {
+        return new TypeFieldAlkemyElement(e);
     }
     
     @Retention(RetentionPolicy.RUNTIME)

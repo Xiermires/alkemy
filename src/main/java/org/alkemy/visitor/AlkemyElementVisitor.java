@@ -17,7 +17,9 @@ package org.alkemy.visitor;
 
 import org.alkemy.AlkemyElement;
 
-public interface AlkemyElementVisitor
+public interface AlkemyElementVisitor<E extends AlkemyElement<E>>
 {
-    void visit(AlkemyElement e, Object parent);
+    void visit(E e, Object parent);
+    
+    E map(AlkemyElement<?> e);
 }

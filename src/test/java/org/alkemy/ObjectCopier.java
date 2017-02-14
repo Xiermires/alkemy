@@ -53,12 +53,12 @@ public class ObjectCopier<T> implements AlkemyTypeVisitor, Supplier<T>
     }
 
     @Override
-    public void visit(Node<? extends AlkemyElement> e)
+    public void visit(Node<? extends AlkemyElement<?>> e)
     {
         visit(e, orig, dest);
     }
 
-    private void visit(Node<? extends AlkemyElement> e, Object orig, Object dest)
+    private void visit(Node<? extends AlkemyElement<?>> e, Object orig, Object dest)
     {
         e.children().forEach(n ->
         {

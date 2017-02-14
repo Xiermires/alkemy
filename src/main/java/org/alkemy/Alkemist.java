@@ -16,27 +16,29 @@
 package org.alkemy;
 
 import org.alkemy.util.Conditions;
+import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyTypeVisitor;
-import org.alkemy.visitor.impl.SingleElementVisitor;
 
 public class Alkemist
 {
     private AlkemyLoadingCache cache;
+    private AlkemyElementVisitor<?> aev;
 
-    Alkemist(AlkemyLoadingCache cache)
+    Alkemist(AlkemyLoadingCache cache, AlkemyElementVisitor<?> aev)
     {
         this.cache = cache;
+        this.aev = aev;
     }
 
-    public <T> T process(T t, AlkemyElementVisitor aev)
+    public <T> T process(T t)
     {
         Conditions.requireNonNull(t);
         Conditions.requireNonNull(aev);
 
-        final SingleElementVisitor sev = new SingleElementVisitor(aev);
-        sev.bind(t);
-        sev.visit(cache.get(t.getClass()));
+        final Node<? extends AlkemyElement<?>> root = cache.get(t.getClass());
+        root.traverse(c -> c.data().accept(aev, t), p -> aev.getClass().equals(p.visitorType()), true);
+      
         return t;
     }
 

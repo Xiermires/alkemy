@@ -39,10 +39,10 @@ public class AlkemistTest
     @Test
     public void testConcat()
     {
-        final Alkemist alkemist = new AlkemistBuilder().build();
-        final TestClass tc = new TestClass();
         final PropertyConcatenation concat = new PropertyConcatenation();
-        alkemist.process(tc, concat);
+        final Alkemist alkemist = new AlkemistBuilder().visitor(concat).build();
+        final TestClass tc = new TestClass();
+        alkemist.process(tc);
 
         assertThat("01234", is(concat.get()));
     }
@@ -50,11 +50,10 @@ public class AlkemistTest
     @Test
     public void testAssign()
     {
-        final Alkemist alkemist = new AlkemistBuilder().build();
-        final AssignConstant<String> assign = new AssignConstant<String>("bar");
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new AssignConstant<String>("bar")).build();
 
         final TestClass tc = new TestClass();
-        alkemist.process(tc, assign);
+        alkemist.process(tc);
 
         assertThat(tc.s0, is("0"));
         assertThat(tc.s1, is("1"));
@@ -97,16 +96,14 @@ public class AlkemistTest
     @Test
     public void peformanceElementVisitor() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build();
-
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new AssignConstant<String>("foo")).build();
         final TestClass tc = new TestClass();
-        final AssignConstant<String> assign = new AssignConstant<String>("foo");
 
         System.out.println("Assign 5e6 strings: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(tc, assign);
+                alkemist.process(tc);
             }
         }) / 1000000 + " ms");
     }
@@ -114,16 +111,14 @@ public class AlkemistTest
     @Test
     public void peformanceTypeVisitor() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build();
-
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new PassThrough()).build();
         final TestClass tc = new TestClass();
-        final PassThrough passthrough = new PassThrough();
         
         System.out.println("Visiting 1e6 types: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(tc, passthrough);
+                alkemist.process(tc);
             }
         }) / 1000000 + " ms");
     }

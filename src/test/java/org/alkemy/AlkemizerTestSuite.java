@@ -22,8 +22,8 @@ import org.junit.runner.RunWith;
 
 @RunWith(InstrumentableLambdaClassSuite.class)
 @InstrumentableLambdaClasses(//
-testClassNames = { "org.alkemy.parse.impl.AlkemizerTest", //
-        "org.alkemy.parse.impl.TypeFieldParserTest", //
+testClassNames = { //"org.alkemy.parse.impl.AlkemizerTest", //
+        //"org.alkemy.parse.impl.TypeFieldParserTest", //
         "org.alkemy.common.IndexedElementTest" }, //
 instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.parse.impl.TestAlkemizer", //

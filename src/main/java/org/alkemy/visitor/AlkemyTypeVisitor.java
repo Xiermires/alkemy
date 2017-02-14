@@ -21,5 +21,5 @@ import org.alkemy.util.Node;
 
 public interface AlkemyTypeVisitor extends Bound<Object>
 {
-    void visit(Node<? extends AlkemyElement> e);
+    void visit(Node<? extends AlkemyElement<?>> e);
 }

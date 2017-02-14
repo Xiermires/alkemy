@@ -21,10 +21,15 @@ import org.alkemy.AlkemyElement;
 import org.alkemy.ValueAccessor;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class TypeFieldAlkemyElement extends AlkemyElement
+public class TypeFieldAlkemyElement extends AlkemyElement<TypeFieldAlkemyElement>
 {
-    protected TypeFieldAlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor> visitorType)
+    protected TypeFieldAlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
     {
         super(desc, valueAccessor, visitorType);
+    }
+    
+    public TypeFieldAlkemyElement(AlkemyElement<?> other)
+    {
+        super(other);
     }
 }

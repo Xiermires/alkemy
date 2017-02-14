@@ -22,25 +22,25 @@ import org.alkemy.AlkemyElementFactory;
 import org.alkemy.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
 
-public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AlkemyElement, AnnotatedElement>
+public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AlkemyElement<?>, AnnotatedElement>
 {
     private TypeFieldAlkemyElementFactory()
     {   
     }
     
-    public static AlkemyElementFactory<AlkemyElement, AnnotatedElement> create()
+    public static AlkemyElementFactory<AlkemyElement<?>, AnnotatedElement> create()
     {
         return new TypeFieldAlkemyElementFactory();
     }
     
     @Override
-    public AlkemyElement createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
+    public AlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
     {
         return new TypeFieldAlkemyElement(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
     }
 
     @Override
-    public AlkemyElement createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
+    public AlkemyElement<?> createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
     {
         return new TypeFieldAlkemyElement(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
     }
