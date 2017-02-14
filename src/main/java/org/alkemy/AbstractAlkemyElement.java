@@ -19,6 +19,7 @@ import java.lang.reflect.AnnotatedElement;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.util.Conditions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor
@@ -27,7 +28,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     private final ValueAccessor valueAccessor;
     private final Class<? extends AlkemyElementVisitor<?>> visitorType;
 
-    protected AbstractAlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+    AbstractAlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
@@ -36,6 +37,8 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
 
     protected AbstractAlkemyElement(AbstractAlkemyElement<?> other)
     {
+        Conditions.requireNonNull(other);
+        
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
         this.visitorType = other.visitorType;

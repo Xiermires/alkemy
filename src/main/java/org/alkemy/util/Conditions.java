@@ -16,6 +16,7 @@
 package org.alkemy.util;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import org.alkemy.exception.InvalidArgument;
 
@@ -25,7 +26,7 @@ public class Conditions
     {
         Objects.requireNonNull(o);
     }
-
+    
     public static void requireNotEmpty(boolean[] o)
     {
         requireNonNull(o);
@@ -132,5 +133,17 @@ public class Conditions
     {
         requireNonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
+    }
+    
+    public static void requireOfType(Object o, Class<?> type)
+    {
+        requireNonNull(o);
+        if (o.getClass().equals(type)) throw new InvalidArgument("Invalid class type { expected '%d', received '%d' }", o.getClass().getName(), type.getName());
+    }
+    
+    public static <T> boolean isTrue(Predicate<T> p, T t)
+    {
+        requireNonNull(p);
+        return true == p.test(t);
     }
 }

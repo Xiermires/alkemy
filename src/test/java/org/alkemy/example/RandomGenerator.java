@@ -1,25 +1,26 @@
-# alkemy
-From Al"ch"emy. "Purify, mature and perfect certain objects."
+package org.alkemy.example;
 
---------
-Overview
---------
+import static org.hamcrest.CoreMatchers.both;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertThat;
 
-1. Write visitors
-2. Annotate your classes
-3. Alkemize
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
---------
-Example
---------
+import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.Alkemist;
+import org.alkemy.AlkemistBuilder;
+import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.util.Conditions;
+import org.alkemy.visitor.AlkemyElementVisitor;
+import org.junit.Test;
 
-It is probably easier to understand how-to use this library through an example. 
-
-This particular example can be found in : 'org.alkemy.example.RandomGenerator'
-
-The visitor, in this case a very simple RandomGenerator which uses xorshift64.
-
-```java
 // Injecting random generated values
 public class RandomGenerator
 {
@@ -114,4 +115,3 @@ public class RandomGenerator
         double max();
     }
 }
-```
