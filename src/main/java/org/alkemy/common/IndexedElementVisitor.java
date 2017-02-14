@@ -15,11 +15,16 @@
  *******************************************************************************/
 package org.alkemy.common;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.function.BiFunction;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.common.IndexedElementVisitor.IndexedElement;
-import org.alkemy.common.annotations.Index;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class IndexedElementVisitor implements AlkemyElementVisitor<IndexedElement>
@@ -39,19 +44,27 @@ public class IndexedElementVisitor implements AlkemyElementVisitor<IndexedElemen
     }
 
     @Override
-    public IndexedElement map(AlkemyElement<?> e)
+    public IndexedElement map(AlkemyElement e)
     {
         return new IndexedElement(e);
     }
 
-    static class IndexedElement extends AlkemyElement<IndexedElement>
+    static class IndexedElement extends AbstractAlkemyElement<IndexedElement>
     {
         int value;
 
-        protected IndexedElement(AlkemyElement<?> ae)
+        protected IndexedElement(AbstractAlkemyElement<?> ae)
         {
             super(ae);
             value = ae.desc().getAnnotation(Index.class).value();
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD })
+    @AlkemyLeaf(IndexedElementVisitor.class)
+    public @interface Index
+    {
+        int value();
     }
 }

@@ -21,31 +21,36 @@ import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public abstract class AlkemyElement<E extends AlkemyElement<E>> implements ValueAccessor
+public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor
 {
-    protected final AnnotatedElement desc;
-    protected final ValueAccessor valueAccessor;
-    protected final Class<? extends AlkemyElementVisitor<?>> visitorType;
+    private final AnnotatedElement desc;
+    private final ValueAccessor valueAccessor;
+    private final Class<? extends AlkemyElementVisitor<?>> visitorType;
 
-    protected AlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+    protected AbstractAlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
         this.visitorType = visitorType;
     }
-    
-    protected AlkemyElement(AlkemyElement<?> other)
+
+    protected AbstractAlkemyElement(AbstractAlkemyElement<?> other)
     {
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
         this.visitorType = other.visitorType;
     }
-    
+
+    public static AlkemyElement create(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+    {
+        return new AlkemyElement(desc, valueAccessor, visitorType);
+    }
+
     public AnnotatedElement desc()
     {
         return desc;
     }
-    
+
     public Class<? extends AlkemyElementVisitor<?>> visitorType()
     {
         return visitorType;
@@ -74,9 +79,35 @@ public abstract class AlkemyElement<E extends AlkemyElement<E>> implements Value
     {
         return valueAccessor.targetName();
     }
-    
-    public <T extends AlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent)
+
+    public <T extends AbstractAlkemyElement<T>> T accept(AlkemyElementVisitor<T> v, Object parent)
     {
-        v.visit(v.map(this), parent);
+        final T t = v.map(new AlkemyElement(this));
+        v.visit(t, parent);
+        return t;
+    }
+
+    public static class AlkemyElement extends AbstractAlkemyElement<AlkemyElement>
+    {
+        Object o;
+        
+        public AlkemyElement(AbstractAlkemyElement<?> other)
+        {
+            super(other);
+        }
+
+        AlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+        {
+            super(desc, valueAccessor, visitorType);
+        }
+        
+        @Override
+        @SuppressWarnings("unchecked")
+        // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
+        // TODO: Allow to switch it off. 
+        public <T extends AbstractAlkemyElement<T>> T accept(AlkemyElementVisitor<T> v, Object parent)
+        {
+            return (T) (o == null ? (o = super.accept(v, parent)) : o);
+        }
     }
 }

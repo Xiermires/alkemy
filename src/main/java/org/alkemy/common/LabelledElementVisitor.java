@@ -13,42 +13,58 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.common;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.BiFunction;
 
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.common.LabelledElementVisitor.LabelledElement;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
+public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElement>
 {
-    private final T t;
-    
-    AssignConstant(T t)
+    private BiFunction<String, Object, Object> f;
+
+    public LabelledElementVisitor(BiFunction<String, Object, Object> f)
     {
-        this.t = t;
-    }
-    
-    @Override
-    public void visit(AlkemyElement e, Object parent)
-    {
-        e.set(t, parent);
+        this.f = f;
     }
 
     @Override
-    public AlkemyElement map(AlkemyElement e)
+    public void visit(LabelledElement e, Object parent)
     {
-        return e;
+        final LabelledElement le = e;
+        f.apply(le.raw, le.get(parent));
+    }
+
+    @Override
+    public LabelledElement map(AlkemyElement e)
+    {
+        return new LabelledElement(e);
+    }
+
+    static class LabelledElement extends AbstractAlkemyElement<LabelledElement>
+    {
+        String raw;
+
+        protected LabelledElement(AbstractAlkemyElement<?> ae)
+        {
+            super(ae);
+            raw = ae.desc().getAnnotation(Label.class).value();
+        }
     }
     
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD, ElementType.PARAMETER })
-    @AlkemyLeaf(AssignConstant.class)
-    public @interface Bar
+    @Target({ ElementType.FIELD })
+    @AlkemyLeaf(LabelledElementVisitor.class)
+    public @interface Label
     {
+        String value() default "";
     }
 }

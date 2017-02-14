@@ -15,11 +15,12 @@
  *******************************************************************************/
 package org.alkemy.visitor;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 
-public interface AlkemyElementVisitor<E extends AlkemyElement<E>>
+public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>>
 {
     void visit(E e, Object parent);
     
-    E map(AlkemyElement<?> e);
+    E map(AlkemyElement e);
 }

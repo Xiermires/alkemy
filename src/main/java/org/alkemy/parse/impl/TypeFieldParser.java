@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.InvalidOrder;
 import org.alkemy.parse.AlkemyLexer;
@@ -30,27 +30,27 @@ import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes;
 
-class TypeFieldParser<E extends AlkemyElement<?>> implements AlkemyParser<E>
+class TypeFieldParser implements AlkemyParser
 {
-    private final AlkemyLexer<E, AnnotatedElement> lexer;
+    private final AlkemyLexer<AnnotatedElement> lexer;
 
-    private TypeFieldParser(AlkemyLexer<E, AnnotatedElement> lexer)
+    private TypeFieldParser(AlkemyLexer<AnnotatedElement> lexer)
     {
         this.lexer = lexer;
     }
 
-    static <E extends AlkemyElement<?>> AlkemyParser<E> create(AlkemyLexer<E, AnnotatedElement> lexer)
+    static AlkemyParser create(AlkemyLexer<AnnotatedElement> lexer)
     {
-        return new TypeFieldParser<E>(lexer);
+        return new TypeFieldParser(lexer);
     }
 
     @Override
-    public Node<E> parse(Class<?> type)
+    public Node<AbstractAlkemyElement<?>> parse(Class<?> type)
     {
         return _parse(type, Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]), AccessorFactory.createSelfAccessor(), type))).build();
     }
 
-    private Node.Builder<E> _parse(Class<?> type, Node.Builder<E> parent)
+    private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent)
     {
         if (Object.class.equals(type))
         {

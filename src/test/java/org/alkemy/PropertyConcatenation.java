@@ -21,11 +21,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
+import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.parse.impl.TypeFieldAlkemyElement;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class PropertyConcatenation implements AlkemyElementVisitor<TypeFieldAlkemyElement>, Supplier<String>
+public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement>, Supplier<String>
 {
     private StringBuilder sb = new StringBuilder();
 
@@ -36,7 +36,7 @@ public class PropertyConcatenation implements AlkemyElementVisitor<TypeFieldAlke
     }
 
     @Override
-    public void visit(TypeFieldAlkemyElement e, Object parent)
+    public void visit(AlkemyElement e, Object parent)
     {
         sb.append(e.get(parent));
     }
@@ -49,8 +49,8 @@ public class PropertyConcatenation implements AlkemyElementVisitor<TypeFieldAlke
     }
 
     @Override
-    public TypeFieldAlkemyElement map(AlkemyElement<?> e)
+    public AlkemyElement map(AlkemyElement e)
     {
-        return new TypeFieldAlkemyElement(e);
+        return e;
     }
 }

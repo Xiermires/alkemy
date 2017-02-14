@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.Node;
 import org.junit.Ignore;
@@ -34,8 +34,8 @@ public class TypeFieldParserTest
     @Test
     public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement<?>> parser = AlkemyParsers.fieldParser();
-        final List<AlkemyElement<?>> result = new ArrayList<AlkemyElement<?>>();
+        final AlkemyParser parser = AlkemyParsers.fieldParser();
+        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
         parser.parse(TestClass.class).drainTo(result);
         
         assertThat(result.size(), is(5));
@@ -47,8 +47,8 @@ public class TypeFieldParserTest
     @Test
     public void parseTestNode() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement<?>> parser = AlkemyParsers.fieldParser();
-        final List<AlkemyElement<?>> result = new ArrayList<AlkemyElement<?>>();
+        final AlkemyParser parser = AlkemyParsers.fieldParser();
+        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
         parser.parse(TestNode.class).drainTo(result);
 
         assertThat(result.size(), is(6));
@@ -57,8 +57,8 @@ public class TypeFieldParserTest
     @Test
     public void testOrdered() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement<?>> parser = AlkemyParsers.fieldParser();
-        final List<AlkemyElement<?>> result = new ArrayList<AlkemyElement<?>>();
+        final AlkemyParser parser = AlkemyParsers.fieldParser();
+        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
         parser.parse(TestOrdered.class).drainTo(result);
 
         assertThat(result.size(), is(7));
@@ -78,9 +78,9 @@ public class TypeFieldParserTest
     // According to the spec Class#getFile, this test can succeed or fail.
     public void testUnordered() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser<AlkemyElement<?>> parser = AlkemyParsers.fieldParser();
-        final List<AlkemyElement<?>> result = new ArrayList<AlkemyElement<?>>();
-        final Node<AlkemyElement<?>> parsedElements = parser.parse(TestUnordered.class);
+        final AlkemyParser parser = AlkemyParsers.fieldParser();
+        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
+        final Node<AbstractAlkemyElement<?>> parsedElements = parser.parse(TestUnordered.class);
 
         parsedElements.drainTo(result);
 

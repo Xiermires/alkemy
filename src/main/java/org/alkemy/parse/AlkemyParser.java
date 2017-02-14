@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 
-public interface AlkemyParser<E extends AlkemyElement<?>>
+public interface AlkemyParser
 {
     /**
      * Returns the {@link Node} root of a tree of <b>unbound</b> elements associated to the owner's type.
      */
-    Node<E> parse(Class<?> ownerType);
+    Node<AbstractAlkemyElement<?>> parse(Class<?> ownerType);
 }

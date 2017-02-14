@@ -36,7 +36,7 @@ public class Alkemist
         Conditions.requireNonNull(t);
         Conditions.requireNonNull(aev);
 
-        final Node<? extends AlkemyElement<?>> root = cache.get(t.getClass());
+        final Node<? extends AbstractAlkemyElement<?>> root = cache.get(t.getClass());
         root.traverse(c -> c.data().accept(aev, t), p -> aev.getClass().equals(p.visitorType()), true);
       
         return t;

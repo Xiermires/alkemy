@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.ValueAccessor;
 
-public interface AlkemyLexer<E extends AlkemyElement<?>, T>
+public interface AlkemyLexer<T>
 {
     /**
      * Returns if the descriptor defines an element with additional nested alkemy elements.
@@ -31,12 +31,12 @@ public interface AlkemyLexer<E extends AlkemyElement<?>, T>
     boolean isLeaf(T desc);
 
     /**
-     * Creates an unbound {@link AlkemyElement} for this leaf.
+     * Creates an unbound {@link AbstractAlkemyElement} for this leaf.
      */
-    E createLeaf(T desc, ValueAccessor valueAccessor);
+    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor);
 
     /**
-     * Creates an unbound {@link AlkemyElement} for this node.
+     * Creates an unbound {@link AbstractAlkemyElement} for this node.
      */
-    E createNode(T desc, ValueAccessor valueAccessor, Class<?> nodeType);
+    AbstractAlkemyElement<?> createNode(T desc, ValueAccessor valueAccessor, Class<?> nodeType);
 }

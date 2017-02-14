@@ -17,31 +17,31 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AlkemyElementFactory;
 import org.alkemy.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
 
-public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AlkemyElement<?>, AnnotatedElement>
+public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AnnotatedElement>
 {
     private TypeFieldAlkemyElementFactory()
     {   
     }
     
-    public static AlkemyElementFactory<AlkemyElement<?>, AnnotatedElement> create()
+    public static AlkemyElementFactory<AnnotatedElement> create()
     {
         return new TypeFieldAlkemyElementFactory();
     }
     
     @Override
-    public AlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
     {
-        return new TypeFieldAlkemyElement(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
+        return AbstractAlkemyElement.create(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
     }
 
     @Override
-    public AlkemyElement<?> createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
+    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
     {
-        return new TypeFieldAlkemyElement(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
+        return AbstractAlkemyElement.create(desc, valueAccessor, AnnotationUtils.findVisitorType(desc));
     }
 }

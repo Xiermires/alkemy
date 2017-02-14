@@ -26,8 +26,8 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class AlkemistBuilder
 {
-    private AlkemyLexer<AlkemyElement<?>, AnnotatedElement> lexer = null;
-    private AlkemyParser<AlkemyElement<?>> parser = null;
+    private AlkemyLexer<AnnotatedElement> lexer = null;
+    private AlkemyParser parser = null;
     private AlkemyLoadingCache cache = null;
     private AlkemyElementVisitor<?> aev = null;
     private Map<Class<? extends AlkemyElementVisitor<?>>, AlkemyElementVisitor<?>> m = new HashMap<>();

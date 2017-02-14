@@ -34,35 +34,35 @@ class AlkemyLoadingCache
     // TODO: Allow external configuration
     private static final int MAXIMUM_BYTE_SIZE = 2 * 1024 * 1024;
 
-    private final AlkemyParser<? extends AlkemyElement<?>> parser;
+    private final AlkemyParser parser;
 
     // Keep a cached version of created AlkemyTypeVisitor to enhance performance.
-    private final LoadingCache<Class<?>, Node<? extends AlkemyElement<?>>> cache;
+    private final LoadingCache<Class<?>, Node<? extends AbstractAlkemyElement<?>>> cache;
 
     private final Map<Class<? extends AlkemyElementVisitor<?>>, AlkemyElementVisitor<?>> mappers;
 
-    AlkemyLoadingCache(AlkemyParser<? extends AlkemyElement<?>> parser, Map<Class<? extends AlkemyElementVisitor<?>>, AlkemyElementVisitor<?>> mappers)
+    AlkemyLoadingCache(AlkemyParser parser, Map<Class<? extends AlkemyElementVisitor<?>>, AlkemyElementVisitor<?>> mappers)
     {
         this.parser = parser;
         this.mappers = mappers;
 
         cache = CacheBuilder.newBuilder().maximumWeight(MAXIMUM_BYTE_SIZE).weigher((k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue())
-                .expireAfterAccess(15, TimeUnit.MINUTES).build(new CacheLoader<Class<?>, Node<? extends AlkemyElement<?>>>()
+                .expireAfterAccess(15, TimeUnit.MINUTES).build(new CacheLoader<Class<?>, Node<? extends AbstractAlkemyElement<?>>>()
                 {
                     @Override
-                    public Node<? extends AlkemyElement<?>> load(Class<?> key) throws AlkemyException
+                    public Node<? extends AbstractAlkemyElement<?>> load(Class<?> key) throws AlkemyException
                     {
                         return _create(key);
                     }
                 });
     }
 
-    private final Node<? extends AlkemyElement<?>> _create(Class<?> type)
+    private final Node<? extends AbstractAlkemyElement<?>> _create(Class<?> type)
     {
         return typify(parser.parse(type));
     }
 
-    private Node<? extends AlkemyElement<?>> typify(Node<? extends AlkemyElement<?>> root)
+    private Node<? extends AbstractAlkemyElement<?>> typify(Node<? extends AbstractAlkemyElement<?>> root)
     {
         if (mappers.isEmpty())
         {
@@ -79,7 +79,7 @@ class AlkemyLoadingCache
         }
     }
 
-    Node<? extends AlkemyElement<?>> get(Class<?> type)
+    Node<? extends AbstractAlkemyElement<?>> get(Class<?> type)
     {
         try
         {

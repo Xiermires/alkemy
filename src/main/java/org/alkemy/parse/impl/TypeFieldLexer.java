@@ -17,25 +17,25 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.AlkemyElement;
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AlkemyElementFactory;
 import org.alkemy.ValueAccessor;
 import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.util.AnnotationUtils;
 
-class TypeFieldLexer<E extends AlkemyElement<?>> implements AlkemyLexer<E, AnnotatedElement>
+class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
 {
-    private AlkemyElementFactory<E, AnnotatedElement> factory;
+    private AlkemyElementFactory<AnnotatedElement> factory;
 
-    private TypeFieldLexer(AlkemyElementFactory<E, AnnotatedElement> factory)
+    private TypeFieldLexer(AlkemyElementFactory<AnnotatedElement> factory)
     {
         this.factory = factory;
     }
     
-    static <E extends AlkemyElement<?>> AlkemyLexer<E, AnnotatedElement> create(AlkemyElementFactory<E, AnnotatedElement> factory)
+    static AlkemyLexer<AnnotatedElement> create(AlkemyElementFactory<AnnotatedElement> factory)
     {
-        return new TypeFieldLexer<E>(factory);
+        return new TypeFieldLexer(factory);
     }
     
     @Override
@@ -52,13 +52,13 @@ class TypeFieldLexer<E extends AlkemyElement<?>> implements AlkemyLexer<E, Annot
     }
 
     @Override
-    public E createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
     {
         return factory.createLeaf(desc, valueAccessor);
     }
 
     @Override
-    public E createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
+    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, ValueAccessor valueAccessor, Class<?> nodeType)
     {
         return factory.createNode(desc, valueAccessor, nodeType);
     }

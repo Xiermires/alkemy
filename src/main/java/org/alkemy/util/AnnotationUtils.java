@@ -26,13 +26,12 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class AnnotationUtils
 {
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // safe, see AlkemyLeaf#value().
     public static Class<? extends AlkemyElementVisitor<?>> findVisitorType(AnnotatedElement ae)
     {
         final List<Pair<Annotation, AlkemyLeaf>> visitors = AnnotationUtils.getAnnotationsQualifiedAs(ae, AlkemyLeaf.class);
         
-        // Allow one visitor type per AlkemyElement only
-        if (visitors.size() > 1)
+        if (visitors.size() > 1) // TODO: temporary restriction. Allow one visitor type per AlkemyElement only.
         {
             throw new AlkemyException("Invalid configuration. Multiple alkemy visitors defined for a single element.");
         }

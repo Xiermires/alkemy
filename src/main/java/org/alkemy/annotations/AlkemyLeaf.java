@@ -26,6 +26,65 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface AlkemyLeaf
 {
+    /*
+     * Why using a rawtype instead of using something like {@code Class<? extends AlkemyElementVisitor<?>>} ?
+     * <p>
+     * Using a rawtype allows defining generic parameters in implementations of the AlkemyElementVisitor.
+     * <p>
+     * Say for instance that we have a class such as follows:
+     * <p>
+     * 
+     * <pre>
+     * {@code
+     * class Foo<T> implements AlkemyElementVisitor<SomeAlkemyElement>, Supplier<T>
+     * <br>{
+     * <br> // alkemy stuff 
+     * <br> public AlkemyElement map(SomeAlkemyElement e) { ... }
+     * <br> public void visit(SomeAlkemyElement e, Object parent) { ... }
+     * <br>
+     * <br> // some other stuff unrelated to alkemy
+     * <br> public T get() { ... }
+     * <br>
+     * </pre>
+     * 
+     * If we try assigning this class to an {@link AlkemyLeaf} ({@code @AlkemyLeaf(Foo.class)}). <br>
+     * The code doesn't compile due to the generic parameter T in the Foo class.
+     * <p>
+     * We could workaround this issue by separating the non generic parts of Foo into another class, like:
+     * 
+     * <pre>
+     * {@code
+     * class FooBase implements AlkemyElementVisitor<SomeAlkemyElement>
+     * <br>{
+     * <br> // alkemy stuff 
+     * <br> public AlkemyElement map(SomeAlkemyElement e) { ... }
+     * <br> public void visit(SomeAlkemyElement e, Object parent) { ... }
+     * <br>}
+     * <br>class Foo<T> extends FooBase implements Supplier<T>
+     * <br>{
+     * <br> // some other stuff unrelated to alkemy
+     * <br> public T get() { ... }
+     * <br>
+     * </pre>
+     * 
+     * Finally assigning FooBase to the AlkemyLeaf ({@code @AlkemyLeaf(FooBase.class)}).
+     * <p>
+     * This indeed compiles but it :
+     * <ol>
+     * <li>Adds unnecessary boiler plate code.
+     * <li>Forces to some questionable code practices.
+     * </ol>
+     * Moreover, restricting generic parameters doesn't look right on the first place.
+     * <p>
+     * Allowing raw classes here, bypasses any parameter restriction, hence allowing ({@code @AlkemyLeaf(Foo.class)}.
+     * <p>
+     * Is this approach safe ?
+     * <p>
+     * As safe as defining {@code Class<? extends AlkemyElementVisitor<?>>}. The {@link AlkemyElementVisitor} interface <br>
+     * defines the typing restrictions, which we will inherit here as well.
+     * <p>
+     * Using a rawtype here, leads to an unchecked cast when retrieving the value of the class, see {@link AnnotationUtils#findVisitorType}.
+     */
     @SuppressWarnings("rawtypes")
     Class<? extends AlkemyElementVisitor> value();
 }

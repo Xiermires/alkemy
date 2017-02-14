@@ -15,7 +15,8 @@
  *******************************************************************************/
 package org.alkemy.common;
 
-import org.alkemy.common.annotations.Index;
+import org.alkemy.common.IndexedElementVisitor.Index;
+import org.alkemy.common.LabelledElementVisitor.Label;
 
 public class TestClass
 {
@@ -33,4 +34,19 @@ public class TestClass
     
     @Index(4)
     int i4 = 0;
+    
+    @Label("id0")
+    int i5 = 4;
+    
+    @Label("id1")
+    int i6 = 3;
+    
+    @Label("id2")
+    int i7 = 2;
+    
+    @Label("id3")
+    int i8 = 1;
+    
+    @Label("id4")
+    int i9 = 0;
 }
