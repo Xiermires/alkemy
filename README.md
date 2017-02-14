@@ -5,8 +5,8 @@ From Al"ch"emy. "Purify, mature and perfect certain objects."
 Overview
 --------
 
-1. Write visitors
-2. Annotate your classes
+1. Annotate your classes
+2. Write visitors
 3. Alkemize
 
 --------
@@ -16,6 +16,19 @@ Example
 It is probably easier to understand how-to use this library through an example. 
 
 This particular example can be found in : 'org.alkemy.example.RandomGenerator'
+
+The test class.
+
+```java
+public class TestClass
+{
+    @Random(min = 5, max = 10)
+    int i;
+    
+    @Random(min = 9.25, max = 11.5)
+    double d;
+}
+```
 
 The visitor, in this case a very simple RandomGenerator which uses xorshift64.
 
