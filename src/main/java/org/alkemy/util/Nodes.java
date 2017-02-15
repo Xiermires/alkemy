@@ -30,16 +30,16 @@ public class Nodes
 {
     public static <E> Node.Builder<E> arborescence(E root)
     {
-        return new ArberescenceBuilder<>(null, root);
+        return new ArborescenceBuilder<>(null, root);
     }
 
-    static class ArberescenceBuilder<E> implements Node.Builder<E>
+    static class ArborescenceBuilder<E> implements Node.Builder<E>
     {
         private E data;
-        private ArberescenceBuilder<E> parent;
-        private List<ArberescenceBuilder<E>> children;
+        private ArborescenceBuilder<E> parent;
+        private List<ArborescenceBuilder<E>> children;
 
-        ArberescenceBuilder(ArberescenceBuilder<E> parent, E data)
+        ArborescenceBuilder(ArborescenceBuilder<E> parent, E data)
         {
             this.data = data;
             this.parent = parent;
@@ -50,9 +50,9 @@ public class Nodes
         {
             if (children == null)
             {
-                children = new ArrayList<ArberescenceBuilder<E>>();
+                children = new ArrayList<ArborescenceBuilder<E>>();
             }
-            final ArberescenceBuilder<E> child = new ArberescenceBuilder<>(this, data);
+            final ArborescenceBuilder<E> child = new ArborescenceBuilder<>(this, data);
             this.children.add(child);
             return child;
         }
@@ -60,7 +60,7 @@ public class Nodes
         @Override
         public Node<E> build()
         {
-            ArberescenceBuilder<E> node = this;
+            ArborescenceBuilder<E> node = this;
             while (node.parent != null)
             {
                 node = node.parent;
@@ -199,25 +199,6 @@ public class Nodes
         public void drainTo(Collection<? super E> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
         {
             traverse(e -> c.add(e.data()), p, keepProcessingOnFailure);
-        }
-    }
-
-    static class KeepLast<E> implements Consumer<Node<? extends E>>
-    {
-        Node<? extends E> last;
-        Consumer<Node<? extends E>> c;
-
-        KeepLast(Consumer<Node<? extends E>> c, Node<? extends E> first)
-        {
-            this.c = c;
-            last = first;
-        }
-
-        @Override
-        public void accept(Node<? extends E> t)
-        {
-            last = t;
-            c.accept(t);
         }
     }
 }
