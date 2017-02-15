@@ -70,7 +70,6 @@ public class AlkemistTest
     @Test
     public void testObjectCopier()
     {
-        final Alkemist alkemist = new AlkemistBuilder().build();
         final TestDeepCopy tdc = new TestDeepCopy();
         final TestClass tc = new TestClass();
         tc.s1 = "foo";
@@ -78,7 +77,7 @@ public class AlkemistTest
         tdc.testClass = tc;
 
         final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<TestDeepCopy>(new TestDeepCopy());
-        alkemist.process(tdc, copier);
+        Alkemist.process(tdc, copier);
 
         assertThat(copier.get().testClass, is(not(nullValue())));
         assertThat(copier.get().testClass.s0, is("0"));

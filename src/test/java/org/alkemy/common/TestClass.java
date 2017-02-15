@@ -49,4 +49,10 @@ public class TestClass
     
     @Label("id4")
     int i9 = 0;
+    
+    @Label("{&dyn1}")
+    int i10 = 5;
+    
+    @Label("{&prefix}.bbb.{&infix}.ddd.{&suffix}")
+    int i11 = 6;
 }

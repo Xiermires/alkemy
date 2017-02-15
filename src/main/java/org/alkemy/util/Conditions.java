@@ -22,9 +22,10 @@ import org.alkemy.exception.InvalidArgument;
 
 public class Conditions
 {
-    public static void requireNonNull(Object o)
+    public static void requireNonNull(Object... o)
     {
-        Objects.requireNonNull(o);
+        for (int i=0; i<o.length; i++)
+            Objects.requireNonNull(o[i]);
     }
     
     public static void requireNotEmpty(boolean[] o)

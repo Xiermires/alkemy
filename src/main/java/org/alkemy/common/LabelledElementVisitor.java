@@ -19,7 +19,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.regex.Pattern;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
@@ -29,18 +32,32 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElement>
 {
-    private BiFunction<String, Object, Object> f;
+    private final Pattern p;
+    private final BiFunction<String, Object, Object> f;
+    private Map<String, String> dynamicVariables = new HashMap<>();
 
     public LabelledElementVisitor(BiFunction<String, Object, Object> f)
     {
-        this.f = f;
+        this(f, "\\{&(.+?)\\}");
     }
 
+    public LabelledElementVisitor(BiFunction<String, Object, Object> f, String dynParamPattern)
+    {
+        this.f = f;
+        this.p = Pattern.compile(dynParamPattern);
+    }
+
+    public LabelledElementVisitor dynamicVariables(Map<String, String> dynamicVariables)
+    {
+        this.dynamicVariables.putAll(dynamicVariables);
+        return this;
+    }
+    
     @Override
     public void visit(LabelledElement e, Object parent)
     {
         final LabelledElement le = e;
-        f.apply(le.raw, le.get(parent));
+        f.apply(DynamicLabel.replace(le.raw, dynamicVariables, p), le.get(parent));
     }
 
     @Override
@@ -59,7 +76,7 @@ public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElem
             raw = ae.desc().getAnnotation(Label.class).value();
         }
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
     @AlkemyLeaf(LabelledElementVisitor.class)

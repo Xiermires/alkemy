@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy;
 
+import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Conditions;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
@@ -27,6 +28,8 @@ public class Alkemist
 
     Alkemist(AlkemyLoadingCache cache, AlkemyElementVisitor<?> aev)
     {
+        Conditions.requireNonNull(cache, aev);
+        
         this.cache = cache;
         this.aev = aev;
     }
@@ -34,7 +37,6 @@ public class Alkemist
     public <T> T process(T t)
     {
         Conditions.requireNonNull(t);
-        Conditions.requireNonNull(aev);
 
         final Node<? extends AbstractAlkemyElement<?>> root = cache.get(t.getClass());
         root.traverse(c -> c.data().accept(aev, t), p -> aev.getClass().equals(p.visitorType()), true);
@@ -42,13 +44,13 @@ public class Alkemist
         return t;
     }
 
-    public <T> T process(T t, AlkemyTypeVisitor atv)
+    public static <T> T process(T t, AlkemyTypeVisitor atv)
     {
         Conditions.requireNonNull(t);
         Conditions.requireNonNull(atv);
 
         atv.bind(t);
-        atv.visit(cache.get(t.getClass()));
+        atv.visit(AlkemyParsers.fieldParser().parse(t.getClass()));
         return t;
     }
 }
