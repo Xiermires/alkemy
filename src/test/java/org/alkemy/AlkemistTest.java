@@ -20,8 +20,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-import org.agenttools.AgentTools;
-import org.alkemy.parse.impl.AlkemizerCTF;
 import org.alkemy.util.Measure;
 import org.alkemy.util.PassThrough;
 import org.junit.BeforeClass;
@@ -33,7 +31,7 @@ public class AlkemistTest
     @BeforeClass
     public static void pre()
     {
-        AgentTools.add(new AlkemizerCTF());
+        //AgentTools.add(new AlkemizerCTF());
     }
 
     @Test

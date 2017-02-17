@@ -1,7 +1,7 @@
 package org.alkemy.parse.impl;
 
 @FunctionalInterface
-public interface NodeConstructorFunction<T>
+public interface NodeConstructorFunction
 {
-    T newInstance(Object... args);
+    Object newInstance(Object... args);
 }

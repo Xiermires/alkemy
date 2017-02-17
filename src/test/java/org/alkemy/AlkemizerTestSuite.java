@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.InstrumentableLambdaClassSuite.Instr;
-import org.alkemy.InstrumentableLambdaClassSuite.InstrumentableLambdaClasses;
+import org.alkemy.InstrumentClassWithLambdasSuite.Instr;
+import org.alkemy.InstrumentClassWithLambdasSuite.InstrumentableLambdaClasses;
 import org.alkemy.parse.impl.AlkemizerCTF;
 import org.junit.runner.RunWith;
 
-@RunWith(InstrumentableLambdaClassSuite.class)
+@RunWith(InstrumentClassWithLambdasSuite.class)
 @InstrumentableLambdaClasses(//
 testClassNames = { "org.alkemy.parse.impl.AlkemizerTest", //
         "org.alkemy.parse.impl.TypeFieldParserTest", //
@@ -28,6 +28,7 @@ testClassNames = { "org.alkemy.parse.impl.AlkemizerTest", //
         "org.alkemy.common.LabelledElementTest", //
         "org.alkemy.example.RandomGenerator" }, //
 instrs = @Instr(classNames = { "org.alkemy.TestClass", //
+        "org.alkemy.TestDeepCopy", //
         "org.alkemy.parse.impl.TestAlkemizer", //
         "org.alkemy.parse.impl.TestClass", //
         "org.alkemy.parse.impl.TestNode", //

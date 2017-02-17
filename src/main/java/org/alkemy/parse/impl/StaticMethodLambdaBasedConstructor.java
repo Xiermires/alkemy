@@ -1,18 +1,16 @@
 package org.alkemy.parse.impl;
 
-import java.lang.invoke.MethodHandle;
-
 import org.alkemy.exception.AlkemyException;
 
-public class TypeCtorMethodHandleBased implements NodeConstructor
+public class StaticMethodLambdaBasedConstructor implements NodeConstructor
 {
     private final Class<?> type;
-    private final MethodHandle mh;
+    private final NodeConstructorFunction ctor;
 
-    public TypeCtorMethodHandleBased(Class<?> type, MethodHandle mh)
+    StaticMethodLambdaBasedConstructor(Class<?> type, NodeConstructorFunction ctor)
     {
         this.type = type;
-        this.mh = mh;
+        this.ctor = ctor;
     }
 
     @Override
@@ -22,12 +20,12 @@ public class TypeCtorMethodHandleBased implements NodeConstructor
     }
 
     @Override
-    @SuppressWarnings("unchecked") // safe
+    @SuppressWarnings("unchecked") // returns an instance of type()
     public <T> T newInstance(Object... args) throws AlkemyException
     {
         try
         {
-            return (T) mh.invokeWithArguments(args);
+            return (T) ctor.newInstance(args);
         }
         catch (Throwable e)
         {

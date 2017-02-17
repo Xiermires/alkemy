@@ -28,16 +28,16 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.alkemy.ValueAccessor;
+import org.alkemy.parse.impl.Alkemizer.RefList;
 import org.alkemy.util.Measure;
 import org.alkemy.util.ObjIntFunction;
-import org.alkemy.util.PassThrough.Bar;
-import org.alkemy.util.PassThrough.Foo;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -52,26 +52,18 @@ public class AlkemizerTest
     }
 
     @Test
-    public void alkemizeFactoryMethod() throws IOException, NoSuchMethodException, SecurityException
+    public void alkemizeNodeConstructorMethod() throws IOException, NoSuchMethodException, SecurityException
     {
-        final Method m = clazz.getMethod(Alkemizer.CREATE_INSTANCE, int.class, String.class);
+        final Method m = clazz.getMethod(Alkemizer.CREATE_INSTANCE, Object[].class);
         assertThat(Modifier.isStatic(m.getModifiers()), is(true));
-        
+
         final Annotation[][] as = m.getParameterAnnotations();
 
-        assertThat(as.length, is(2));
-        assertThat(as[0].length, is(2));
-        assertThat(as[1].length, is(1));
+        assertThat(as.length, is(1));
+        assertThat(as[0].length, is(1));
 
-        final Foo foofoo = Foo.class.cast(as[0][0]);
-        final Bar foobar = Bar.class.cast(as[0][1]);
-        final Bar barbar = Bar.class.cast(as[1][0]);
-        
-        assertThat(foofoo.value(), is("foo"));
-        assertThat(foobar.desc(), is(""));
-        assertThat(foobar.id(), is(0l));
-        assertThat(barbar.desc(), is("bar"));
-        assertThat(barbar.id(), is(1001l));
+        final RefList refs = RefList.class.cast(as[0][0]);
+        assertThat(Arrays.asList(refs.value()), is(Arrays.asList(new String[] { "foo", "bar" })));
     }
 
     @Test
@@ -94,15 +86,15 @@ public class AlkemizerTest
     }
 
     @Test
-    public void testCtor() throws NoSuchFieldException, SecurityException, IllegalAccessException
+    public void testNodeConstructor() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
         final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
         final TestAlkemizer tc = ctor.newInstance(1, "foo");
-        
+
         assertThat(1, is(tc.foo));
         assertThat("foo", is(tc.bar));
     }
-    
+
     @Test
     public void testAccessorGetter() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
@@ -129,8 +121,7 @@ public class AlkemizerTest
     {
         final Method method = clazz.getDeclaredMethod("get$$bar");
         final MethodHandle handle = methodHandle(clazz, "get$$bar");
-        final Function<Object, String> function = 
-                LambdaRefHelper.ref2MemberGetter(handle, Object.class, String.class);
+        final Function<Object, String> function = LambdaRefHelper.ref2MemberGetter(handle, Object.class, String.class);
         final ValueAccessor accessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("bar"));
 
         final TestAlkemizer tc = new TestAlkemizer();
@@ -201,8 +192,7 @@ public class AlkemizerTest
     public void compareLambdaRefObjectvsRefPrimitive() throws Throwable
     {
         final MethodHandle handle = methodHandle(clazz, "get$$foo");
-        final Function<TestAlkemizer, Integer> f1 = LambdaRefHelper.ref2MemberGetter(handle, TestAlkemizer.class,
-                Integer.class);
+        final Function<TestAlkemizer, Integer> f1 = LambdaRefHelper.ref2MemberGetter(handle, TestAlkemizer.class, Integer.class);
         final ObjIntFunction<TestAlkemizer> f2 = objIntLambdaRef(handle, TestAlkemizer.class);
 
         final TestAlkemizer tc = new TestAlkemizer();

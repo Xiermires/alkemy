@@ -4,7 +4,6 @@ import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -39,16 +38,15 @@ public class LambdaRefHelper
         {
             try
             {
-                return createLambdaRef(MethodHandles.lookup(), Function.class, Function.class.getMethod("apply", Object.class),
-                        handle);
+                return createLambdaRef(Function.class, Function.class.getMethod("apply", Object.class), handle);
             }
-            catch (IllegalAccessException | SecurityException e)
+            catch (SecurityException e)
             {
                 throw e;
             }
-            catch (Throwable e)
+            catch (NoSuchMethodException e)
             {
-                log.debug(String.format("Can't create lambda reference for type '%s'.", clazz.getName()), e);
+                log.debug("Functional interface doesn't implement", e);
             }
         }
         return null;
@@ -63,15 +61,15 @@ public class LambdaRefHelper
         {
             try
             {
-                return createLambdaRef(MethodHandles.lookup(), Supplier.class, Supplier.class.getMethod("get"), handle);
+                return createLambdaRef(Supplier.class, Supplier.class.getMethod("get"), handle);
             }
-            catch (IllegalAccessException | SecurityException e)
+            catch (SecurityException e)
             {
                 throw e;
             }
-            catch (Throwable e)
+            catch (NoSuchMethodException e)
             {
-                log.debug(String.format("Can't create lambda reference for type '%s'.", clazz.getName()), e);
+                log.debug("Functional interface doesn't implement", e);
             }
         }
         return null;
@@ -86,16 +84,15 @@ public class LambdaRefHelper
         {
             try
             {
-                return createLambdaRef(MethodHandles.lookup(), BiConsumer.class,
-                        BiConsumer.class.getMethod("accept", Object.class, Object.class), handle);
+                return createLambdaRef(BiConsumer.class, BiConsumer.class.getMethod("accept", Object.class, Object.class), handle);
             }
-            catch (IllegalAccessException | SecurityException e)
+            catch (SecurityException e)
             {
                 throw e;
             }
-            catch (Throwable e)
+            catch (NoSuchMethodException e)
             {
-                log.debug(String.format("Can't create lambda reference for type '%s'.", clazz.getName()), e);
+                log.debug("Functional interface doesn't implement", e);
             }
         }
         return null;
@@ -110,30 +107,37 @@ public class LambdaRefHelper
         {
             try
             {
-                return createLambdaRef(MethodHandles.lookup(), Consumer.class, Consumer.class.getMethod("accept", Object.class),
-                        handle);
+                return createLambdaRef(Consumer.class, Consumer.class.getMethod("accept", Object.class), handle);
             }
-            catch (IllegalAccessException | SecurityException e)
+            catch (SecurityException e)
             {
                 throw e;
             }
-            catch (Throwable e)
+            catch (NoSuchMethodException e)
             {
-                log.debug(String.format("Can't create lambda reference for type '%s'.", clazz.getName()), e);
+                log.debug("Functional interface doesn't implement", e);
             }
         }
         return null;
     }
 
-    static <T> T createLambdaRef(Lookup lookup, Class<T> funcClass, Method funcMethod, MethodHandle handle) throws Throwable
+    static <T> T createLambdaRef(Class<T> funcClass, Method funcMethod, MethodHandle handle)
     {
-        final Class<?> funcRet = funcMethod.getReturnType();
-        final Class<?>[] funcParams = funcMethod.getParameterTypes();
-        final MethodType funcType = MethodType.methodType(funcRet, funcParams);
+        try
+        {
+            final Class<?> funcRet = funcMethod.getReturnType();
+            final Class<?>[] funcParams = funcMethod.getParameterTypes();
+            final MethodType funcType = MethodType.methodType(funcRet, funcParams);
 
-        final CallSite metafactory = LambdaMetafactory.metafactory(MethodHandles.lookup(), funcMethod.getName(),
-                MethodType.methodType(funcClass), funcType, handle, handle.type());
-        return (T) metafactory.getTarget().invoke();
+            final CallSite metafactory = LambdaMetafactory.metafactory(MethodHandles.lookup(), funcMethod.getName(),
+                    MethodType.methodType(funcClass), funcType, handle, handle.type());
+            return (T) metafactory.getTarget().invoke();
+        }
+        catch (Throwable e)
+        {
+            log.debug(String.format("Can't create lambda reference for type '%s'.", funcClass.getName()), e);
+        }
+        return null;
     }
 
     static MethodHandle methodHandle(Class<?> clazz, String name, Class<?>... params) throws IllegalAccessException,

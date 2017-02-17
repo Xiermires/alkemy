@@ -15,12 +15,14 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import static org.alkemy.parse.impl.LambdaRefHelper.createLambdaRef;
 import static org.alkemy.parse.impl.LambdaRefHelper.methodHandle;
 import static org.alkemy.parse.impl.LambdaRefHelper.ref2MemberGetter;
 import static org.alkemy.parse.impl.LambdaRefHelper.ref2MemberSetter;
 import static org.alkemy.parse.impl.LambdaRefHelper.ref2StaticGetter;
 import static org.alkemy.parse.impl.LambdaRefHelper.ref2StaticSetter;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -34,9 +36,13 @@ import java.util.stream.Collectors;
 
 import org.alkemy.ValueAccessor;
 import org.alkemy.util.Conditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MethodHandleFactory
 {
+    private static final Logger log = LoggerFactory.getLogger(MethodHandleFactory.class);
+
     @SuppressWarnings("unchecked")
     // This method provides accessors for any types, except primitives. Uses functions with obj. references only.
     static ValueAccessor createAccessor(Field f) throws IllegalAccessException, SecurityException
@@ -71,6 +77,19 @@ public class MethodHandleFactory
                 .filter(p -> Alkemizer.CREATE_INSTANCE.equals(p.getName())).collect(Collectors.toList());
 
         Conditions.requireCollectionSize(l, 1); // we instrument only one factory method
-        return new TypeCtorMethodHandleBased(clazz, methodHandle(clazz, Alkemizer.CREATE_INSTANCE, l.get(0).getParameterTypes()));
+
+        final MethodHandle mh = methodHandle(clazz, Alkemizer.CREATE_INSTANCE, l.get(0).getParameterTypes());
+
+        Method m;
+        try
+        {
+            m = NodeConstructorFunction.class.getMethod("newInstance", Object[].class);
+            return new StaticMethodLambdaBasedConstructor(clazz, createLambdaRef(NodeConstructorFunction.class, m, mh));
+        }
+        catch (NoSuchMethodException e)
+        {
+            log.debug("Functional interface doesn't implement", e);
+        }
+        return null;
     }
 }
