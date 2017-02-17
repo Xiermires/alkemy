@@ -17,6 +17,7 @@ package org.alkemy.parse;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.ValueAccessor;
+import org.alkemy.parse.impl.NodeConstructor;
 
 public interface AlkemyLexer<T>
 {
@@ -38,5 +39,5 @@ public interface AlkemyLexer<T>
     /**
      * Creates an unbound {@link AbstractAlkemyElement} for this node.
      */
-    AbstractAlkemyElement<?> createNode(T desc, ValueAccessor valueAccessor, Class<?> nodeType);
+    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType);
 }

@@ -46,7 +46,7 @@ public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
     }
     
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD, ElementType.PARAMETER })
+    @Target({ ElementType.FIELD })
     @AlkemyLeaf(AssignConstant.class)
     public @interface Bar
     {

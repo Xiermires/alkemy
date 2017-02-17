@@ -22,14 +22,14 @@ import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public class StaticMethodHandleAccessor implements ValueAccessor
+public class StaticFieldLambdaBasedAccessor implements ValueAccessor
 {
     private final String name;
     private final Class<?> type;
     private final Supplier<?> getter;
     private final Consumer<Object> setter;
 
-    StaticMethodHandleAccessor(String name, Class<?> type, Supplier<?> getter, Consumer<Object> setter)
+    StaticFieldLambdaBasedAccessor(String name, Class<?> type, Supplier<?> getter, Consumer<Object> setter)
     {
         this.name = name;
         this.type = type;
@@ -42,7 +42,7 @@ public class StaticMethodHandleAccessor implements ValueAccessor
     {
         return type;
     }
-
+    
     @Override
     public Object get(Object unused) throws AccessException
     {

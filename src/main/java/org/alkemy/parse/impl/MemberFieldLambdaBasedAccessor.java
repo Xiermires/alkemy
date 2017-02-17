@@ -23,14 +23,14 @@ import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public class MemberMethodHandleAccessor implements ValueAccessor
+public class MemberFieldLambdaBasedAccessor implements ValueAccessor
 {
     private final String name;
     private final Class<?> type;
     private final Function<Object, ?> getter;
     private final BiConsumer<Object, Object> setter;
     
-    MemberMethodHandleAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
+    MemberFieldLambdaBasedAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
         this.name = name;
         this.type = type;

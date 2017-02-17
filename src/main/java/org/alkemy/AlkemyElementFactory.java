@@ -15,17 +15,17 @@
  *******************************************************************************/
 package org.alkemy;
 
+import org.alkemy.parse.impl.NodeConstructor;
+
 public interface AlkemyElementFactory<T>
 {
     /**
-     * Creates an unbound mapping for this target.
-     * @param valueAccessor 
+     * Creates an alkemy element for this target.
      */
     AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor);
 
     /**
-     * Creates an unbound mapping node for this target.
-     * @param valueAccessor 
+     * Creates an alkemy element node for this target.
      */
-    AbstractAlkemyElement<?> createNode(T desc, ValueAccessor valueAccessor, Class<?> nodeType);
+    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType);
 }

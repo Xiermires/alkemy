@@ -20,12 +20,14 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -34,6 +36,8 @@ import java.util.function.Supplier;
 import org.alkemy.ValueAccessor;
 import org.alkemy.util.Measure;
 import org.alkemy.util.ObjIntFunction;
+import org.alkemy.util.PassThrough.Bar;
+import org.alkemy.util.PassThrough.Foo;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -48,9 +52,33 @@ public class AlkemizerTest
     }
 
     @Test
+    public void alkemizeFactoryMethod() throws IOException, NoSuchMethodException, SecurityException
+    {
+        final Method m = clazz.getMethod(Alkemizer.CREATE_INSTANCE, int.class, String.class);
+        assertThat(Modifier.isStatic(m.getModifiers()), is(true));
+        
+        final Annotation[][] as = m.getParameterAnnotations();
+
+        assertThat(as.length, is(2));
+        assertThat(as[0].length, is(2));
+        assertThat(as[1].length, is(1));
+
+        final Foo foofoo = Foo.class.cast(as[0][0]);
+        final Bar foobar = Bar.class.cast(as[0][1]);
+        final Bar barbar = Bar.class.cast(as[1][0]);
+        
+        assertThat(foofoo.value(), is("foo"));
+        assertThat(foobar.desc(), is(""));
+        assertThat(foobar.id(), is(0l));
+        assertThat(barbar.desc(), is("bar"));
+        assertThat(barbar.id(), is(1001l));
+    }
+
+    @Test
     public void alkemizeIsInstrumented() throws IllegalAccessException, NoSuchMethodException, SecurityException, Throwable
     {
-        final Supplier<Boolean> s = MethodHandleAccessorFactory.ref2StaticGetter(methodHandle(clazz, "is$$instrumented"), clazz, boolean.class);
+        final Supplier<Boolean> s = LambdaRefHelper.ref2StaticGetter(methodHandle(clazz, "is$$instrumented"), clazz,
+                boolean.class);
         assertThat(s.get(), is(true));
     }
 
@@ -66,20 +94,30 @@ public class AlkemizerTest
     }
 
     @Test
-    public void testAccessorGetter() throws NoSuchFieldException, SecurityException, IllegalAccessException 
+    public void testCtor() throws NoSuchFieldException, SecurityException, IllegalAccessException
+    {
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
+        final TestAlkemizer tc = ctor.newInstance(1, "foo");
+        
+        assertThat(1, is(tc.foo));
+        assertThat("foo", is(tc.bar));
+    }
+    
+    @Test
+    public void testAccessorGetter() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final ValueAccessor accessor = MethodHandleAccessorFactory.createAccessor(f);
+        final ValueAccessor accessor = MethodHandleFactory.createAccessor(f);
 
         final TestAlkemizer tc = new TestAlkemizer();
         assertThat(-1, is(accessor.get(tc)));
     }
-    
+
     @Test
     public void testAccessorSetter() throws Throwable
     {
         final Field f = clazz.getDeclaredField("foo");
-        final ValueAccessor accessor = MethodHandleAccessorFactory.createAccessor(f);
+        final ValueAccessor accessor = MethodHandleFactory.createAccessor(f);
 
         final TestAlkemizer tc = new TestAlkemizer();
         accessor.set(1, tc);
@@ -87,13 +125,14 @@ public class AlkemizerTest
     }
 
     @Test
-    public void performanceMeasurements() throws Throwable
+    public void performanceAccesingStrategies() throws Throwable
     {
         final Method method = clazz.getDeclaredMethod("get$$bar");
         final MethodHandle handle = methodHandle(clazz, "get$$bar");
-        final Function<Object, String> function = MethodHandleAccessorFactory.ref2MemberGetter(handle, Object.class, String.class);
-        final ValueAccessor accessor = MethodHandleAccessorFactory.createAccessor(clazz.getDeclaredField("bar"));
-        
+        final Function<Object, String> function = 
+                LambdaRefHelper.ref2MemberGetter(handle, Object.class, String.class);
+        final ValueAccessor accessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("bar"));
+
         final TestAlkemizer tc = new TestAlkemizer();
 
         // warm up
@@ -139,7 +178,7 @@ public class AlkemizerTest
                 accessor.get(tc);
             }
         }) / 1000000 + " ms");
-        
+
         System.out.println("Reflection: " + Measure.measure(() ->
         {
             for (int i = 0; i < 10000000; i++)
@@ -162,7 +201,8 @@ public class AlkemizerTest
     public void compareLambdaRefObjectvsRefPrimitive() throws Throwable
     {
         final MethodHandle handle = methodHandle(clazz, "get$$foo");
-        final Function<TestAlkemizer, Integer> f1 = MethodHandleAccessorFactory.ref2MemberGetter(handle, TestAlkemizer.class, Integer.class);
+        final Function<TestAlkemizer, Integer> f1 = LambdaRefHelper.ref2MemberGetter(handle, TestAlkemizer.class,
+                Integer.class);
         final ObjIntFunction<TestAlkemizer> f2 = objIntLambdaRef(handle, TestAlkemizer.class);
 
         final TestAlkemizer tc = new TestAlkemizer();
@@ -192,7 +232,8 @@ public class AlkemizerTest
         }) / 1000000 + " ms");
     }
 
-    private MethodHandle methodHandle(Class<?> clazz, String methodName) throws IllegalAccessException, NoSuchMethodException, SecurityException
+    private MethodHandle methodHandle(Class<?> clazz, String methodName) throws IllegalAccessException, NoSuchMethodException,
+            SecurityException
     {
         final Method method = clazz.getDeclaredMethod(methodName);
         return MethodHandles.lookup().unreflect(method);
@@ -206,7 +247,7 @@ public class AlkemizerTest
         final MethodType funcType = MethodType.methodType(funcRet, funcParams);
 
         return (ObjIntFunction<T>) LambdaMetafactory
-                .metafactory(MethodHandles.lookup(), funcMethod.getName(), MethodType.methodType(ObjIntFunction.class), funcType, handle, handle.type()).getTarget()
-                .invoke();
+                .metafactory(MethodHandles.lookup(), funcMethod.getName(), MethodType.methodType(ObjIntFunction.class), funcType,
+                        handle, handle.type()).getTarget().invoke();
     }
 }

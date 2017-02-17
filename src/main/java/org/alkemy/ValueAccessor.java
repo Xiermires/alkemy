@@ -43,7 +43,7 @@ public interface ValueAccessor
      *             If an error occurs while setting the value.
      */
     void set(Object value, Object parent) throws AccessException;
-
+    
     /**
      * Returns the target name. Each target name is unique in the owner context.
      */

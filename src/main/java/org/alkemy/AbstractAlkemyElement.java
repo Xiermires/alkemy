@@ -19,6 +19,7 @@ import java.lang.reflect.AnnotatedElement;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.impl.NodeConstructor;
 import org.alkemy.util.Conditions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
@@ -26,12 +27,14 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
 {
     private final AnnotatedElement desc;
     private final ValueAccessor valueAccessor;
+    private final NodeConstructor valueConstructor;
     private final Class<? extends AlkemyElementVisitor<?>> visitorType;
 
-    AbstractAlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
+        this.valueConstructor = valueConstructor;
         this.visitorType = visitorType;
     }
 
@@ -41,14 +44,15 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
+        this.valueConstructor = other.valueConstructor;
         this.visitorType = other.visitorType;
     }
 
-    public static AlkemyElement create(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+    public static AlkemyElement create(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
     {
-        return new AlkemyElement(desc, valueAccessor, visitorType);
+        return new AlkemyElement(desc, valueConstructor, valueAccessor, visitorType);
     }
-
+    
     public AnnotatedElement desc()
     {
         return desc;
@@ -99,9 +103,9 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
             super(other);
         }
 
-        AlkemyElement(AnnotatedElement desc, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+        AlkemyElement(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
         {
-            super(desc, valueAccessor, visitorType);
+            super(desc, valueConstructor, valueAccessor, visitorType);
         }
         
         @Override

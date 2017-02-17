@@ -32,17 +32,20 @@ public class PassThrough implements AlkemyElementVisitor<AlkemyElement>
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD, ElementType.PARAMETER })
+    @Target({ ElementType.FIELD })
     @AlkemyLeaf(PassThrough.class)
     public @interface Bar
     {
+        long id() default 0;
+        String desc() default "";
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD, ElementType.PARAMETER })
+    @Target({ ElementType.FIELD })
     @AlkemyLeaf(PassThrough.class)
     public @interface Foo
     {
+        String value() default "";
     }
 
     @Override

@@ -18,10 +18,15 @@ package org.alkemy.parse.impl;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.RETURN;
 
@@ -29,7 +34,10 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,15 +49,22 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Alkemizer extends ClassVisitor 
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
+
+public class Alkemizer extends ClassVisitor
 {
     static final String IS_INSTRUMENTED = "is$$instrumented";
+    static final String CREATE_INSTANCE = "create$$instance";
+
+    private static final Object NO_PROPERTY = new Object(); // indicates an annotation has no properties.
 
     private static final Logger log = LoggerFactory.getLogger(Alkemizer.class);
 
@@ -64,7 +79,7 @@ public class Alkemizer extends ClassVisitor
         super(Opcodes.ASM5, cv);
         this.className = className;
     }
-    
+
     static byte[] alkemize(String className, byte[] classBytes)
     {
         final ClassReader cr = new ClassReader(classBytes);
@@ -95,9 +110,17 @@ public class Alkemizer extends ClassVisitor
     {
         if (!alkemizableFields.isEmpty())
         {
-            appendIsInstrumented();
-            appendGetters();
-            appendSetters();
+            try
+            {
+                appendFactory();
+                appendIsInstrumented();
+                appendGetters();
+                appendSetters();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         super.visitEnd();
@@ -111,6 +134,111 @@ public class Alkemizer extends ClassVisitor
         mv.visitInsn(ICONST_1);
         mv.visitInsn(IRETURN);
         mv.visitMaxs(0, 0);
+        mv.visitEnd();
+    }
+
+    private void appendFactory()
+    {
+        final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, "create$$instance", parameterSignature().toString(),
+                null, null);
+
+        for (int i = 0; i < alkemizableFields.size(); i++)
+        {
+            for (Entry<String, Map<String, Object>> outer : alkemizableFields.get(i).annotations.rowMap().entrySet())
+            {
+                final AnnotationVisitor av = mv.visitParameterAnnotation(i, outer.getKey(), true);
+                for (Entry<String, Object> inner : outer.getValue().entrySet())
+                {
+                    if (NO_PROPERTY == inner.getValue()) continue;
+
+                    av.visit(inner.getKey(), inner.getValue());
+                }
+                av.visitEnd();
+            }
+        }
+
+        mv.visitCode();
+        final Label l0 = new Label();
+        mv.visitLabel(l0);
+
+        // TODO 1: document "a visible non-args ctor is required for the instrumented version."
+        // TODO 2: detect it and do not create the ctor.
+        mv.visitTypeInsn(NEW, className);
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
+
+        final int instancePos = findStorePosition();
+        mv.visitVarInsn(ASTORE, instancePos);
+
+        // need this label for the local variables
+        final Label l1 = new Label();
+        mv.visitLabel(l1);
+
+        mv.visitVarInsn(ALOAD, instancePos);
+        mv.visitVarInsn(Type.getType(alkemizableFields.get(0).type).getOpcode(ILOAD), 0);
+        mv.visitFieldInsn(PUTFIELD, className, alkemizableFields.get(0).name, alkemizableFields.get(0).type);
+
+        final int offset = getTypeOffset(alkemizableFields.get(0).type);
+
+        for (int i = 1, j = 1 + offset; i < alkemizableFields.size(); i++, j++)
+        {
+            final AlkemizableField af = alkemizableFields.get(i);
+
+            mv.visitLabel(new Label());
+            mv.visitVarInsn(ALOAD, instancePos);
+            mv.visitVarInsn(Type.getType(af.type).getOpcode(ILOAD), j);
+            mv.visitFieldInsn(PUTFIELD, className, af.name, af.type);
+
+            j += getTypeOffset(af.type);
+        }
+
+        mv.visitLabel(new Label());
+        mv.visitVarInsn(ALOAD, instancePos);
+        mv.visitInsn(ARETURN);
+
+        final Label ln = new Label();
+        mv.visitLabel(ln);
+
+        for (int i = 0, j = 0; i < alkemizableFields.size(); i++, j++)
+        {
+            final AlkemizableField af = alkemizableFields.get(i);
+            mv.visitLocalVariable("arg" + i, af.type, null, l0, ln, j);
+            j += getTypeOffset(af.type);
+        }
+        mv.visitLocalVariable("instance", classNameAsDesc(className), null, l1, ln, instancePos);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+    }
+
+    private int getTypeOffset(String desc)
+    {
+        return "D".equals(desc) || "J".equals(desc) ? 1 : 0; // double && long take two spots.
+    }
+
+    private int findStorePosition()
+    {
+        int pos = 0;
+        for (int i = 0; i < alkemizableFields.size(); i++, pos++)
+        {
+            pos += getTypeOffset(alkemizableFields.get(i).type);
+        }
+        return pos;
+    }
+
+    private StringBuilder parameterSignature()
+    {
+        final StringBuilder sb = new StringBuilder().append("(");
+        for (AlkemizableField af : alkemizableFields)
+        {
+            sb.append(Type.getType(af.type));
+        }
+        sb.append(")").append(classNameAsDesc(className));
+        return sb;
+    }
+
+    private String classNameAsDesc(String className)
+    {
+        return "L" + className + ";";
     }
 
     private void appendGetters()
@@ -138,6 +266,7 @@ public class Alkemizer extends ClassVisitor
         mv.visitFieldInsn(GETFIELD, className, name, desc);
         mv.visitInsn(Type.getType(desc).getOpcode(IRETURN));
         mv.visitMaxs(0, 0);
+        mv.visitEnd();
     }
 
     private void appendSetter(String name, String desc)
@@ -150,6 +279,7 @@ public class Alkemizer extends ClassVisitor
         mv.visitFieldInsn(PUTFIELD, className, name, desc);
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);
+        mv.visitEnd();
     }
 
     private static class FieldAnnotationVisitor extends FieldVisitor
@@ -162,8 +292,10 @@ public class Alkemizer extends ClassVisitor
         private final Set<String> alkemizableAnnotations;
         private final Set<String> nonAlkemizableAnnotations;
 
-        FieldAnnotationVisitor(FieldVisitor fv, String name, String type, List<AlkemizableField> alkemizables, Set<String> alkemizableAnnotations,
-                Set<String> nonAlkemizableAnnotations)
+        private AlkemizableField alkemizable;
+
+        FieldAnnotationVisitor(FieldVisitor fv, String name, String type, List<AlkemizableField> alkemizables,
+                Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations)
         {
             super(Opcodes.ASM5, fv);
 
@@ -179,16 +311,33 @@ public class Alkemizer extends ClassVisitor
         {
             if (visible && isAlkemizable(desc))
             {
-                alkemizables.add(new AlkemizableField(name, type));
+                if (alkemizable == null)
+                {
+                    alkemizable = new AlkemizableField(name, type);
+                }
+                alkemizable.annotations.put(desc, "", NO_PROPERTY); // In case the annotation has no properties, we still must
+                                                                    // attach to the ctor parameter.
+                return new ReadAnnotation(alkemizable, desc, super.visitAnnotation(desc, visible));
             }
             return super.visitAnnotation(desc, visible);
+        }
+
+        @Override
+        public void visitEnd()
+        {
+            if (alkemizable != null)
+            {
+                alkemizables.add(alkemizable);
+            }
+            super.visitEnd();
         }
 
         private boolean isAlkemizable(String desc)
         {
             return !nonAlkemizableAnnotations.contains(desc)
-                    && (alkemizableAnnotations.contains(desc) || AlkemyNode.class.getName().equals(getAnnotationQualifiedName(desc)) || isAnnotationPresent(desc,
-                            AlkemyLeaf.class));
+                    && (alkemizableAnnotations.contains(desc)
+                            || AlkemyNode.class.getName().equals(getAnnotationQualifiedName(desc)) || isAnnotationPresent(desc,
+                                AlkemyLeaf.class));
         }
 
         private static String getAnnotationQualifiedName(String desc)
@@ -206,7 +355,7 @@ public class Alkemizer extends ClassVisitor
                 final ClassReader cr = new ClassReader(qualifiedName);
                 final FindAnnotation cv = new FindAnnotation(clazz, nonAlkemizableAnnotations);
                 cr.accept(cv, ClassReader.SKIP_CODE);
-                
+
                 if (cv.annotated)
                 {
                     alkemizableAnnotations.add(desc);
@@ -252,15 +401,38 @@ public class Alkemizer extends ClassVisitor
         }
     }
 
+    private static class ReadAnnotation extends AnnotationVisitor
+    {
+        private final AlkemizableField af;
+        private final String desc;
+
+        public ReadAnnotation(AlkemizableField af, String desc, AnnotationVisitor annotationVisitor)
+        {
+            super(Opcodes.ASM5, annotationVisitor);
+
+            this.af = af;
+            this.desc = desc;
+        }
+
+        @Override
+        public void visit(String name, Object value)
+        {
+            af.annotations.put(desc, name, value);
+            super.visit(name, value);
+        }
+    }
+
     private static class AlkemizableField
     {
         private final String name;
         private final String type;
+        private final Table<String, String, Object> annotations; // annotation desc / property name / value
 
         AlkemizableField(String name, String type)
         {
             this.name = name;
             this.type = type;
+            this.annotations = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new);
         }
     }
 }

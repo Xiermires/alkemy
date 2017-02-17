@@ -31,14 +31,19 @@ class AccessorFactory
     {
         return new SelfAccessor();
     }
-    
+
+    static NodeConstructor notSupported()
+    {
+        return new UnsupportedConstructor();
+    }
+
     static ValueAccessor createAccessor(Field f)
     {
         try
         {
-            if (MethodHandleAccessorFactory.isInstrumented(f))
+            if (LambdaRefHelper.isInstrumented(f.getDeclaringClass()))
             {
-                return MethodHandleAccessorFactory.createAccessor(f);
+                return MethodHandleFactory.createAccessor(f);
             }
             else
             {
@@ -51,11 +56,31 @@ class AccessorFactory
             throw new RuntimeException("TODO");
         }
     }
-    
+
+    static NodeConstructor createConstructor(Class<?> type)
+    {
+        try
+        {
+            if (LambdaRefHelper.isInstrumented(type))
+            {
+                return MethodHandleFactory.createNodeConstructor(type);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (IllegalAccessException | SecurityException e)
+        {
+            // TODO
+            throw new RuntimeException("TODO");
+        }
+    }
+
     static class SelfAccessor implements ValueAccessor
     {
         Object ref;
-                
+
         @Override
         public Class<?> type() throws AlkemyException
         {
@@ -78,6 +103,22 @@ class AccessorFactory
         public String targetName()
         {
             throw new AlkemyException(""); // TODO (??)
+        }
+    }
+
+    static class UnsupportedConstructor implements NodeConstructor
+    {
+
+        @Override
+        public Class<?> type() throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public <T> T newInstance(Object... args) throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
         }
     }
 }

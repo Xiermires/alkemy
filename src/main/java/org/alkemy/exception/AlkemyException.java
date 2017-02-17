@@ -24,7 +24,7 @@ public class AlkemyException extends FormattedException
         super(message, args);
     }
     
-    public AlkemyException(String message, Exception cause, Object... args)
+    public AlkemyException(String message, Throwable cause, Object... args)
     {
         super(message, cause, args);
     }    

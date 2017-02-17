@@ -42,7 +42,7 @@ public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD, ElementType.PARAMETER })
+    @Target({ ElementType.FIELD })
     @AlkemyLeaf(PropertyConcatenation.class)
     public @interface Foo
     {

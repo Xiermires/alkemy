@@ -20,9 +20,17 @@ import org.alkemy.util.PassThrough.Foo;
 
 public class TestAlkemizer
 {
-    @Foo
-    private int foo = -1;
+    @Foo("foo") @Bar
+    int foo = -1;
+
+    @Bar(desc = "bar", id = 1001)
+    String bar = "baz";
     
-    @Bar
-    private String bar = "baz";
+    /*public static TestAlkemizer create$$instance(@RefList({"foo", "bar"}) Object[] args)
+    {
+        TestAlkemizer instance = new TestAlkemizer();
+        instance.foo = (int) args[0];
+        instance.bar = (String) args[1];
+        return instance;
+    }*/
 }

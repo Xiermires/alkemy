@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.alkemy.util;
 
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -146,5 +148,11 @@ public class Conditions
     {
         requireNonNull(p);
         return true == p.test(t);
+    }
+
+    public static void requireCollectionSize(List<Method> l, int size)
+    {
+        requireNonNull(l);
+        if (l.size() != size) throw new InvalidArgument("Invalid collection size { expected '%d', received '%d' }", size, l.size());
     }
 }

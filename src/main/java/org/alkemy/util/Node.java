@@ -22,7 +22,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-// TODO @FunctionalInterface
 public interface Node<E>
 {
     Node<E> parent();

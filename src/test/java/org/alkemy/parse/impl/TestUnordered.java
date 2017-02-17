@@ -20,17 +20,17 @@ import org.alkemy.util.PassThrough.Bar;
 public class TestUnordered
 {
     @Bar
-    String s1 = "Hello";
+    String s1;
     
     @Bar
-    int i2 = 0;
+    int i2;
     
     @Bar
-    String s3 = "World";
+    String s3;
+        
+    @Bar
+    long l4;
     
     @Bar
-    long l4 = 1l;
-    
-    @Bar
-    Boolean s5 = Boolean.TRUE;
+    Boolean s5;
 }
