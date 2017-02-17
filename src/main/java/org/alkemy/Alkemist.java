@@ -29,7 +29,7 @@ public class Alkemist
     Alkemist(AlkemyLoadingCache cache, AlkemyElementVisitor<?> aev)
     {
         Conditions.requireNonNull(cache, aev);
-        
+
         this.cache = cache;
         this.aev = aev;
     }
@@ -39,17 +39,31 @@ public class Alkemist
         Conditions.requireNonNull(t);
 
         final Node<? extends AbstractAlkemyElement<?>> root = cache.get(t.getClass());
-        root.traverse(c -> c.data().accept(aev, t), p -> aev.getClass().equals(p.visitorType()), true);
-      
+        root.children().forEach(c -> process(c, t));
         return t;
+    }
+
+    // Default top->Down strategy.
+    // TODO: AlkemyTypeVisitor defines the traverse strategy.
+    private void process(Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    {
+        if (e.hasChildren())
+        {
+            e.children().forEach(c -> process(c, e.data().get(parent)));
+        }
+        else
+        {
+            if (aev.getClass().equals(e.data().visitorType()))
+            {
+                e.data().accept(aev, parent);
+            }
+        }
     }
 
     public static <T> T process(T t, AlkemyTypeVisitor atv)
     {
-        Conditions.requireNonNull(t);
-        Conditions.requireNonNull(atv);
+        Conditions.requireNonNull(t, atv);
 
-        atv.bind(t);
         atv.visit(AlkemyParsers.fieldParser().parse(t.getClass()));
         return t;
     }

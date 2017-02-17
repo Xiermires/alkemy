@@ -23,36 +23,41 @@ import org.alkemy.parse.impl.NodeConstructor;
 import org.alkemy.util.Conditions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor
+public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
 {
     private final AnnotatedElement desc;
     private final ValueAccessor valueAccessor;
-    private final NodeConstructor valueConstructor;
+    private final NodeConstructor nodeConstructor;
     private final Class<? extends AlkemyElementVisitor<?>> visitorType;
+    private final boolean isNode;
 
-    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean isNode)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
-        this.valueConstructor = valueConstructor;
+        this.nodeConstructor = nodeConstructor;
         this.visitorType = visitorType;
+        this.isNode = isNode;
     }
 
     protected AbstractAlkemyElement(AbstractAlkemyElement<?> other)
     {
         Conditions.requireNonNull(other);
-        
+
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
-        this.valueConstructor = other.valueConstructor;
+        this.nodeConstructor = other.nodeConstructor;
         this.visitorType = other.visitorType;
+        this.isNode = other.isNode;
     }
 
-    public static AlkemyElement create(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+    public static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean isNode)
     {
-        return new AlkemyElement(desc, valueConstructor, valueAccessor, visitorType);
+        return new AlkemyElement(desc, nodeConstructor, valueAccessor, visitorType, isNode);
     }
-    
+
     public AnnotatedElement desc()
     {
         return desc;
@@ -69,6 +74,16 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return valueAccessor.type();
     }
 
+    @Override
+    public <T> T newInstance(Object... args) throws AlkemyException
+    {
+        if (isNode)
+        {
+            return nodeConstructor.newInstance(args);
+        }
+        throw new AlkemyException("Alkemy elements w/o children cannot be instantiated"); 
+    }
+    
     @Override
     public Object get(Object parent) throws AccessException
     {
@@ -97,21 +112,22 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     public static class AlkemyElement extends AbstractAlkemyElement<AlkemyElement>
     {
         Object o;
-        
+
         public AlkemyElement(AbstractAlkemyElement<?> other)
         {
             super(other);
         }
 
-        AlkemyElement(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<? extends AlkemyElementVisitor<?>> visitorType)
+        AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+                Class<? extends AlkemyElementVisitor<?>> visitorType, boolean isNode)
         {
-            super(desc, valueConstructor, valueAccessor, visitorType);
+            super(desc, nodeConstructor, valueAccessor, visitorType, isNode);
         }
-        
+
         @Override
         @SuppressWarnings("unchecked")
         // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
-        // TODO: Allow to switch it off. 
+        // TODO: Allow to switch it off.
         public <T extends AbstractAlkemyElement<T>> T accept(AlkemyElementVisitor<T> v, Object parent)
         {
             return (T) (o == null ? (o = super.accept(v, parent)) : o);

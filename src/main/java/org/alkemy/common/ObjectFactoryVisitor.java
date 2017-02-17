@@ -13,55 +13,50 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.common;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
+import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.AlkemyProvider;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyTypeVisitor;
-import org.objenesis.Objenesis;
-import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements AlkemyTypeVisitor, Supplier<T>
+public class ObjectFactoryVisitor implements Supplier<Object>, AlkemyTypeVisitor
 {
-    private T t;
-    private Object orig;
-    private Object dest;
-    private Objenesis objenesis = new ObjenesisStd();
+    private Object o;
+    private AlkemyProvider ap;
 
-    ObjectCopier(T orig, T dest)
+    public ObjectFactoryVisitor(AlkemyProvider ap)
     {
-        this.orig = orig;
-        this.dest = this.t = dest;
+        this.ap = ap;
     }
 
     @Override
-    public T get()
+    public Object get()
     {
-        return t;
+        return o;
     }
 
     @Override
     public void visit(Node<? extends AbstractAlkemyElement<?>> e)
     {
-        visit(e, orig, dest);
+        o = getValue(e);
     }
 
-    private void visit(Node<? extends AbstractAlkemyElement<?>> e, Object orig, Object dest)
+    private Object getValue(Node<? extends AbstractAlkemyElement<?>> e)
     {
-        e.children().forEach(n ->
+        if (e.hasChildren())
         {
-            final Object vo = n.data().get(orig);
-            if (n.hasChildren())
+            final List<Object> values = new ArrayList<Object>();
+            for (Node<? extends AbstractAlkemyElement<?>> c : e.children())
             {
-                final Object vd = objenesis.newInstance(n.data().type());
-                n.data().set(vd, dest);
-                visit(n, vo, vd);
+                values.add(getValue(c));
             }
-            else
-            {
-                n.data().set(vo, dest);
-            }
-        });
+            return e.data().newInstance(values.toArray());
+        }
+        return ap.getValue(ap.createKey(e.data()));
     }
 }

@@ -74,7 +74,7 @@ public class AlkemistTest
         tc.s2 = "bar";
         tdc.testClass = tc;
 
-        final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<TestDeepCopy>(new TestDeepCopy());
+        final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<TestDeepCopy>(tdc, new TestDeepCopy());
         Alkemist.process(tdc, copier);
 
         assertThat(copier.get().testClass, is(not(nullValue())));

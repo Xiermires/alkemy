@@ -494,9 +494,9 @@ public class Alkemizer extends ClassVisitor
     
     // Compile check so changing conditions doesn't miss this class.
     // If changed, change also the instrumentation boundary check. 
-    static class ConditionsProxy
+    public static class ConditionsProxy
     {
-        static void requireArraySize(Object[] o, int i)
+        public static void requireArraySize(Object[] o, int i)
         {
             Conditions.requireArraySize(o, i);
         }

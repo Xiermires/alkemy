@@ -16,10 +16,9 @@
 package org.alkemy.visitor;
 
 import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.Bound;
 import org.alkemy.util.Node;
 
-public interface AlkemyTypeVisitor extends Bound<Object>
+public interface AlkemyTypeVisitor
 {
     void visit(Node<? extends AbstractAlkemyElement<?>> e);
 }

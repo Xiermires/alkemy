@@ -15,44 +15,41 @@
  *******************************************************************************/
 package org.alkemy.common;
 
+import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.common.IndexedElementVisitor.Index;
-import org.alkemy.common.LabelledElementVisitor.Label;
 
-public class TestClass
+public class TestNested
 {
-    @Index(0)
-    int i0 = 4;
+    @Index(1)
+    int i0;
 
     @Index(1)
-    int i1 = 3;
+    int i1;
 
-    @Index(2)
-    int i2 = 2;
+    @AlkemyNode
+    InnerA a;
 
-    @Index(3)
-    int i3 = 1;
+    @AlkemyNode
+    InnerB b;
 
-    @Index(4)
-    int i4 = 0;
+    public static class InnerA
+    {
+        @Index(0)
+        int i0 = 4;
 
-    @Label("id0")
-    int i5 = 4;
+        @Index(1)
+        int i1 = 3;
 
-    @Label("id1")
-    int i6 = 3;
+        @AlkemyNode
+        InnerB b;
+    }
 
-    @Label("id2")
-    int i7 = 2;
+    public static class InnerB
+    {
+        @Index(0)
+        int i0 = 4;
 
-    @Label("id3")
-    int i8 = 1;
-
-    @Label("id4")
-    int i9 = 0;
-
-    @Label("{&dyn1}")
-    int i10 = 5;
-
-    @Label("{&prefix}.bbb.{&infix}.ddd.{&suffix}")
-    int i11 = 6;
+        @Index(1)
+        int i1 = 3;
+    }
 }

@@ -18,8 +18,7 @@ package org.alkemy.common;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertThat;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
@@ -31,8 +30,8 @@ public class IndexedElementTest
     @Test
     public void testIndexedElement()
     {
-        final Map<Integer, Integer> m = new HashMap<Integer, Integer>();
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new IndexedElementVisitor((a, b) -> m.put(a, (Integer) b))).build();
+        final Properties m = new Properties();
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new IndexedElementVisitor((a, b) -> m.put(a, b))).build();
         final TestClass tc = new TestClass();
 
         alkemist.process(tc);
@@ -47,8 +46,8 @@ public class IndexedElementTest
     @Test
     public void performanceIndexed() throws Throwable
     {
-        final Map<Integer, Integer> m = new HashMap<Integer, Integer>();
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new IndexedElementVisitor((a, b) -> m.put(a, (Integer) b))).build();
+        final Properties m = new Properties();
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new IndexedElementVisitor((a, b) -> m.put(a, b))).build();
         final TestClass tc = new TestClass();
 
         System.out.println("Handle 5e6 indexed elements: " + Measure.measure(() ->

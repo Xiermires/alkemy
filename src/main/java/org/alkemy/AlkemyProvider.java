@@ -13,46 +13,45 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.common;
+package org.alkemy;
 
-import org.alkemy.common.IndexedElementVisitor.Index;
-import org.alkemy.common.LabelledElementVisitor.Label;
-
-public class TestClass
+public interface AlkemyProvider
 {
-    @Index(0)
-    int i0 = 4;
+    // enums are slower.
+    static final int DOUBLE = 0;
+    static final int FLOAT = 1;
+    static final int LONG = 2;
+    static final int INTEGER = 3;
+    static final int SHORT = 4;
+    static final int BYTE = 5;
+    static final int CHAR = 6;
+    static final int BOOLEAN = 7;
+    static final int OBJECT = 8;
+    
+    public static interface Key
+    {
+        int type();
+    }
 
-    @Index(1)
-    int i1 = 3;
-
-    @Index(2)
-    int i2 = 2;
-
-    @Index(3)
-    int i3 = 1;
-
-    @Index(4)
-    int i4 = 0;
-
-    @Label("id0")
-    int i5 = 4;
-
-    @Label("id1")
-    int i6 = 3;
-
-    @Label("id2")
-    int i7 = 2;
-
-    @Label("id3")
-    int i8 = 1;
-
-    @Label("id4")
-    int i9 = 0;
-
-    @Label("{&dyn1}")
-    int i10 = 5;
-
-    @Label("{&prefix}.bbb.{&infix}.ddd.{&suffix}")
-    int i11 = 6;
+    Key createKey(AbstractAlkemyElement<?> e);
+    
+    Object getValue(Key key);
+    
+    Double getDouble(Key key);
+    
+    Float getFloat(Key key);
+    
+    Long getLong(Key key);
+    
+    Integer getInteger(Key key);
+    
+    Short getShort(Key key);
+    
+    Byte getByte(Key key);
+    
+    Character getChar(Key key);
+    
+    Boolean getBoolean(Key key);
+    
+    Object getObject(Key key);
 }
