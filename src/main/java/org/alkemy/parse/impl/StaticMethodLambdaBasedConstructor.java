@@ -1,6 +1,7 @@
 package org.alkemy.parse.impl;
 
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.exception.InvalidArgument;
 
 public class StaticMethodLambdaBasedConstructor implements NodeConstructor
 {
@@ -26,6 +27,10 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
         try
         {
             return (T) ctor.newInstance(args);
+        }
+        catch (InvalidArgument e)
+        {
+            throw e;
         }
         catch (Throwable e)
         {

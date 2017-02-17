@@ -33,6 +33,7 @@ import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.NEW;
@@ -56,6 +57,7 @@ import java.util.regex.Pattern;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.AlkemyNode;
+import org.alkemy.util.Conditions;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -90,7 +92,7 @@ public class Alkemizer extends ClassVisitor
 
     static byte[] alkemize(String className, byte[] classBytes)
     {
-        if (Objects.nonNull(className)) // do not instrument on the fly created classes by Unsafe#define...
+        if (Objects.nonNull(className)) // do not instrument on the fly created classes by for instance Unsafe#define...
         {
             final ClassReader cr = new ClassReader(classBytes);
             final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -163,9 +165,15 @@ public class Alkemizer extends ClassVisitor
         mv.visitCode();
         final Label l0 = new Label();
         mv.visitLabel(l0);
+        
+        // Boundary check (throws InvalidArgument).
+        mv.visitVarInsn(ALOAD, 0);
+        visitArgsPosToLoad(alkemizableFields.size(), mv);
+        mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/Alkemizer$ConditionsProxy", "requireArraySize", "([Ljava/lang/Object;I)V", false);
 
         // TODO 1: document "a visible non-args ctor is required for the instrumented version."
         // TODO 2: detect it and do not create the ctor.
+        mv.visitLabel(new Label());
         mv.visitTypeInsn(NEW, className);
         mv.visitInsn(DUP);
         mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
@@ -173,8 +181,8 @@ public class Alkemizer extends ClassVisitor
         mv.visitVarInsn(ASTORE, 1);
 
         // need this label for the local variables
-        final Label l1 = new Label();
-        mv.visitLabel(l1);
+        final Label l2 = new Label();
+        mv.visitLabel(l2);
 
         for (int i = 0; i < alkemizableFields.size(); i++)
         {
@@ -202,7 +210,7 @@ public class Alkemizer extends ClassVisitor
         mv.visitLabel(ln);
 
         mv.visitLocalVariable("args", "[Ljava/lang/Object;", null, l0, ln, 0);
-        mv.visitLocalVariable("instance", classNameAsDesc(className), null, l1, ln, 1);
+        mv.visitLocalVariable("instance", classNameAsDesc(className), null, l2, ln, 1);
 
         mv.visitMaxs(0, 0);
         mv.visitEnd();
@@ -481,5 +489,16 @@ public class Alkemizer extends ClassVisitor
     static @interface RefList
     {
         String[] value();
+    }
+    
+    
+    // Compile check so changing conditions doesn't miss this class.
+    // If changed, change also the instrumentation boundary check. 
+    static class ConditionsProxy
+    {
+        static void requireArraySize(Object[] o, int i)
+        {
+            Conditions.requireArraySize(o, i);
+        }
     }
 }

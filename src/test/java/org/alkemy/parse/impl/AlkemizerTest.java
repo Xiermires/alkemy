@@ -35,6 +35,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.alkemy.ValueAccessor;
+import org.alkemy.exception.InvalidArgument;
 import org.alkemy.parse.impl.Alkemizer.RefList;
 import org.alkemy.util.Measure;
 import org.alkemy.util.ObjIntFunction;
@@ -85,7 +86,7 @@ public class AlkemizerTest
         assertThat(methodNames, hasItems("get$$foo", "get$$bar", "set$$foo", "set$$bar"));
     }
 
-    @Test
+    @Test(expected = InvalidArgument.class)
     public void testNodeConstructor() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
         final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
@@ -93,6 +94,9 @@ public class AlkemizerTest
 
         assertThat(1, is(tc.foo));
         assertThat("foo", is(tc.bar));
+        
+        // throws invalid argument ex.
+        ctor.newInstance(1, 2, 3);
     }
 
     @Test
