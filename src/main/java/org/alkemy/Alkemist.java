@@ -53,7 +53,7 @@ public class Alkemist
     public static <T> T process(T t, AlkemyNodeVisitor anv)
     {
         Conditions.requireContentNotNull(t, anv);
-        final Reference<Object> ref = Reference.inOut();
+        final Reference<Object> ref = Reference.inOut(t);
         anv.visit(AlkemyParsers.fieldParser().parse(t.getClass()), ref);
         return (T) ref.get();
     }

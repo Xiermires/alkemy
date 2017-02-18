@@ -23,43 +23,109 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
 import org.alkemy.AlkemistBuilder.Mode;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Measure;
+import org.alkemy.util.Node;
 import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.impl.AlkemyValueProvider.Key;
 import org.junit.Test;
+import org.objenesis.Objenesis;
+import org.objenesis.ObjenesisStd;
 
 public class AlkemyElementWriterTest
 {
+    private final Objenesis objenesis = new ObjenesisStd();
+
     @Test
     public void testAlkemyElementWriter()
     {
         final ObjectFactory of = new ObjectFactory(new Constant(55));
-        final AlkemyElementWriter aew = new AlkemyElementWriter(of, of, false);
-        
-        final TestClass tc =  Alkemist.process(TestClass.class, aew);
+        final AlkemyElementWriter aew = new AlkemyElementWriter(of);
+        final TestWriter tc = Alkemist.process(TestWriter.class, aew);
+
         assertThat(tc.a, is(55));
         assertThat(tc.b, is(55));
+        assertThat(tc.c, is(55));
+        assertThat(tc.d, is(55));
+        assertThat(tc.na.a, is(55));
+        assertThat(tc.na.b, is(55));
+        assertThat(tc.nb.c, is(55));
+        assertThat(tc.nb.d, is(55));
     }
 
     @Test
     public void performanceAlkemyElementWriter() throws Throwable
     {
         final Alkemist alkemist = new AlkemistBuilder().visitor(new ObjectFactory(new Constant(55))).build(Mode.WRITE);
-        System.out.println("Create 1e6 objects: " + Measure.measure(() ->
+        System.out.println("Create 1e6 objects (writer): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(TestClass.class); 
+                alkemist.process(TestClass.class);
             }
         }) / 1000000 + " ms");
     }
 
-    // Implements both supplier & consumer
+    @Test
+    public void performanceCreateUsingNewInstanceDirect() throws Throwable
+    {
+        final Node<AbstractAlkemyElement<?>> root = AlkemyParsers.fieldParser().parse(TestClass.class);
+        final Constant provider = new Constant(55);
+
+        System.out.println("Create 1e6 objects (AbstractAlkemyElement#newInstance(...)): "
+                + Measure.measure(() ->
+                {
+                    for (int i = 0; i < 1000000; i++)
+                    {
+                        final Key key = provider.createKey(root.children().get(0).data());
+                        root.data().newInstance(provider.getInteger(key), provider.getInteger(key), provider.getInteger(key),
+                                provider.getInteger(key), provider.getInteger(key));
+                    }
+                }) / 1000000 + " ms");
+    }
+
+    @Test
+    public void performanceCreateUseObjenesis() throws Throwable
+    {
+        final Node<AbstractAlkemyElement<?>> root = AlkemyParsers.fieldParser().parse(TestClass.class);
+        final Constant provider = new Constant(55);
+        
+        System.out.println("Create 1e6 objects (objenesis): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                final TestClass rootObj = objenesis.newInstance(TestClass.class);
+                final Key key = provider.createKey(root.children().get(0).data());
+                root.children().forEach(c -> c.data().set(provider.getInteger(key), rootObj));
+                
+            }
+        }) / 1000000 + " ms");
+    }
+
+    @Test
+    public void performanceCreateUseReflection() throws Throwable
+    {
+        final Node<AbstractAlkemyElement<?>> root = AlkemyParsers.fieldParser().parse(TestClass.class);
+        final Constant provider = new Constant(55);
+        
+        System.out.println("Create 1e6 objects (reflection): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                final TestClass rootObj = TestClass.class.newInstance();
+                final Key key = provider.createKey(root.children().get(0).data());
+                root.children().forEach(c -> c.data().set(provider.getInteger(key), rootObj));
+            }
+        }) / 1000000 + " ms");
+    }
+
     static class ObjectFactory implements AlkemyElementVisitor<AlkemyElement, Object>
     {
         private AlkemyValueProvider avp;
@@ -70,17 +136,15 @@ public class AlkemyElementWriterTest
         }
 
         @Override
-        public void visit(AlkemyElement e, Reference<Object> ref, Object... params)
+        public void visit(Reference<Object> ref, AlkemyElement e)
         {
-            if (params.length > 0) // consumer mode (generate object)
-            {
-                ref.set(e.newInstance(params));
-            }
-            else
-            // supplier mode, update the reference
-            {
-                ref.set(avp.getValue(avp.createKey(e)));
-            }
+            ref.set(avp.getValue(avp.createKey(e)));
+        }
+
+        @Override
+        public void visit(Reference<Object> ref, AlkemyElement e, Object... args)
+        {
+            ref.set(e.newInstance(args));
         }
 
         @Override

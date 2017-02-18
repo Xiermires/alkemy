@@ -27,7 +27,7 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 public class PassThrough implements AlkemyElementVisitor<AlkemyElement, Object>
 {
     @Override
-    public void visit(AlkemyElement e, Reference<Object> parent, Object... params)
+    public void visit(Reference<Object> parent, AlkemyElement e)
     {
     }
 

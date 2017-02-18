@@ -38,7 +38,6 @@ public class AlkemistBuilder
     private AlkemyParser parser = null;
     private AlkemyLoadingCache cache = null;
     private AlkemyElementVisitor<?, Object> aev = null;
-    private boolean parallel = false;
 
     public AlkemistBuilder()
     {
@@ -50,7 +49,7 @@ public class AlkemistBuilder
         this.aev = aev;
         return this;
     }
-
+    
     public Alkemist build()
     {
         Conditions.requireNonNull(aev);
@@ -58,7 +57,7 @@ public class AlkemistBuilder
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
-        return new Alkemist(cache, new AlkemyElementReader(aev, parallel, true));
+        return new Alkemist(cache, new AlkemyElementReader(aev, true));
     }
 
     public Alkemist build(Mode mode)
@@ -86,11 +85,11 @@ public class AlkemistBuilder
         switch (mode)
         {
             case READ_EXISTING:
-                return new AlkemyElementReader(aev, parallel, false);
+                return new AlkemyElementReader(aev, false);
             case READ_ALL:
-                return new AlkemyElementReader(aev, parallel, false);
+                return new AlkemyElementReader(aev, false);
             case WRITE:
-                return new AlkemyElementWriter(aev, aev, parallel);
+                return new AlkemyElementWriter(aev);
         }
         throw new AlkemyException("Invalid mode '%s'", mode.name()); // should never happen
     }

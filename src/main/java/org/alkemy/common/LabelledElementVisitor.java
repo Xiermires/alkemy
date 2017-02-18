@@ -55,10 +55,9 @@ public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElem
     }
     
     @Override
-    public void visit(LabelledElement e, Reference<Object> parent, Object... params)
+    public void visit(Reference<Object> parent, LabelledElement e)
     {
-        final LabelledElement le = e;
-        f.apply(DynamicLabel.replace(le.raw, dynamicVariables, p), le.get(parent.get()));
+        f.apply(DynamicLabel.replace(e.raw, dynamicVariables, p), e.get(parent.get()));
     }
 
     @Override

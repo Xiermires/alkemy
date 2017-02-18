@@ -38,7 +38,7 @@ public class IndexedElementVisitor implements AlkemyElementVisitor<IndexedElemen
     }
 
     @Override
-    public void visit(IndexedElement e, Reference<Object> parent, Object... params)
+    public void visit(Reference<Object> parent, IndexedElement e)
     {
         final IndexedElement ie = e;
         f.apply(ie.value, ie.get(parent.get()));

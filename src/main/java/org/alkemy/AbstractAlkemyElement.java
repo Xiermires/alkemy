@@ -103,16 +103,28 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return valueAccessor.targetName();
     }
 
-    public <T extends AbstractAlkemyElement<T>, S> T accept(AlkemyElementVisitor<T, S> v, Reference<S> ref, Object... params)
+    public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v)
     {
         final T t = v.map(new AlkemyElement(this));
-        v.visit(t, ref, params);
+        v.visit(ref, t);
+        return t;
+    }
+
+    public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v, Object... args)
+    {
+        final T t = v.map(new AlkemyElement(this));
+        v.visit(ref, t, args);
         return t;
     }
 
     public boolean isOrdered()
     {
         return ordered;
+    }
+
+    public boolean isNode()
+    {
+        return node;
     }
 
     public static class AlkemyElement extends AbstractAlkemyElement<AlkemyElement>
@@ -134,9 +146,18 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         @SuppressWarnings("unchecked")
         // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
         // TODO: Allow to switch it off.
-        public <T extends AbstractAlkemyElement<T>, S> T accept(AlkemyElementVisitor<T, S> v, Reference<S> ref, Object... params)
+        public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v)
         {
-            return (T) (o == null ? (o = super.accept(v, ref, params)) : o);
+            return (T) (o == null ? (o = super.accept(ref, v)) : o);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
+        // TODO: Allow to switch it off.
+        public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v, Object... args)
+        {
+            return (T) (o == null ? (o = super.accept(ref, v, args)) : o);
         }
     }
 }

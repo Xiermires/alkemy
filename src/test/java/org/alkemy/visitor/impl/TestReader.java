@@ -13,43 +13,49 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.common;
+package org.alkemy.visitor.impl;
 
 import org.alkemy.annotations.AlkemyNode;
-import org.alkemy.common.IndexedElementVisitor.Index;
+import org.alkemy.visitor.impl.AlkemyElementReaderTest.ObjectReader.Bar;
 
-public class TestNested
+public class TestReader
 {
-    @Index(1)
-    int i0;
-
-    @Index(1)
-    int i1;
-
+    @Bar
+    int a = 55;
+    
+    @Bar
+    int b = 55;
+    
+    @Bar
+    int c = 55;
+    
+    @Bar
+    int d = 55;
+    
     @AlkemyNode
-    InnerA a;
-
+    NestedA na = new NestedA();
+    
     @AlkemyNode
-    InnerB b;
-
-    public static class InnerA
+    NestedB nb = new NestedB();
+    
+    @AlkemyNode
+    NestedA na2;
+    
+    public static class NestedA
     {
-        @Index(0)
-        int i0 = 4;
-
-        @Index(1)
-        int i1 = 3;
-
-        @AlkemyNode
-        InnerB b;
+        @Bar
+        int a = 55;
+        
+        @Bar
+        int b = 55;
     }
-
-    public static class InnerB
+    
+    public static class NestedB
     {
-        @Index(0)
-        int i0 = 4;
-
-        @Index(1)
-        int i1 = 3;
+        @Bar
+        int c = 55;
+        
+        @Bar
+        int d = 55;        
     }
 }

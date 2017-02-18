@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
-import org.alkemy.annotations.AlkemyNode;
-import org.alkemy.visitor.impl.AlkemyElementReaderTest.ObjectReader.Bar;
 import org.alkemy.visitor.impl.AlkemyElementWriterTest.ObjectFactory.Foo;
 
 public class TestClass
@@ -27,33 +25,12 @@ public class TestClass
     @Foo
     int b;
     
-    @Foo
+    @Foo 
     int c;
     
-    @Foo
+    @Foo 
     int d;
     
-    @AlkemyNode
-    NestedA na;
-    
-    @AlkemyNode
-    NestedB nb;
-    
-    public static class NestedA
-    {
-        @Foo
-        int a;
-        
-        @Foo
-        int b;
-    }
-    
-    public static class NestedB
-    {
-        @Bar
-        int c;
-        
-        @Bar
-        int d;        
-    }
+    @Foo 
+    int e;
 }

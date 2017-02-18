@@ -15,10 +15,8 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
-import java.util.Collection;
 import java.util.function.Consumer;
-import java.util.function.IntSupplier;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.util.Node;
@@ -28,94 +26,79 @@ import org.alkemy.visitor.AlkemyNodeVisitor;
 
 public class AlkemyElementWriter implements AlkemyNodeVisitor
 {
-    private final static Object NOT_ACCEPTED = new Object();
-    private AlkemyElementVisitor<?, Object> supplier;
-    private AlkemyElementVisitor<?, Object> consumer;
-    private boolean parallel;
+    private AlkemyElementVisitor<?, Object> aev;
 
-    public AlkemyElementWriter(AlkemyElementVisitor<?, Object> supplier, AlkemyElementVisitor<?, Object> consumer,
-            boolean parallel)
+    public AlkemyElementWriter(AlkemyElementVisitor<?, Object> aev)
     {
-        this.supplier = supplier;
-        this.consumer = consumer;
-        this.parallel = parallel;
+        this.aev = aev;
     }
 
     @Override
-    public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj)
+    public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> output)
     {
-        final Object[] params = new Object[root.children().size()];
-        stream(root, root.children()).forEach(processNode(rootObj.get(), params, new Increment()));
-
-        if (validateParameters(params))
-        {
-            final Reference<Object> ref = Reference.inOut();
-            root.data().accept(consumer, ref, params);
-            rootObj.set(ref.get());
-        }
+        final Parameters params = new Parameters(aev, root.children().size());
+        root.children().forEach(processNode(params));
+        root.data().accept(output, aev, params.get());
     }
 
-    private Consumer<? super Node<? extends AbstractAlkemyElement<?>>> processNode(Object parent, Object[] params,
-            IntSupplier incr)
+    private Consumer<? super Node<? extends AbstractAlkemyElement<?>>> processNode(Parameters params)
     {
         return e ->
         {
             if (e.hasChildren())
             {
-                final Object[] childParams = new Object[e.children().size()];
-                stream(e, e.children()).forEach(processNode(e.data().get(parent), childParams, new Increment()));
-                final Reference<Object> ref = Reference.inOut();
-                if (validateParameters(childParams))
-                {
-                    e.data().accept(consumer, ref, childParams);
-                    params[incr.getAsInt()] = ref.get();
+                final Parameters childParams = new Parameters(aev, e.children().size());
+                e.children().forEach(processNode(childParams));
+                final Reference<Object> out = Reference.inOut();
+                if (!childParams.unsupported)
+                {    
+                    e.data().accept(out, aev, childParams.get());
                 }
-                else
-                {
-                    params[incr.getAsInt()] = null; // leave node as null
-                }
+                params.add(out.get());
             }
             else
             {
-                if (supplier.accepts(e.data().visitorType()))
-                {
-                    final Reference<Object> ref = Reference.inOut();
-                    e.data().accept(supplier, ref);
-                    params[incr.getAsInt()] = ref.get();
-                }
-                else
-                {
-                    params[incr.getAsInt()] = NOT_ACCEPTED;
-                }
+                params.tryAdd(e);
             }
         };
     }
 
-    private boolean validateParameters(Object[] params)
+    static class Parameters implements Supplier<Object[]>
     {
-        for (int i = 0; i < params.length; i++)
-            if (params[i] == NOT_ACCEPTED) return false;
+        int c = 0;
+        Object[] params;
+        boolean unsupported = false;
+        AlkemyElementVisitor<?, Object> aev;
 
-        return true;
-    }
-
-    private <T> Stream<T> stream(Node<? extends AbstractAlkemyElement<?>> node, Collection<T> col)
-    {
-        return parallel && !node.data().isOrdered() ? col.parallelStream() : col.stream().sequential();
-    }
-
-    class Increment implements IntSupplier
-    {
-        int inc = 0;
-
-        Increment()
+        Parameters(AlkemyElementVisitor<?, Object> aev, int size)
         {
+            this.aev = aev;
+            params = new Object[size];
+        }
+
+        void add(Object param)
+        {
+            params[c++] = param;
+        }
+        
+        void tryAdd(Node<? extends AbstractAlkemyElement<?>> e)
+        {
+            if (aev.accepts(e.data().visitorType()))
+            {
+                final Reference<Object> out = Reference.inOut();
+                e.data().accept(out, aev);
+                params[c++] = out.get();
+            }
+            else
+            {
+                unsupported = true;
+            }
         }
 
         @Override
-        public int getAsInt()
+        public Object[] get()
         {
-            return inc++;
+            return params;
         }
     }
 }

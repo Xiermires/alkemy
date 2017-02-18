@@ -56,7 +56,7 @@ public class RandomGenerator
     static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement, Object>
     {
         @Override
-        public void visit(RandomElement e, Reference<Object> parent, Object... params)
+        public void visit(Reference<Object> parent, RandomElement e)
         {
             e.set(nextDouble(e.min, e.max), parent.get()); // generates and sets the next random
         }

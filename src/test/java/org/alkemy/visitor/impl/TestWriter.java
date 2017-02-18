@@ -13,25 +13,46 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.visitor;
+package org.alkemy.visitor.impl;
 
-import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.AbstractAlkemyElement.AlkemyElement;
-import org.alkemy.util.Reference;
+import org.alkemy.annotations.AlkemyNode;
+import org.alkemy.visitor.impl.AlkemyElementWriterTest.ObjectFactory.Foo;
 
-public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>, S>
+public class TestWriter
 {
-    default void visit(Reference<S> ref, E element)
+    @Foo
+    int a;
+    
+    @Foo
+    int b;
+    
+    @Foo
+    int c;
+    
+    @Foo
+    int d;
+    
+    @AlkemyNode
+    NestedA na;
+    
+    @AlkemyNode
+    NestedB nb;
+    
+    public static class NestedA
     {
-        throw new UnsupportedOperationException("Not implemented.");
+        @Foo
+        int a;
+        
+        @Foo
+        int b;
     }
     
-    default void visit(Reference<S> ref, E node, Object... args)
+    public static class NestedB
     {
-        throw new UnsupportedOperationException("Not implemented.");
+        @Foo
+        int c;
+        
+        @Foo
+        int d;        
     }
-
-    E map(AlkemyElement e);
-
-    boolean accepts(Class<?> type);
 }

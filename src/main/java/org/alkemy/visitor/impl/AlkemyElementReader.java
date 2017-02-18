@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
-import java.util.Collection;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.util.Conditions;
 import org.alkemy.util.Node;
@@ -31,13 +26,11 @@ import org.alkemy.visitor.AlkemyNodeVisitor;
 public class AlkemyElementReader implements AlkemyNodeVisitor
 {
     private AlkemyElementVisitor<?, Object> aev;
-    private boolean parallel;
     private boolean includeNullNodes;
 
-    public AlkemyElementReader(AlkemyElementVisitor<?, Object> aev, boolean parallel, boolean includeNullNodes)
+    public AlkemyElementReader(AlkemyElementVisitor<?, Object> aev, boolean includeNullNodes)
     {
         this.aev = aev;
-        this.parallel = parallel;
         this.includeNullNodes = includeNullNodes;
     }
 
@@ -45,39 +38,30 @@ public class AlkemyElementReader implements AlkemyNodeVisitor
     public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj)
     {
         Conditions.requireNonNull(root);
-        stream(root, root.children()).filter(filterNodes(rootObj.get())).forEach(processNode(rootObj.get()));
+        root.children().forEach(c -> processNode(c, rootObj.get()));
     }
 
-    private Consumer<? super Node<? extends AbstractAlkemyElement<?>>> processNode(Object parent)
+    private void processNode(Node<? extends AbstractAlkemyElement<?>> e, Object parent)
     {
-        return e ->
+        if (e.hasChildren())
         {
-            if (e.hasChildren())
+            final Object node = e.data().get(parent);
+            if (includeNullNodes || node != null)
             {
-                stream(e, e.children()).filter(filterNodes(parent)).forEach(processNode(e.data().get(parent)));
+                e.children().forEach(c -> processNode(c, node));
             }
-            else
-            {
-                processLeaf(parent, e);
-            }
-        };
+        }
+        else
+        {
+            processLeaf(parent, e);
+        }
     }
 
     private void processLeaf(Object parent, Node<? extends AbstractAlkemyElement<?>> e)
     {
         if (aev.accepts(e.data().visitorType()))
         {
-            e.data().accept(aev, Reference.inOut(parent));
+            e.data().accept(Reference.inOut(parent), aev);
         }
-    }
-
-    private Predicate<? super Node<? extends AbstractAlkemyElement<?>>> filterNodes(Object parent)
-    {
-        return f -> includeNullNodes || f.data().get(parent) != null;
-    }
-
-    private <T> Stream<T> stream(Node<? extends AbstractAlkemyElement<?>> node, Collection<T> col)
-    {
-        return parallel && !node.data().isOrdered() ? col.parallelStream() : col.stream().sequential();
     }
 }

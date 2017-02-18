@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,6 +25,7 @@ import java.lang.annotation.Target;
 import java.util.Stack;
 
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.Alkemist;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
@@ -32,7 +36,11 @@ public class AlkemyElementReaderTest
     @Test
     public void testAlkemyElementReader()
     {
+        final ObjectReader or = new ObjectReader(new Stack<Integer>());
+        final AlkemyElementReader aer = new AlkemyElementReader(or, false);
+        Alkemist.process(new TestReader(), aer);
         
+        assertThat(or.stack.size(), is(8));
     }
     
     // Implements both supplier & consumer
@@ -46,7 +54,7 @@ public class AlkemyElementReaderTest
         }
 
         @Override
-        public void visit(AlkemyElement e, Reference<Object> ref, Object... params)
+        public void visit(Reference<Object> ref, AlkemyElement e)
         {
             stack.push(Integer.valueOf((int) e.get(ref.get())));
         }

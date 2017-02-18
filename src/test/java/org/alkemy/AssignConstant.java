@@ -35,7 +35,7 @@ public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement, Ob
     }
 
     @Override
-    public void visit(AlkemyElement e, Reference<Object> parent, Object... params)
+    public void visit(Reference<Object> parent, AlkemyElement e)
     {
         e.set(t, parent.get());
     }

@@ -21,5 +21,13 @@ import org.alkemy.util.Reference;
 
 public interface AlkemyNodeVisitor
 {
-    void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj);
+    default void visit(Node<? extends AbstractAlkemyElement<?>> root)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    default void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
 }
