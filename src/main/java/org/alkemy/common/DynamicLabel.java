@@ -29,7 +29,7 @@ public class DynamicLabel
 
     public static boolean isDynamic(String raw, Pattern parameterKey)
     {
-        Conditions.requireNonNull(raw, parameterKey);
+        Conditions.requireContentNotNull(raw, parameterKey);
         return parameterKey.matcher(raw).find();
     }
 
@@ -48,7 +48,7 @@ public class DynamicLabel
      */
     public static String replace(String raw, Map<String, String> parameters, Pattern parameterKey)
     {
-        Conditions.requireNonNull(raw, parameterKey, parameters);
+        Conditions.requireContentNotNull(raw, parameterKey, parameters);
 
         final Matcher matcher = parameterKey.matcher(raw);
         final StringBuffer sb = new StringBuffer();

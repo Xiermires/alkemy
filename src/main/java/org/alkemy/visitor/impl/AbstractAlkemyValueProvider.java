@@ -13,36 +13,37 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.visitor.impl;
 
+import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.exception.AlkemyException;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
-public class AbstractAlkemyProvider implements AlkemyProvider
+public class AbstractAlkemyValueProvider implements AlkemyValueProvider
 {
     static final ImmutableMap<Class<?>, Integer> types;
     static 
     {
         final Builder<Class<?>, Integer> b = ImmutableMap.builder();
         
-        b.put(Double.class, AlkemyProvider.DOUBLE);
-        b.put(double.class, AlkemyProvider.DOUBLE);
-        b.put(Float.class, AlkemyProvider.FLOAT);
-        b.put(float.class, AlkemyProvider.FLOAT);
-        b.put(Long.class, AlkemyProvider.LONG);
-        b.put(long.class, AlkemyProvider.LONG);
-        b.put(Integer.class, AlkemyProvider.INTEGER);
-        b.put(int.class, AlkemyProvider.INTEGER);
-        b.put(Short.class, AlkemyProvider.SHORT);
-        b.put(short.class, AlkemyProvider.SHORT);
-        b.put(Byte.class, AlkemyProvider.BYTE);
-        b.put(byte.class, AlkemyProvider.BYTE);
-        b.put(Character.class, AlkemyProvider.CHAR);
-        b.put(char.class, AlkemyProvider.CHAR);
-        b.put(Boolean.class, AlkemyProvider.BOOLEAN);
-        b.put(boolean.class, AlkemyProvider.BOOLEAN);
+        b.put(Double.class, AlkemyValueProvider.DOUBLE);
+        b.put(double.class, AlkemyValueProvider.DOUBLE);
+        b.put(Float.class, AlkemyValueProvider.FLOAT);
+        b.put(float.class, AlkemyValueProvider.FLOAT);
+        b.put(Long.class, AlkemyValueProvider.LONG);
+        b.put(long.class, AlkemyValueProvider.LONG);
+        b.put(Integer.class, AlkemyValueProvider.INTEGER);
+        b.put(int.class, AlkemyValueProvider.INTEGER);
+        b.put(Short.class, AlkemyValueProvider.SHORT);
+        b.put(short.class, AlkemyValueProvider.SHORT);
+        b.put(Byte.class, AlkemyValueProvider.BYTE);
+        b.put(byte.class, AlkemyValueProvider.BYTE);
+        b.put(Character.class, AlkemyValueProvider.CHAR);
+        b.put(char.class, AlkemyValueProvider.CHAR);
+        b.put(Boolean.class, AlkemyValueProvider.BOOLEAN);
+        b.put(boolean.class, AlkemyValueProvider.BOOLEAN);
         
         types = b.build();
     }
@@ -52,7 +53,7 @@ public class AbstractAlkemyProvider implements AlkemyProvider
     {
         // handle primitives && wrappers
         final Integer type = types.get(e.type());
-        final int typeAsInt = type == null ? AlkemyProvider.OBJECT : type.intValue();
+        final int typeAsInt = type == null ? AlkemyValueProvider.OBJECT : type.intValue();
         return () -> typeAsInt;
     }
 

@@ -17,7 +17,6 @@ package org.alkemy.util;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -61,18 +60,25 @@ public interface Node<E>
     void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure);
 
     /**
-     * Applies c to every node until p is satisfied.
+     * Applies c to every node in the underlying branches satisfying p. 
      * <p>
-     * It returns last satisfying node.
+     * Traverse order is defined by each node implementation.
      * <p>
-     * Consumption order is children first, in order of appearance.
-     * 
+     * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not. 
+     * <p>
+     * <ul>
+     * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be potentially consumed.
+     * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be consumed.
+     * </ul>
+     *  
      * @param c
      *            node consumer
      * @param p
      *            consumption condition
+     * @param keepProcessingOnFailure
+     *            process subnodes of a node failing p.
      */
-    Optional<Node<E>> traverseUntil(Consumer<Node<? extends E>> c, Predicate<Node<? extends E>> p);
+    void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p, boolean keepProcessingOnFailure);
     
     /**
      * As {@link #drainTo(Consumer, Predicate) adding all branch's subnodes.

@@ -13,51 +13,61 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.visitor.impl;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Supplier;
+import java.util.Stack;
 
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
+import org.junit.Test;
 
-public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement, Object>, Supplier<String>
+public class AlkemyElementReaderTest
 {
-    private StringBuilder sb = new StringBuilder();
-
-    @Override
-    public String get()
+    @Test
+    public void testAlkemyElementReader()
     {
-        return sb.toString();
+        
     }
-
-    @Override
-    public void visit(AlkemyElement e, Reference<Object> parent, Object... params)
+    
+    // Implements both supplier & consumer
+    static class ObjectReader implements AlkemyElementVisitor<AlkemyElement, Object>
     {
-        sb.append(e.get(parent.get()));
-    }
+        private Stack<Integer> stack;
 
-    @Override
-    public AlkemyElement map(AlkemyElement e)
-    {
-        return e;
-    }
+        ObjectReader(Stack<Integer> stack)
+        {
+            this.stack = stack;
+        }
 
-    @Override
-    public boolean accepts(Class<?> type)
-    {
-        return PropertyConcatenation.class.equals(type);
-    }
+        @Override
+        public void visit(AlkemyElement e, Reference<Object> ref, Object... params)
+        {
+            stack.push(Integer.valueOf((int) e.get(ref.get())));
+        }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD })
-    @AlkemyLeaf(PropertyConcatenation.class)
-    public @interface Foo
-    {
+        @Override
+        public AlkemyElement map(AlkemyElement e)
+        {
+            return e;
+        }
+
+        @Override
+        public boolean accepts(Class<?> type)
+        {
+            return ObjectReader.class.equals(type);
+        }
+
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target({ ElementType.FIELD })
+        @AlkemyLeaf(ObjectReader.class)
+        public @interface Bar
+        {
+        }
     }
 }

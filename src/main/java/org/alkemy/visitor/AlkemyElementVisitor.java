@@ -17,10 +17,13 @@ package org.alkemy.visitor;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.util.Reference;
 
-public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>>
+public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>, S>
 {
-    void visit(E e, Object parent);
+    void visit(E e, Reference<S> ref, Object... params);
     
     E map(AlkemyElement e);
+    
+    boolean accepts(Class<?> type);
 }

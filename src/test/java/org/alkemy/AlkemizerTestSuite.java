@@ -22,12 +22,16 @@ import org.junit.runner.RunWith;
 
 @RunWith(InstrumentClassWithLambdasSuite.class)
 @InstrumentableLambdaClasses(//
-testClassNames = { "org.alkemy.parse.impl.AlkemizerTest", //
+testClassNames = { "org.alkemy.AlkemistTest", //
+        "org.alkemy.parse.impl.AlkemizerTest", //
         "org.alkemy.parse.impl.TypeFieldParserTest", //
         "org.alkemy.common.IndexedElementTest", //
         "org.alkemy.common.LabelledElementTest", //
         "org.alkemy.common.ObjectFactoryVisitorTest", //
-        "org.alkemy.example.RandomGenerator" }, //
+        "org.alkemy.visitor.impl.AlkemyElementWriterTest", //
+        "org.alkemy.visitor.impl.AlkemyElementReaderTest", //
+        "org.alkemy.example.RandomGenerator" //
+}, //
 instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.TestDeepCopy", //
         "org.alkemy.parse.impl.TestAlkemizer", //
@@ -39,7 +43,10 @@ instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.common.TestNested", //
         "org.alkemy.common.TestNested$InnerA", //
         "org.alkemy.common.TestNested$InnerB", //
-        "org.alkemy.example.TestClass"}, ctf = AlkemizerCTF.class))
+        "org.alkemy.example.TestClass", //
+        "org.alkemy.visitor.impl.TestClass", //
+        "org.alkemy.visitor.impl.TestClass$NestedA", //
+        "org.alkemy.visitor.impl.TestClass$NestedB" }, ctf = AlkemizerCTF.class))
 public class AlkemizerTestSuite
 {
 }

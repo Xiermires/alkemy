@@ -50,7 +50,7 @@ class TypeFieldParser implements AlkemyParser
         return _parse(
                 type,
                 Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]),
-                        AccessorFactory.createConstructor(type), AccessorFactory.createSelfAccessor(), type))).build();
+                        AccessorFactory.createConstructor(type), AccessorFactory.createSelfAccessor(), type, type.isAnnotationPresent(Order.class)))).build();
     }
 
     private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent)
@@ -74,7 +74,7 @@ class TypeFieldParser implements AlkemyParser
             {
                 _parse(f.getType(),
                         parent.addChild(lexer.createNode(f, AccessorFactory.createConstructor(f.getType()),
-                                AccessorFactory.createAccessor(f), f.getType())));
+                                AccessorFactory.createAccessor(f), f.getType(), type.isAnnotationPresent(Order.class))));
             }
         }
         return parent;

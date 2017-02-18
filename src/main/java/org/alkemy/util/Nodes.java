@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -182,11 +181,29 @@ public class Nodes
                 }
             });
         }
-
+        
         @Override
-        public Optional<Node<E>> traverseUntil(Consumer<Node<? extends E>> c, Predicate<Node<? extends E>> p)
+        public void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p, boolean keepProcessingOnFailure)
         {
-            return children().stream().filter(p).findFirst();
+            children().forEach(e ->
+            {
+                if (p.test(e.data()))
+                {
+                    if (e.hasChildren())
+                    {
+                        onNode.accept(e);
+                        e.traverse(onNode, onLeaf, p, keepProcessingOnFailure);
+                    }
+                    else
+                    {
+                        onLeaf.accept(e);
+                    }
+                }
+                else if (keepProcessingOnFailure && e.hasChildren())
+                {
+                    e.traverse(onNode, onLeaf, p, keepProcessingOnFailure);
+                }
+            });
         }
 
         @Override

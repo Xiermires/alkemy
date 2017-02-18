@@ -58,8 +58,8 @@ class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType)
+    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, boolean ordered)
     {
-        return factory.createNode(desc, valueConstructor, valueAccessor, nodeType);
+        return factory.createNode(desc, valueConstructor, valueAccessor, nodeType, ordered);
     }
 }

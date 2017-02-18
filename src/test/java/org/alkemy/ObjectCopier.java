@@ -18,11 +18,12 @@ package org.alkemy;
 import java.util.function.Supplier;
 
 import org.alkemy.util.Node;
-import org.alkemy.visitor.AlkemyTypeVisitor;
+import org.alkemy.util.Reference;
+import org.alkemy.visitor.AlkemyNodeVisitor;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements AlkemyTypeVisitor, Supplier<T>
+public class ObjectCopier<T> implements AlkemyNodeVisitor, Supplier<T>
 {
     private T t;
     private Object orig;
@@ -42,9 +43,9 @@ public class ObjectCopier<T> implements AlkemyTypeVisitor, Supplier<T>
     }
 
     @Override
-    public void visit(Node<? extends AbstractAlkemyElement<?>> e)
+    public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj)
     {
-        visit(e, orig, dest);
+        visit(root, orig, dest);
     }
 
     private void visit(Node<? extends AbstractAlkemyElement<?>> e, Object orig, Object dest)

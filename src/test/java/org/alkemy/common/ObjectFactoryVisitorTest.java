@@ -19,11 +19,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.AbstractAlkemyProvider;
 import org.alkemy.Alkemist;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Measure;
 import org.alkemy.util.Node;
+import org.alkemy.visitor.impl.AbstractAlkemyValueProvider;
 import org.junit.Test;
 
 public class ObjectFactoryVisitorTest
@@ -53,10 +53,10 @@ public class ObjectFactoryVisitorTest
         System.out.println("Handle 4e6 nested objects, 8e6 indexed elements: " + Measure.measure(() ->
         {
             for (int i = 0; i < 100; i++) // FIXME The ObjectFactoryVisitor has a huge performance bug.
-            {
-                Alkemist.process(new TestNested(), factory);
-            }
-        }) / 1000000 + " ms");
+                {
+                    Alkemist.process(new TestNested(), factory);
+                }
+            }) / 1000000 + " ms");
     }
 
     @Test
@@ -73,7 +73,7 @@ public class ObjectFactoryVisitorTest
         }) / 1000000 + " ms");
     }
 
-    static class ConstantInt extends AbstractAlkemyProvider
+    static class ConstantInt extends AbstractAlkemyValueProvider
     {
         @Override
         public Integer getInteger(Key key)

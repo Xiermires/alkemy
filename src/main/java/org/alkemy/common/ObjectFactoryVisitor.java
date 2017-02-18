@@ -20,16 +20,17 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.AlkemyProvider;
 import org.alkemy.util.Node;
-import org.alkemy.visitor.AlkemyTypeVisitor;
+import org.alkemy.util.Reference;
+import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.impl.AlkemyValueProvider;
 
-public class ObjectFactoryVisitor implements Supplier<Object>, AlkemyTypeVisitor
+public class ObjectFactoryVisitor implements Supplier<Object>, AlkemyNodeVisitor
 {
     private Object o;
-    private AlkemyProvider ap;
+    private AlkemyValueProvider ap;
 
-    public ObjectFactoryVisitor(AlkemyProvider ap)
+    public ObjectFactoryVisitor(AlkemyValueProvider ap)
     {
         this.ap = ap;
     }
@@ -41,9 +42,9 @@ public class ObjectFactoryVisitor implements Supplier<Object>, AlkemyTypeVisitor
     }
 
     @Override
-    public void visit(Node<? extends AbstractAlkemyElement<?>> e)
+    public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj)
     {
-        o = getValue(e);
+        o = getValue(root);
     }
 
     private Object getValue(Node<? extends AbstractAlkemyElement<?>> e)

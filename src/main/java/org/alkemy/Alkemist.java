@@ -17,54 +17,53 @@ package org.alkemy;
 
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Conditions;
-import org.alkemy.util.Node;
-import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyTypeVisitor;
+import org.alkemy.util.Reference;
+import org.alkemy.visitor.AlkemyNodeVisitor;
 
 public class Alkemist
 {
     private AlkemyLoadingCache cache;
-    private AlkemyElementVisitor<?> aev;
+    private AlkemyNodeVisitor anv;
 
-    Alkemist(AlkemyLoadingCache cache, AlkemyElementVisitor<?> aev)
+    Alkemist(AlkemyLoadingCache cache, AlkemyNodeVisitor anv)
     {
-        Conditions.requireNonNull(cache, aev);
+        Conditions.requireContentNotNull(cache, anv);
 
         this.cache = cache;
-        this.aev = aev;
+        this.anv = anv;
     }
 
     public <T> T process(T t)
     {
         Conditions.requireNonNull(t);
-
-        final Node<? extends AbstractAlkemyElement<?>> root = cache.get(t.getClass());
-        root.children().forEach(c -> process(c, t));
+        anv.visit(cache.get(t.getClass()), Reference.in(t));
         return t;
     }
-
-    // Default top->Down strategy.
-    // TODO: AlkemyTypeVisitor defines the traverse strategy.
-    private void process(Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    
+    @SuppressWarnings("unchecked")
+    public <T> T process(Class<T> clazz)
     {
-        if (e.hasChildren())
-        {
-            e.children().forEach(c -> process(c, e.data().get(parent)));
-        }
-        else
-        {
-            if (aev.getClass().equals(e.data().visitorType()))
-            {
-                e.data().accept(aev, parent);
-            }
-        }
+        Conditions.requireContentNotNull(clazz, anv);
+        final Reference<Object> ref = Reference.inOut();
+        anv.visit(cache.get(clazz), ref);
+        return (T) ref.get();
     }
 
-    public static <T> T process(T t, AlkemyTypeVisitor atv)
+    @SuppressWarnings("unchecked")
+    public static <T> T process(T t, AlkemyNodeVisitor anv)
     {
-        Conditions.requireNonNull(t, atv);
-
-        atv.visit(AlkemyParsers.fieldParser().parse(t.getClass()));
-        return t;
+        Conditions.requireContentNotNull(t, anv);
+        final Reference<Object> ref = Reference.inOut();
+        anv.visit(AlkemyParsers.fieldParser().parse(t.getClass()), ref);
+        return (T) ref.get();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T> T process(Class<T> clazz, AlkemyNodeVisitor anv)
+    {
+        Conditions.requireContentNotNull(clazz, anv);
+        final Reference<Object> ref = Reference.inOut();
+        anv.visit(AlkemyParsers.fieldParser().parse(clazz), ref);
+        return (T) ref.get();
     }
 }

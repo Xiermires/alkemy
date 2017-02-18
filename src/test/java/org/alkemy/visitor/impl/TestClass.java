@@ -13,45 +13,47 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.visitor.impl;
 
-public interface AlkemyProvider
+import org.alkemy.annotations.AlkemyNode;
+import org.alkemy.visitor.impl.AlkemyElementReaderTest.ObjectReader.Bar;
+import org.alkemy.visitor.impl.AlkemyElementWriterTest.ObjectFactory.Foo;
+
+public class TestClass
 {
-    // enums are slower.
-    static final int DOUBLE = 0;
-    static final int FLOAT = 1;
-    static final int LONG = 2;
-    static final int INTEGER = 3;
-    static final int SHORT = 4;
-    static final int BYTE = 5;
-    static final int CHAR = 6;
-    static final int BOOLEAN = 7;
-    static final int OBJECT = 8;
+    @Foo
+    int a;
     
-    public static interface Key
+    @Foo
+    int b;
+    
+    @Foo
+    int c;
+    
+    @Foo
+    int d;
+    
+    @AlkemyNode
+    NestedA na;
+    
+    @AlkemyNode
+    NestedB nb;
+    
+    public static class NestedA
     {
-        int type();
+        @Foo
+        int a;
+        
+        @Foo
+        int b;
     }
-
-    Key createKey(AbstractAlkemyElement<?> e);
     
-    Object getValue(Key key);
-    
-    Double getDouble(Key key);
-    
-    Float getFloat(Key key);
-    
-    Long getLong(Key key);
-    
-    Integer getInteger(Key key);
-    
-    Short getShort(Key key);
-    
-    Byte getByte(Key key);
-    
-    Character getChar(Key key);
-    
-    Boolean getBoolean(Key key);
-    
-    Object getObject(Key key);
+    public static class NestedB
+    {
+        @Bar
+        int c;
+        
+        @Bar
+        int d;        
+    }
 }

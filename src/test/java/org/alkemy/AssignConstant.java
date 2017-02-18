@@ -22,21 +22,22 @@ import java.lang.annotation.Target;
 
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
+public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement, Object>
 {
     private final T t;
-    
+
     AssignConstant(T t)
     {
         this.t = t;
     }
-    
+
     @Override
-    public void visit(AlkemyElement e, Object parent)
+    public void visit(AlkemyElement e, Reference<Object> parent, Object... params)
     {
-        e.set(t, parent);
+        e.set(t, parent.get());
     }
 
     @Override
@@ -44,7 +45,13 @@ public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
     {
         return e;
     }
-    
+
+    @Override
+    public boolean accepts(Class<?> type)
+    {
+        return AssignConstant.class.equals(type);
+    }
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
     @AlkemyLeaf(AssignConstant.class)

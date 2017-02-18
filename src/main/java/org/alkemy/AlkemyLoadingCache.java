@@ -26,6 +26,7 @@ import org.alkemy.util.Node;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 class AlkemyLoadingCache
 {
@@ -65,9 +66,13 @@ class AlkemyLoadingCache
         {
             return cache.get(type);
         }
-        catch (ExecutionException e)
+        catch (ExecutionException e) // TODO
         {
-            throw new AlkemyException("Cache error.", e); // TODO
+            throw new AlkemyException("Cache error.", e); 
+        }
+        catch (UncheckedExecutionException e)
+        {
+            throw new AlkemyException("Cache error.", e); 
         }
     }
 }

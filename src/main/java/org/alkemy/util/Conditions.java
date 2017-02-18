@@ -24,12 +24,17 @@ import org.alkemy.exception.InvalidArgument;
 
 public class Conditions
 {
-    public static void requireNonNull(Object... o)
+    public static void requireContentNotNull(Object... o)
     {
-        for (int i=0; i<o.length; i++)
+        for (int i = 0; i < o.length; i++)
             Objects.requireNonNull(o[i]);
     }
-    
+
+    public static void requireNonNull(Object o)
+    {
+        Objects.requireNonNull(o);
+    }
+
     public static void requireNotEmpty(boolean[] o)
     {
         requireNonNull(o);
@@ -83,7 +88,7 @@ public class Conditions
         requireNonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
-    
+
     public static void requireArraySize(boolean[] o, int size)
     {
         requireNonNull(o);
@@ -137,13 +142,14 @@ public class Conditions
         requireNonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
-    
+
     public static void requireOfType(Object o, Class<?> type)
     {
         requireNonNull(o);
-        if (o.getClass().equals(type)) throw new InvalidArgument("Invalid class type { expected '%d', received '%d' }", o.getClass().getName(), type.getName());
+        if (o.getClass().equals(type)) throw new InvalidArgument("Invalid class type { expected '%d', received '%d' }", o
+                .getClass().getName(), type.getName());
     }
-    
+
     public static <T> boolean isTrue(Predicate<T> p, T t)
     {
         requireNonNull(p);
@@ -153,6 +159,7 @@ public class Conditions
     public static void requireCollectionSize(List<Method> l, int size)
     {
         requireNonNull(l);
-        if (l.size() != size) throw new InvalidArgument("Invalid collection size { expected '%d', received '%d' }", size, l.size());
+        if (l.size() != size) throw new InvalidArgument("Invalid collection size { expected '%d', received '%d' }", size,
+                l.size());
     }
 }

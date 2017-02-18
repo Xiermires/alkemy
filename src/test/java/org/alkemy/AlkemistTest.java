@@ -22,18 +22,11 @@ import static org.junit.Assert.assertThat;
 
 import org.alkemy.util.Measure;
 import org.alkemy.util.PassThrough;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 // Alkemist usage examples.
 public class AlkemistTest
 {
-    @BeforeClass
-    public static void pre()
-    {
-        //AgentTools.add(new AlkemizerCTF());
-    }
-
     @Test
     public void testConcat()
     {

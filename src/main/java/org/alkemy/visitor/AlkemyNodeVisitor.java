@@ -17,8 +17,9 @@ package org.alkemy.visitor;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.util.Node;
+import org.alkemy.util.Reference;
 
-public interface AlkemyTypeVisitor
+public interface AlkemyNodeVisitor
 {
-    void visit(Node<? extends AbstractAlkemyElement<?>> e);
+    void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj);
 }

@@ -33,6 +33,7 @@ import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.util.Conditions;
+import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.junit.Test;
 
@@ -52,12 +53,12 @@ public class RandomGenerator
     }
     
     // The visitor that works on the AlkemyElements. 
-    static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement>
+    static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement, Object>
     {
         @Override
-        public void visit(RandomElement e, Object parent)
+        public void visit(RandomElement e, Reference<Object> parent, Object... params)
         {
-            e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
+            e.set(nextDouble(e.min, e.max), parent.get()); // generates and sets the next random
         }
 
         @Override
@@ -66,6 +67,12 @@ public class RandomGenerator
             return new RandomElement(e);
         }
 
+        @Override
+        public boolean accepts(Class<?> type)
+        {
+            return XorRandomGenerator.class.equals(type);
+        }
+        
         protected double nextDouble(double min, double max)
         {
             return min + (nextDouble() * ((max - min)));

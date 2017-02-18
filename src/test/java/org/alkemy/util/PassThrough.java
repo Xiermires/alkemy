@@ -24,11 +24,23 @@ import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class PassThrough implements AlkemyElementVisitor<AlkemyElement>
+public class PassThrough implements AlkemyElementVisitor<AlkemyElement, Object>
 {
     @Override
-    public void visit(AlkemyElement e, Object parent)
+    public void visit(AlkemyElement e, Reference<Object> parent, Object... params)
     {
+    }
+
+    @Override
+    public AlkemyElement map(AlkemyElement e)
+    {
+        return e;
+    }
+
+    @Override
+    public boolean accepts(Class<?> type)
+    {
+        return true;
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -37,6 +49,7 @@ public class PassThrough implements AlkemyElementVisitor<AlkemyElement>
     public @interface Bar
     {
         long id() default 0;
+
         String desc() default "";
     }
 
@@ -46,11 +59,5 @@ public class PassThrough implements AlkemyElementVisitor<AlkemyElement>
     public @interface Foo
     {
         String value() default "";
-    }
-
-    @Override
-    public AlkemyElement map(AlkemyElement e)
-    {
-        return e;
     }
 }

@@ -160,7 +160,7 @@ public class LambdaRefHelper
     {
         try
         {
-            return MethodHandles.lookup().unreflect(clazz.getMethod(name, params));
+            return MethodHandles.lookup().unreflect(clazz.getDeclaredMethod(name, params));
         }
         catch (NoSuchMethodException e)
         {

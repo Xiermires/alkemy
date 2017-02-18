@@ -13,43 +13,47 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.visitor.impl;
 
-import org.alkemy.exception.AlkemyException;
-import org.alkemy.exception.InvalidArgument;
+import org.alkemy.AbstractAlkemyElement;
 
-public class StaticMethodLambdaBasedConstructor implements NodeConstructor
+public interface AlkemyValueProvider
 {
-    private final Class<?> type;
-    private final NodeConstructorFunction ctor;
-
-    StaticMethodLambdaBasedConstructor(Class<?> type, NodeConstructorFunction ctor)
+    // enums are slower.
+    static final int DOUBLE = 0;
+    static final int FLOAT = 1;
+    static final int LONG = 2;
+    static final int INTEGER = 3;
+    static final int SHORT = 4;
+    static final int BYTE = 5;
+    static final int CHAR = 6;
+    static final int BOOLEAN = 7;
+    static final int OBJECT = 8;
+    
+    public static interface Key
     {
-        this.type = type;
-        this.ctor = ctor;
+        int type();
     }
 
-    @Override
-    public Class<?> type() throws AlkemyException
-    {
-        return type;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked") // returns an instance of type()
-    public <T> T newInstance(Object... args) throws AlkemyException
-    {
-        try
-        {
-            return (T) ctor.newInstance(args);
-        }
-        catch (InvalidArgument e)
-        {
-            throw e;
-        }
-        catch (Throwable e) // TODO.
-        {
-            throw new AlkemyException("Invalid arguments.", e); 
-        }
-    }
+    Key createKey(AbstractAlkemyElement<?> e);
+    
+    Object getValue(Key key);
+    
+    Double getDouble(Key key);
+    
+    Float getFloat(Key key);
+    
+    Long getLong(Key key);
+    
+    Integer getInteger(Key key);
+    
+    Short getShort(Key key);
+    
+    Byte getByte(Key key);
+    
+    Character getChar(Key key);
+    
+    Boolean getBoolean(Key key);
+    
+    Object getObject(Key key);
 }

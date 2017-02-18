@@ -52,8 +52,8 @@ class AccessorFactory
         }
         catch (IllegalAccessException | SecurityException e)
         {
-            // TODO
-            throw new RuntimeException("TODO");
+            // TODO (Security)
+            throw new RuntimeException("TODO", e);
         }
     }
 
@@ -72,8 +72,8 @@ class AccessorFactory
         }
         catch (IllegalAccessException | SecurityException e)
         {
-            // TODO
-            throw new RuntimeException("TODO");
+            // TODO (Class not public // Security)
+            throw new RuntimeException("TODO", e);
         }
     }
 

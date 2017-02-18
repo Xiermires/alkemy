@@ -25,9 +25,10 @@ import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.common.IndexedElementVisitor.IndexedElement;
+import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class IndexedElementVisitor implements AlkemyElementVisitor<IndexedElement>
+public class IndexedElementVisitor implements AlkemyElementVisitor<IndexedElement, Object>
 {
     private BiFunction<Integer, Object, Object> f;
 
@@ -37,16 +38,22 @@ public class IndexedElementVisitor implements AlkemyElementVisitor<IndexedElemen
     }
 
     @Override
-    public void visit(IndexedElement e, Object parent)
+    public void visit(IndexedElement e, Reference<Object> parent, Object... params)
     {
         final IndexedElement ie = e;
-        f.apply(ie.value, ie.get(parent));
+        f.apply(ie.value, ie.get(parent.get()));
     }
 
     @Override
     public IndexedElement map(AlkemyElement e)
     {
         return new IndexedElement(e);
+    }
+
+    @Override
+    public boolean accepts(Class<?> type)
+    {
+        return IndexedElementVisitor.class.equals(type);
     }
 
     static class IndexedElement extends AbstractAlkemyElement<IndexedElement>

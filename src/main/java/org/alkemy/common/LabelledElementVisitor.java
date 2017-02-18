@@ -28,9 +28,10 @@ import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.common.LabelledElementVisitor.LabelledElement;
+import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElement>
+public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElement, Object>
 {
     private final Pattern p;
     private final BiFunction<String, Object, Object> f;
@@ -54,16 +55,22 @@ public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElem
     }
     
     @Override
-    public void visit(LabelledElement e, Object parent)
+    public void visit(LabelledElement e, Reference<Object> parent, Object... params)
     {
         final LabelledElement le = e;
-        f.apply(DynamicLabel.replace(le.raw, dynamicVariables, p), le.get(parent));
+        f.apply(DynamicLabel.replace(le.raw, dynamicVariables, p), le.get(parent.get()));
     }
 
     @Override
     public LabelledElement map(AlkemyElement e)
     {
         return new LabelledElement(e);
+    }
+    
+    @Override
+    public boolean accepts(Class<?> type)
+    {
+        return LabelledElementVisitor.class.equals(type);
     }
 
     static class LabelledElement extends AbstractAlkemyElement<LabelledElement>
