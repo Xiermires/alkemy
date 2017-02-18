@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.alkemy;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +22,6 @@ import org.agenttools.AgentTools;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.Node;
-import org.alkemy.visitor.AlkemyElementVisitor;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -39,15 +37,14 @@ class AlkemyLoadingCache
     // Keep a cached version of created AlkemyTypeVisitor to enhance performance.
     private final LoadingCache<Class<?>, Node<? extends AbstractAlkemyElement<?>>> cache;
 
-    private final Map<Class<? extends AlkemyElementVisitor<?>>, AlkemyElementVisitor<?>> mappers;
-
-    AlkemyLoadingCache(AlkemyParser parser, Map<Class<? extends AlkemyElementVisitor<?>>, AlkemyElementVisitor<?>> mappers)
+    AlkemyLoadingCache(AlkemyParser parser)
     {
         this.parser = parser;
-        this.mappers = mappers;
 
-        cache = CacheBuilder.newBuilder().maximumWeight(MAXIMUM_BYTE_SIZE).weigher((k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue())
-                .expireAfterAccess(15, TimeUnit.MINUTES).build(new CacheLoader<Class<?>, Node<? extends AbstractAlkemyElement<?>>>()
+        cache = CacheBuilder.newBuilder().maximumWeight(MAXIMUM_BYTE_SIZE)
+                .weigher((k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue())
+                .expireAfterAccess(15, TimeUnit.MINUTES)
+                .build(new CacheLoader<Class<?>, Node<? extends AbstractAlkemyElement<?>>>()
                 {
                     @Override
                     public Node<? extends AbstractAlkemyElement<?>> load(Class<?> key) throws AlkemyException
@@ -59,24 +56,7 @@ class AlkemyLoadingCache
 
     private final Node<? extends AbstractAlkemyElement<?>> _create(Class<?> type)
     {
-        return typify(parser.parse(type));
-    }
-
-    private Node<? extends AbstractAlkemyElement<?>> typify(Node<? extends AbstractAlkemyElement<?>> root)
-    {
-        if (mappers.isEmpty())
-        {
-            return root;
-        }
-        else
-        {
-            /*return Node.copy(root, Nodes.arborescence(root.data()), f ->
-            {
-                final Function<AlkemyElement<?>, ? extends AlkemyElement<?>> mapper = mappers.get(f.visitorType());
-                return mapper == null ? f : mapper.apply(f);
-            }).build();*/
-            return null;
-        }
+        return parser.parse(type);
     }
 
     Node<? extends AbstractAlkemyElement<?>> get(Class<?> type)

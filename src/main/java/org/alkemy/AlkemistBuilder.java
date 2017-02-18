@@ -16,8 +16,6 @@
 package org.alkemy;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
@@ -30,7 +28,6 @@ public class AlkemistBuilder
     private AlkemyParser parser = null;
     private AlkemyLoadingCache cache = null;
     private AlkemyElementVisitor<?> aev = null;
-    private Map<Class<? extends AlkemyElementVisitor<?>>, AlkemyElementVisitor<?>> m = new HashMap<>();
     
     public AlkemistBuilder()
     {   
@@ -47,7 +44,7 @@ public class AlkemistBuilder
     {
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
-        cache = new AlkemyLoadingCache(parser, m);
+        cache = new AlkemyLoadingCache(parser);
         return new Alkemist(cache, aev);
     }
 }
