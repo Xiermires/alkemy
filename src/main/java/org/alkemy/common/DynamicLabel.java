@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alkemy.util.Conditions;
+import org.alkemy.util.Assertions;
 
 public class DynamicLabel
 {
@@ -29,7 +29,7 @@ public class DynamicLabel
 
     public static boolean isDynamic(String raw, Pattern parameterKey)
     {
-        Conditions.requireContentNotNull(raw, parameterKey);
+        Assertions.exist(raw, parameterKey);
         return parameterKey.matcher(raw).find();
     }
 
@@ -46,9 +46,27 @@ public class DynamicLabel
      * parameters : { { "prefix: "aaa" }, { "infix": "ccc" }, { "suffix": "eee" } } <br>
      * DynamicLabel.solve(raw, parameters, Pattern.compile(regex)) = "aaa.bbb.ccc.ddd.eee"
      */
+    /*public static String replace(String raw, Map<String, String> parameters, Pattern parameterKey)
+    {
+        Assertions.exist(raw, parameterKey, parameters);
+
+        final Matcher matcher = parameterKey.matcher(raw);
+        final StringBuffer sb = new StringBuffer();
+        int s = 0;
+        while (matcher.find())
+        {
+            final String paramKey = matcher.group(1);
+            final String replacement = parameters.get(paramKey);
+            matcher.appendReplacement(sb, replacement == null ? paramKey : replacement);
+            s = matcher.end();
+        }
+        sb.append(raw.substring(s));
+        return sb.toString();
+    }*/
+    
     public static String replace(String raw, Map<String, String> parameters, Pattern parameterKey)
     {
-        Conditions.requireContentNotNull(raw, parameterKey, parameters);
+        Assertions.exist(raw, parameterKey, parameters);
 
         final Matcher matcher = parameterKey.matcher(raw);
         final StringBuffer sb = new StringBuffer();

@@ -32,8 +32,7 @@ import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.util.Conditions;
-import org.alkemy.util.Reference;
+import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.junit.Test;
 
@@ -53,24 +52,18 @@ public class RandomGenerator
     }
     
     // The visitor that works on the AlkemyElements. 
-    static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement, Object>
+    static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement>
     {
         @Override
-        public void visit(Reference<Object> parent, RandomElement e)
+        public void visit(RandomElement e, Object parent)
         {
-            e.set(nextDouble(e.min, e.max), parent.get()); // generates and sets the next random
+            e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
         }
 
         @Override
         public RandomElement map(AlkemyElement e)
         {
             return new RandomElement(e);
-        }
-
-        @Override
-        public boolean accepts(Class<?> type)
-        {
-            return XorRandomGenerator.class.equals(type);
         }
         
         protected double nextDouble(double min, double max)
@@ -119,7 +112,7 @@ public class RandomGenerator
             super(other);
 
             final Random a = other.desc().getAnnotation(Random.class);
-            Conditions.requireNonNull(a); 
+            Assertions.exists(a); 
 
             min = a.min();
             max = a.max();

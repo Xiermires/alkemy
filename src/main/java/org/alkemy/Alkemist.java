@@ -16,8 +16,7 @@
 package org.alkemy;
 
 import org.alkemy.parse.impl.AlkemyParsers;
-import org.alkemy.util.Conditions;
-import org.alkemy.util.Reference;
+import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 
 public class Alkemist
@@ -27,7 +26,7 @@ public class Alkemist
 
     Alkemist(AlkemyLoadingCache cache, AlkemyNodeVisitor anv)
     {
-        Conditions.requireContentNotNull(cache, anv);
+        Assertions.exist(cache, anv);
 
         this.cache = cache;
         this.anv = anv;
@@ -35,35 +34,27 @@ public class Alkemist
 
     public <T> T process(T t)
     {
-        Conditions.requireNonNull(t);
-        anv.visit(cache.get(t.getClass()), Reference.in(t));
+        Assertions.exists(t);
+        anv.visit(cache.get(t.getClass()), t);
+        return t;
+    }
+
+    public static <T> T process(T t, AlkemyNodeVisitor anv)
+    {
+        Assertions.exist(t, anv);
+        anv.visit(AlkemyParsers.fieldParser().parse(t.getClass()), t);
         return t;
     }
     
-    @SuppressWarnings("unchecked")
-    public <T> T process(Class<T> clazz)
+    public <T> T create(Class<T> clazz)
     {
-        Conditions.requireContentNotNull(clazz, anv);
-        final Reference<Object> ref = Reference.inOut();
-        anv.visit(cache.get(clazz), ref);
-        return (T) ref.get();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T process(T t, AlkemyNodeVisitor anv)
-    {
-        Conditions.requireContentNotNull(t, anv);
-        final Reference<Object> ref = Reference.inOut(t);
-        anv.visit(AlkemyParsers.fieldParser().parse(t.getClass()), ref);
-        return (T) ref.get();
+        Assertions.exist(clazz, anv);
+        return clazz.cast(anv.visit(cache.get(clazz)));
     }
     
-    @SuppressWarnings("unchecked")
-    public static <T> T process(Class<T> clazz, AlkemyNodeVisitor anv)
+    public static <T> T create(Class<T> clazz, AlkemyNodeVisitor anv)
     {
-        Conditions.requireContentNotNull(clazz, anv);
-        final Reference<Object> ref = Reference.inOut();
-        anv.visit(AlkemyParsers.fieldParser().parse(clazz), ref);
-        return (T) ref.get();
+        Assertions.exist(clazz, anv);
+        return clazz.cast(anv.visit(AlkemyParsers.fieldParser().parse(clazz)));
     }
 }

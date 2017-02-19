@@ -16,52 +16,62 @@
 package org.alkemy.visitor.impl;
 
 import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.util.Conditions;
+import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
-import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 
-// pre-order.
-public class AlkemyElementReader implements AlkemyNodeVisitor
+public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
 {
-    private AlkemyElementVisitor<?, Object> aev;
+    private AlkemyElementVisitor<?> aev;
     private boolean includeNullNodes;
 
-    public AlkemyElementReader(AlkemyElementVisitor<?, Object> aev, boolean includeNullNodes)
+    AlkemyPreorderVisitor(AlkemyElementVisitor<?> aev, boolean includeNullNodes)
     {
         this.aev = aev;
         this.includeNullNodes = includeNullNodes;
     }
 
-    @Override
-    public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj)
+    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeVisitor create(AlkemyElementVisitor<E> aev, boolean includeNullNodes)
     {
-        Conditions.requireNonNull(root);
-        root.children().forEach(c -> processNode(c, rootObj.get()));
+        return new AlkemyPreorderVisitor(aev, includeNullNodes);
+    }
+    
+    @Override
+    public Object visit(Node<? extends AbstractAlkemyElement<?>> root)
+    {
+        Assertions.exists(root);
+        
+        final Object instance = root.data().newInstance();        
+        root.children().forEach(c -> processBranch(c, instance));
+        return instance;
+    }
+    
+    @Override
+    public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object raw)
+    {
+        Assertions.exists(root);
+        
+        root.children().forEach(c -> processBranch(c, raw));
+        return raw;
     }
 
-    private void processNode(Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    private void processBranch(Node<? extends AbstractAlkemyElement<?>> e, Object parent)
     {
         if (e.hasChildren())
         {
-            final Object node = e.data().get(parent);
-            if (includeNullNodes || node != null)
+            if (includeNullNodes || e.data().get(parent) != null)
             {
-                e.children().forEach(c -> processNode(c, node));
+                e.data().accept(aev, parent);
+                e.children().forEach(c -> processBranch(c, e.data().get(parent)));
             }
         }
         else
         {
-            processLeaf(parent, e);
-        }
-    }
-
-    private void processLeaf(Object parent, Node<? extends AbstractAlkemyElement<?>> e)
-    {
-        if (aev.accepts(e.data().visitorType()))
-        {
-            e.data().accept(Reference.inOut(parent), aev);
+            if (aev.accepts(e.data().visitorType()))
+            {
+                e.data().accept(aev, parent);
+            }
         }
     }
 }

@@ -17,21 +17,33 @@ package org.alkemy.visitor;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
-import org.alkemy.util.Reference;
 
-public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>, S>
+public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>>
 {
-    default void visit(Reference<S> ref, E element)
+    default Object visit(E element)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
     
-    default void visit(Reference<S> ref, E node, Object... args)
+    default void visit(E element, Object parent)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    default Object visit(E node, Object... args)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    default void visit(E node, Object parent, Object... args)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
     E map(AlkemyElement e);
 
-    boolean accepts(Class<?> type);
+    default boolean accepts(Class<?> type)
+    {
+        return getClass().equals(type);
+    }
 }

@@ -13,47 +13,29 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.visitor.impl;
+package org.alkemy.visitor;
 
 import org.alkemy.AbstractAlkemyElement;
 
-public interface AlkemyValueProvider
+public interface AlkemyValueProvider<E extends AbstractAlkemyElement<E>>
 {
-    // enums are slower.
-    static final int DOUBLE = 0;
-    static final int FLOAT = 1;
-    static final int LONG = 2;
-    static final int INTEGER = 3;
-    static final int SHORT = 4;
-    static final int BYTE = 5;
-    static final int CHAR = 6;
-    static final int BOOLEAN = 7;
-    static final int OBJECT = 8;
+    Object getValue(E e);
     
-    public static interface Key
-    {
-        int type();
-    }
-
-    Key createKey(AbstractAlkemyElement<?> e);
+    Double getDouble(E e);
     
-    Object getValue(Key key);
+    Float getFloat(E e);
     
-    Double getDouble(Key key);
+    Long getLong(E e);
     
-    Float getFloat(Key key);
+    Integer getInteger(E e);
     
-    Long getLong(Key key);
+    Short getShort(E e);
     
-    Integer getInteger(Key key);
+    Byte getByte(E e);
     
-    Short getShort(Key key);
+    Character getChar(E e);
     
-    Byte getByte(Key key);
+    Boolean getBoolean(E e);
     
-    Character getChar(Key key);
-    
-    Boolean getBoolean(Key key);
-    
-    Object getObject(Key key);
+    Object getObject(E e);
 }

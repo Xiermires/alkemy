@@ -23,6 +23,7 @@ import static org.alkemy.parse.impl.LambdaRefHelper.ref2StaticGetter;
 import static org.alkemy.parse.impl.LambdaRefHelper.ref2StaticSetter;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -35,7 +36,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.alkemy.ValueAccessor;
-import org.alkemy.util.Conditions;
+import org.alkemy.util.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,19 +77,21 @@ public class MethodHandleFactory
         final List<Method> l = Arrays.asList(clazz.getMethods()).stream()
                 .filter(p -> Alkemizer.CREATE_INSTANCE.equals(p.getName())).collect(Collectors.toList());
 
-        Conditions.requireCollectionSize(l, 1); // we instrument only one factory method
+        Assertions.ofSize(l, 1); // we instrument only one factory method
 
         final MethodHandle mh = methodHandle(clazz, Alkemizer.CREATE_INSTANCE, l.get(0).getParameterTypes());
 
-        Method m;
         try
         {
-            m = NodeConstructorFunction.class.getMethod("newInstance", Object[].class);
-            return new StaticMethodLambdaBasedConstructor(clazz, createLambdaRef(NodeConstructorFunction.class, m, mh));
+            final MethodHandle dh = MethodHandles.lookup().unreflectConstructor(clazz.getDeclaredConstructor());
+            final Method m = NodeConstructorFunction.class.getMethod("newInstance", Object[].class);
+
+            return new StaticMethodLambdaBasedConstructor(clazz, ref2StaticGetter(dh, clazz, clazz), createLambdaRef(
+                    NodeConstructorFunction.class, m, mh));
         }
         catch (NoSuchMethodException e)
         {
-            log.debug("Functional interface doesn't implement", e);
+            log.debug("Method not found. Can't use lambdas.", e);
         }
         return null;
     }

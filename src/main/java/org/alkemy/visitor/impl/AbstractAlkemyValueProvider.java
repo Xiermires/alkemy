@@ -17,124 +17,134 @@ package org.alkemy.visitor.impl;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.visitor.AlkemyValueProvider;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
-public class AbstractAlkemyValueProvider implements AlkemyValueProvider
+public abstract class AbstractAlkemyValueProvider<E extends AbstractAlkemyElement<E>> implements AlkemyValueProvider<E>
 {
+    // enums are slower.
+    static final int DOUBLE = 0;
+    static final int FLOAT = 1;
+    static final int LONG = 2;
+    static final int INTEGER = 3;
+    static final int SHORT = 4;
+    static final int BYTE = 5;
+    static final int CHAR = 6;
+    static final int BOOLEAN = 7;
+    static final int OBJECT = 8;
+    
     static final ImmutableMap<Class<?>, Integer> types;
     static 
     {
         final Builder<Class<?>, Integer> b = ImmutableMap.builder();
         
-        b.put(Double.class, AlkemyValueProvider.DOUBLE);
-        b.put(double.class, AlkemyValueProvider.DOUBLE);
-        b.put(Float.class, AlkemyValueProvider.FLOAT);
-        b.put(float.class, AlkemyValueProvider.FLOAT);
-        b.put(Long.class, AlkemyValueProvider.LONG);
-        b.put(long.class, AlkemyValueProvider.LONG);
-        b.put(Integer.class, AlkemyValueProvider.INTEGER);
-        b.put(int.class, AlkemyValueProvider.INTEGER);
-        b.put(Short.class, AlkemyValueProvider.SHORT);
-        b.put(short.class, AlkemyValueProvider.SHORT);
-        b.put(Byte.class, AlkemyValueProvider.BYTE);
-        b.put(byte.class, AlkemyValueProvider.BYTE);
-        b.put(Character.class, AlkemyValueProvider.CHAR);
-        b.put(char.class, AlkemyValueProvider.CHAR);
-        b.put(Boolean.class, AlkemyValueProvider.BOOLEAN);
-        b.put(boolean.class, AlkemyValueProvider.BOOLEAN);
+        b.put(Double.class, DOUBLE);
+        b.put(double.class, DOUBLE);
+        b.put(Float.class, FLOAT);
+        b.put(float.class, FLOAT);
+        b.put(Long.class, LONG);
+        b.put(long.class, LONG);
+        b.put(Integer.class, INTEGER);
+        b.put(int.class, INTEGER);
+        b.put(Short.class, SHORT);
+        b.put(short.class, SHORT);
+        b.put(Byte.class, BYTE);
+        b.put(byte.class, BYTE);
+        b.put(Character.class, CHAR);
+        b.put(char.class, CHAR);
+        b.put(Boolean.class, BOOLEAN);
+        b.put(boolean.class, BOOLEAN);
         
         types = b.build();
     }
     
-    @Override
-    public Key createKey(AbstractAlkemyElement<?> e)
+    public int type(AbstractAlkemyElement<?> e)
     {
         // handle primitives && wrappers
         final Integer type = types.get(e.type());
-        final int typeAsInt = type == null ? AlkemyValueProvider.OBJECT : type.intValue();
-        return () -> typeAsInt;
+        return type == null ? OBJECT : type.intValue();
     }
 
     @Override
-    public Object getValue(Key key)
+    public Object getValue(E e)
     {
-        switch (key.type())
+        switch (type(e))
         {
             case 0:
-                return getDouble(key);
+                return getDouble(e);
             case 1:
-                return getFloat(key);
+                return getFloat(e);
             case 2:
-                return getLong(key);
+                return getLong(e);
             case 3:
-                return getInteger(key);
+                return getInteger(e);
             case 4:
-                return getShort(key);
+                return getShort(e);
             case 5:
-                return getByte(key);
+                return getByte(e);
             case 6:
-                return getChar(key);
+                return getChar(e);
             case 7:
-                return getBoolean(key);
+                return getBoolean(e);
             case 8:
-                return getObject(key);
+                return getObject(e);
             default:
-                throw new AlkemyException("Undefined type '%d'", key.type());
+                throw new AlkemyException("Undefined type '%d'", e.type());
         }
     }
 
     @Override
-    public Double getDouble(Key key)
+    public Double getDouble(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Float getFloat(Key key)
+    public Float getFloat(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Long getLong(Key key)
+    public Long getLong(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Integer getInteger(Key key)
+    public Integer getInteger(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Short getShort(Key key)
+    public Short getShort(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Byte getByte(Key key)
+    public Byte getByte(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Character getChar(Key key)
+    public Character getChar(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Boolean getBoolean(Key key)
+    public Boolean getBoolean(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Object getObject(Key key)
+    public Object getObject(E e)
     {
         throw new UnsupportedOperationException("not implemented.");
     }

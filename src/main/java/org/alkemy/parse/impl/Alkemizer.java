@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.AlkemyNode;
-import org.alkemy.util.Conditions;
+import org.alkemy.util.Assertions;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -169,7 +169,7 @@ public class Alkemizer extends ClassVisitor
         // Boundary check (throws InvalidArgument).
         mv.visitVarInsn(ALOAD, 0);
         visitArgsPosToLoad(alkemizableFields.size(), mv);
-        mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/Alkemizer$ConditionsProxy", "requireArraySize", "([Ljava/lang/Object;I)V", false);
+        mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/Alkemizer$Proxy", "ofSize", "([Ljava/lang/Object;I)V", false);
 
         // TODO 1: document "a visible non-args ctor is required for the instrumented version."
         // TODO 2: detect it and do not create the ctor.
@@ -494,11 +494,11 @@ public class Alkemizer extends ClassVisitor
     
     // Compile check so changing conditions doesn't miss this class.
     // If changed, change also the instrumentation boundary check. 
-    public static class ConditionsProxy
+    public static class Proxy
     {
-        public static void requireArraySize(Object[] o, int i)
+        public static void ofSize(Object[] o, int i)
         {
-            Conditions.requireArraySize(o, i);
+            Assertions.ofSize(o, i);
         }
     }
 }

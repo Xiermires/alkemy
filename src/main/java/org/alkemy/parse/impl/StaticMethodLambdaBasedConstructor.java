@@ -15,18 +15,22 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.util.function.Supplier;
+
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.exception.InvalidArgument;
 
 public class StaticMethodLambdaBasedConstructor implements NodeConstructor
 {
     private final Class<?> type;
-    private final NodeConstructorFunction ctor;
+    private final Supplier<?> noargsCtor;
+    private final NodeConstructorFunction argsCtor;
 
-    StaticMethodLambdaBasedConstructor(Class<?> type, NodeConstructorFunction ctor)
+    StaticMethodLambdaBasedConstructor(Class<?> type, Supplier<?> noargsCtor, NodeConstructorFunction argsCtor)
     {
         this.type = type;
-        this.ctor = ctor;
+        this.noargsCtor = noargsCtor;
+        this.argsCtor = argsCtor;
     }
 
     @Override
@@ -36,12 +40,20 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
     }
 
     @Override
-    @SuppressWarnings("unchecked") // returns an instance of type()
+    @SuppressWarnings("unchecked")
+    // returns an instance of type()
     public <T> T newInstance(Object... args) throws AlkemyException
     {
         try
         {
-            return (T) ctor.newInstance(args);
+            if (args.length == 0)
+            {
+                return (T) noargsCtor.get();
+            }
+            else
+            {
+                return (T) argsCtor.newInstance(args);
+            }
         }
         catch (InvalidArgument e)
         {
@@ -49,7 +61,7 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
         }
         catch (Throwable e) // TODO.
         {
-            throw new AlkemyException("Invalid arguments.", e); 
+            throw new AlkemyException("Invalid arguments.", e);
         }
     }
 }

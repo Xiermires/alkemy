@@ -23,10 +23,9 @@ import java.util.function.Supplier;
 
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement, Object>, Supplier<String>
+public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement>, Supplier<String>
 {
     private StringBuilder sb = new StringBuilder();
 
@@ -37,9 +36,9 @@ public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement
     }
 
     @Override
-    public void visit(Reference<Object> parent, AlkemyElement e)
+    public void visit(AlkemyElement e, Object parent)
     {
-        sb.append(e.get(parent.get()));
+        sb.append(e.get(parent));
     }
 
     @Override

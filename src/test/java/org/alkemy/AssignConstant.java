@@ -22,10 +22,9 @@ import java.lang.annotation.Target;
 
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement, Object>
+public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
 {
     private final T t;
 
@@ -35,9 +34,9 @@ public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement, Ob
     }
 
     @Override
-    public void visit(Reference<Object> parent, AlkemyElement e)
+    public void visit(AlkemyElement e, Object parent)
     {
-        e.set(t, parent.get());
+        e.set(t, parent);
     }
 
     @Override

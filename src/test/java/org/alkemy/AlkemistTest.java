@@ -67,20 +67,20 @@ public class AlkemistTest
         tc.s2 = "bar";
         tdc.testClass = tc;
 
-        final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<TestDeepCopy>(tdc, new TestDeepCopy());
-        Alkemist.process(tdc, copier);
+        final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<>();
+        final TestDeepCopy copy = Alkemist.process(tdc, copier);
 
-        assertThat(copier.get().testClass, is(not(nullValue())));
-        assertThat(copier.get().testClass.s0, is("0"));
-        assertThat(copier.get().testClass.s1, is("foo"));
-        assertThat(copier.get().testClass.s2, is("bar"));
-        assertThat(copier.get().testClass.s3, is("3"));
-        assertThat(copier.get().testClass.s4, is("4"));
-        assertThat(copier.get().testClass.s5, is("5"));
-        assertThat(copier.get().testClass.s6, is("6"));
-        assertThat(copier.get().testClass.s7, is("7"));
-        assertThat(copier.get().testClass.s8, is("8"));
-        assertThat(copier.get().testClass.s9, is("9"));
+        assertThat(copy.testClass, is(not(nullValue())));
+        assertThat(copy.testClass.s0, is("0"));
+        assertThat(copy.testClass.s1, is("foo"));
+        assertThat(copy.testClass.s2, is("bar"));
+        assertThat(copy.testClass.s3, is("3"));
+        assertThat(copy.testClass.s4, is("4"));
+        assertThat(copy.testClass.s5, is("5"));
+        assertThat(copy.testClass.s6, is("6"));
+        assertThat(copy.testClass.s7, is("7"));
+        assertThat(copy.testClass.s8, is("8"));
+        assertThat(copy.testClass.s9, is("9"));
     }
 
     @Test

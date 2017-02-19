@@ -20,8 +20,7 @@ import java.lang.reflect.AnnotatedElement;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.impl.NodeConstructor;
-import org.alkemy.util.Conditions;
-import org.alkemy.util.Reference;
+import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
@@ -29,12 +28,12 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     private final AnnotatedElement desc;
     private final ValueAccessor valueAccessor;
     private final NodeConstructor nodeConstructor;
-    private final Class<? extends AlkemyElementVisitor<?, ?>> visitorType;
+    private final Class<? extends AlkemyElementVisitor<?>> visitorType;
     private final boolean node;
     private final boolean ordered;
 
     AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends AlkemyElementVisitor<?, ?>> visitorType, boolean node, boolean ordered)
+            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, boolean ordered)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
@@ -46,7 +45,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
 
     protected AbstractAlkemyElement(AbstractAlkemyElement<?> other)
     {
-        Conditions.requireNonNull(other);
+        Assertions.exists(other);
 
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
@@ -57,7 +56,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     public static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends AlkemyElementVisitor<?, ?>> visitorType, boolean node, boolean ordered)
+            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, boolean ordered)
     {
         return new AlkemyElement(desc, nodeConstructor, valueAccessor, visitorType, node, ordered);
     }
@@ -67,7 +66,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return desc;
     }
 
-    public Class<? extends AlkemyElementVisitor<?, ?>> visitorType()
+    public Class<? extends AlkemyElementVisitor<?>> visitorType()
     {
         return visitorType;
     }
@@ -103,18 +102,38 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return valueAccessor.targetName();
     }
 
-    public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v)
+    public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v)
     {
-        final T t = v.map(new AlkemyElement(this));
-        v.visit(ref, t);
-        return t;
+        final T t = map(v);
+        return v.visit(t);
+    }
+    
+    public <T extends AbstractAlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent)
+    {
+        final T t = map(v);
+        v.visit(t, parent);
     }
 
-    public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v, Object... args)
+    public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v, Object... args)
     {
-        final T t = v.map(new AlkemyElement(this));
-        v.visit(ref, t, args);
-        return t;
+        final T t = map(v);
+        return v.visit(t, args);
+    }
+    
+    public <T extends AbstractAlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent, Object... args)
+    {
+        final T t = map(v);
+        v.visit(t, parent, args);
+    }
+    
+    private Object cachedRef = null;
+    
+    @SuppressWarnings("unchecked")
+    // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
+    // extend otherwise.
+    protected <T extends AbstractAlkemyElement<T>> T map(AlkemyElementVisitor<T> v)
+    {
+        return (T) (cachedRef == null ? (cachedRef = v.map(new AlkemyElement(this))) : cachedRef);
     }
 
     public boolean isOrdered()
@@ -137,27 +156,9 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
 
         AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-                Class<? extends AlkemyElementVisitor<?, ?>> visitorType, boolean node, boolean ordered)
+                Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, boolean ordered)
         {
             super(desc, nodeConstructor, valueAccessor, visitorType, node, ordered);
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
-        // TODO: Allow to switch it off.
-        public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v)
-        {
-            return (T) (o == null ? (o = super.accept(ref, v)) : o);
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
-        // TODO: Allow to switch it off.
-        public <T extends AbstractAlkemyElement<T>, S> T accept(Reference<S> ref, AlkemyElementVisitor<T, S> v, Object... args)
-        {
-            return (T) (o == null ? (o = super.accept(ref, v, args)) : o);
         }
     }
 }

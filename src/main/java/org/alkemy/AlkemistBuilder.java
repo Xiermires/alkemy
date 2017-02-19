@@ -21,30 +21,30 @@ import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AlkemyParsers;
-import org.alkemy.util.Conditions;
+import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
-import org.alkemy.visitor.impl.AlkemyElementReader;
 import org.alkemy.visitor.impl.AlkemyElementWriter;
+import org.alkemy.visitor.impl.AlkemyPreorderVisitor;
 
 public class AlkemistBuilder
 {
     public enum Mode
     {
-        READ_EXISTING, READ_ALL, WRITE
+        PREORDER_EXISTING, PREORDER_ALL, WRITE
     };
 
     private AlkemyLexer<AnnotatedElement> lexer = null;
     private AlkemyParser parser = null;
     private AlkemyLoadingCache cache = null;
-    private AlkemyElementVisitor<?, Object> aev = null;
+    private AlkemyElementVisitor<?> aev = null;
 
     public AlkemistBuilder()
     {
     }
 
     // TODO: addVisitor(...)
-    public AlkemistBuilder visitor(AlkemyElementVisitor<?, Object> aev)
+    public AlkemistBuilder visitor(AlkemyElementVisitor<?> aev)
     {
         this.aev = aev;
         return this;
@@ -52,17 +52,17 @@ public class AlkemistBuilder
     
     public Alkemist build()
     {
-        Conditions.requireNonNull(aev);
+        Assertions.exists(aev);
         
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
-        return new Alkemist(cache, new AlkemyElementReader(aev, true));
+        return new Alkemist(cache, AlkemyPreorderVisitor.create(aev, true));
     }
 
     public Alkemist build(Mode mode)
     {
-        Conditions.requireNonNull(mode);
+        Assertions.exists(mode);
         
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
@@ -72,7 +72,7 @@ public class AlkemistBuilder
 
     public Alkemist build(AlkemyNodeVisitor anv)
     {
-        Conditions.requireNonNull(anv);
+        Assertions.exists(anv);
         
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
@@ -80,14 +80,14 @@ public class AlkemistBuilder
         return new Alkemist(cache, anv);
     }
 
-    private AlkemyNodeVisitor createAlkemyNodeVisitor(Mode mode, AlkemyElementVisitor<?, Object> aev)
+    private AlkemyNodeVisitor createAlkemyNodeVisitor(Mode mode, AlkemyElementVisitor<?> aev)
     {
         switch (mode)
         {
-            case READ_EXISTING:
-                return new AlkemyElementReader(aev, false);
-            case READ_ALL:
-                return new AlkemyElementReader(aev, false);
+            case PREORDER_EXISTING:
+                return AlkemyPreorderVisitor.create(aev, false);
+            case PREORDER_ALL:
+                return AlkemyPreorderVisitor.create(aev, true);
             case WRITE:
                 return new AlkemyElementWriter(aev);
         }

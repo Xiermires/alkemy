@@ -23,60 +23,60 @@ public class ConditionsTest
     public void requiresNonNull()
     {
         Object o = null;
-        Conditions.requireNonNull(o);
+        Assertions.exists(o);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyBoolean()
     {
-        Conditions.requireNotEmpty(new boolean[0]);
+        Assertions.notEmpty(new boolean[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyChar()
     {
-        Conditions.requireNotEmpty(new char[0]);
+        Assertions.notEmpty(new char[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyByte()
     {
-        Conditions.requireNotEmpty(new byte[0]);
+        Assertions.notEmpty(new byte[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyShort()
     {
-        Conditions.requireNotEmpty(new short[0]);
+        Assertions.notEmpty(new short[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyInt()
     {
-        Conditions.requireNotEmpty(new int[0]);
+        Assertions.notEmpty(new int[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyLong()
     {
-        Conditions.requireNotEmpty(new long[0]);
+        Assertions.notEmpty(new long[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyFloat()
     {
-        Conditions.requireNotEmpty(new float[0]);
+        Assertions.notEmpty(new float[0]);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyDouble()
     {
-        Conditions.requireNotEmpty(new double[0]);
+        Assertions.notEmpty(new double[0]);
     }   
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void requiresNotEmptyObjArray()
     {
-        Conditions.requireNotEmpty(new Object[0]);
+        Assertions.notEmpty(new Object[0]);
     }
 }

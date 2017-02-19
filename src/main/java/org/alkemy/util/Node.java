@@ -32,6 +32,19 @@ public interface Node<E>
     boolean hasChildren();
 
     /**
+     * Returns the number of jumps needed to reach from this node to the lowest leaf of this branch.
+     * <p>
+     * For instance if function returns...
+     * <ul>
+     * <li>0, then this node is no branch, but a leaf (equivalent to hasChildren() == false).
+     * <li>1, then the node has children and all of them are leaves.
+     * <li>2, then the node has children and some of them, or all, have children themselves.
+     * <li>etc.
+     * </ul>
+     */
+    int branchDepth();
+
+/**
      * As {@link #traverse(Consumer, Predicate) consuming all branches nodes.
      * 
      * @param c node consumer
@@ -39,17 +52,19 @@ public interface Node<E>
     void traverse(Consumer<Node<? extends E>> c);
 
     /**
-     * Applies c to every node in the underlying branches satisfying p. 
+     * Applies c to every node in the underlying branches satisfying p.
      * <p>
      * Traverse order is defined by each node implementation.
      * <p>
-     * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not. 
+     * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not.
      * <p>
      * <ul>
-     * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be potentially consumed.
-     * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be consumed.
+     * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be
+     * potentially consumed.
+     * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be
+     * consumed.
      * </ul>
-     *  
+     * 
      * @param c
      *            node consumer
      * @param p
@@ -60,17 +75,19 @@ public interface Node<E>
     void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure);
 
     /**
-     * Applies c to every node in the underlying branches satisfying p. 
+     * Applies c to every node in the underlying branches satisfying p.
      * <p>
      * Traverse order is defined by each node implementation.
      * <p>
-     * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not. 
+     * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not.
      * <p>
      * <ul>
-     * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be potentially consumed.
-     * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be consumed.
+     * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be
+     * potentially consumed.
+     * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be
+     * consumed.
      * </ul>
-     *  
+     * 
      * @param c
      *            node consumer
      * @param p
@@ -78,9 +95,10 @@ public interface Node<E>
      * @param keepProcessingOnFailure
      *            process subnodes of a node failing p.
      */
-    void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p, boolean keepProcessingOnFailure);
-    
-    /**
+    void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p,
+            boolean keepProcessingOnFailure);
+
+/**
      * As {@link #drainTo(Consumer, Predicate) adding all branch's subnodes.
      * 
      * @param c

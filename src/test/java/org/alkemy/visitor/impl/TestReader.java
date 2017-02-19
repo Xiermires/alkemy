@@ -16,7 +16,7 @@
 package org.alkemy.visitor.impl;
 
 import org.alkemy.annotations.AlkemyNode;
-import org.alkemy.visitor.impl.AlkemyElementReaderTest.ObjectReader.Bar;
+import org.alkemy.visitor.impl.AlkemyVisitorTests.ObjectReader.Bar;
 
 public class TestReader
 {

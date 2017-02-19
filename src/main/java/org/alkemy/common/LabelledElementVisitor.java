@@ -28,10 +28,9 @@ import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.common.LabelledElementVisitor.LabelledElement;
-import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElement, Object>
+public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElement>
 {
     private final Pattern p;
     private final BiFunction<String, Object, Object> f;
@@ -50,20 +49,25 @@ public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElem
 
     public LabelledElementVisitor dynamicVariables(Map<String, String> dynamicVariables)
     {
-        this.dynamicVariables.putAll(dynamicVariables);
+        this.dynamicVariables = dynamicVariables;
         return this;
     }
     
     @Override
-    public void visit(Reference<Object> parent, LabelledElement e)
+    public void visit(LabelledElement e, Object parent)
     {
-        f.apply(DynamicLabel.replace(e.raw, dynamicVariables, p), e.get(parent.get()));
+        f.apply(e.isDynamic ? DynamicLabel.replace(e.raw, dynamicVariables, p) : e.raw, e.get(parent));
     }
 
     @Override
     public LabelledElement map(AlkemyElement e)
     {
-        return new LabelledElement(e);
+        final LabelledElement le = new LabelledElement(e);
+        if (le.isDynamic == null) 
+        {
+            le.isDynamic = DynamicLabel.isDynamic(le.raw, p);
+        }
+        return le;
     }
     
     @Override
@@ -75,6 +79,7 @@ public class LabelledElementVisitor implements AlkemyElementVisitor<LabelledElem
     static class LabelledElement extends AbstractAlkemyElement<LabelledElement>
     {
         String raw;
+        Boolean isDynamic = null;
 
         protected LabelledElement(AbstractAlkemyElement<?> ae)
         {

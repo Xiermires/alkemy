@@ -15,40 +15,24 @@
  *******************************************************************************/
 package org.alkemy;
 
-import java.util.function.Supplier;
-
 import org.alkemy.util.Node;
-import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements AlkemyNodeVisitor, Supplier<T>
+public class ObjectCopier<T> implements AlkemyNodeVisitor
 {
-    private T t;
-    private Object orig;
-    private Object dest;
     private Objenesis objenesis = new ObjenesisStd();
-
-    ObjectCopier(T orig, T dest)
-    {
-        this.orig = orig;
-        this.dest = this.t = dest;
-    }
-
+    
     @Override
-    public T get()
+    public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object orig)
     {
-        return t;
-    }
-
-    @Override
-    public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> rootObj)
-    {
+        final Object dest = objenesis.newInstance(orig.getClass());
         visit(root, orig, dest);
+        return dest;
     }
 
-    private void visit(Node<? extends AbstractAlkemyElement<?>> e, Object orig, Object dest)
+    private Object visit(Node<? extends AbstractAlkemyElement<?>> e, Object orig, Object dest)
     {
         e.children().forEach(n ->
         {
@@ -64,5 +48,6 @@ public class ObjectCopier<T> implements AlkemyNodeVisitor, Supplier<T>
                 n.data().set(vo, dest);
             }
         });
+        return dest;
     }
 }

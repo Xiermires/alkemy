@@ -27,8 +27,7 @@ testClassNames = { "org.alkemy.AlkemistTest", //
         "org.alkemy.parse.impl.TypeFieldParserTest", //
         "org.alkemy.common.IndexedElementTest", //
         "org.alkemy.common.LabelledElementTest", //
-        "org.alkemy.visitor.impl.AlkemyElementWriterTest", //
-        "org.alkemy.visitor.impl.AlkemyElementReaderTest", //
+        "org.alkemy.visitor.impl.AlkemyVisitorTests", //
         "org.alkemy.example.RandomGenerator" //
 }, //
 instrs = @Instr(classNames = { "org.alkemy.TestClass", //

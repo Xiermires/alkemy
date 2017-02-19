@@ -20,25 +20,25 @@ import java.util.function.Supplier;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.util.Node;
-import org.alkemy.util.Reference;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 
+// This is buggy. Behavior is only guaranteed if elements are ordered (@Order) in declaration order.
 public class AlkemyElementWriter implements AlkemyNodeVisitor
 {
-    private AlkemyElementVisitor<?, Object> aev;
+    private AlkemyElementVisitor<?> aev;
 
-    public AlkemyElementWriter(AlkemyElementVisitor<?, Object> aev)
+    public AlkemyElementWriter(AlkemyElementVisitor<?> aev)
     {
         this.aev = aev;
     }
 
     @Override
-    public void visit(Node<? extends AbstractAlkemyElement<?>> root, Reference<Object> output)
+    public Object visit(Node<? extends AbstractAlkemyElement<?>> root)
     {
         final Parameters params = new Parameters(aev, root.children().size());
         root.children().forEach(processNode(params));
-        root.data().accept(output, aev, params.get());
+        return root.data().accept(aev, params.get());
     }
 
     private Consumer<? super Node<? extends AbstractAlkemyElement<?>>> processNode(Parameters params)
@@ -49,12 +49,10 @@ public class AlkemyElementWriter implements AlkemyNodeVisitor
             {
                 final Parameters childParams = new Parameters(aev, e.children().size());
                 e.children().forEach(processNode(childParams));
-                final Reference<Object> out = Reference.inOut();
                 if (!childParams.unsupported)
-                {    
-                    e.data().accept(out, aev, childParams.get());
+                {
+                    params.add(e.data().accept(aev, childParams.get()));
                 }
-                params.add(out.get());
             }
             else
             {
@@ -68,9 +66,9 @@ public class AlkemyElementWriter implements AlkemyNodeVisitor
         int c = 0;
         Object[] params;
         boolean unsupported = false;
-        AlkemyElementVisitor<?, Object> aev;
+        AlkemyElementVisitor<?> aev;
 
-        Parameters(AlkemyElementVisitor<?, Object> aev, int size)
+        Parameters(AlkemyElementVisitor<?> aev, int size)
         {
             this.aev = aev;
             params = new Object[size];
@@ -80,14 +78,12 @@ public class AlkemyElementWriter implements AlkemyNodeVisitor
         {
             params[c++] = param;
         }
-        
+
         void tryAdd(Node<? extends AbstractAlkemyElement<?>> e)
         {
             if (aev.accepts(e.data().visitorType()))
             {
-                final Reference<Object> out = Reference.inOut();
-                e.data().accept(out, aev);
-                params[c++] = out.get();
+                params[c++] = e.data().accept(aev);
             }
             else
             {

@@ -22,143 +22,144 @@ import java.util.function.Predicate;
 
 import org.alkemy.exception.InvalidArgument;
 
-public class Conditions
+// program with assertions having control over the exceptions types.
+public class Assertions
 {
-    public static void requireContentNotNull(Object... o)
+    public static void exist(Object... o)
     {
         for (int i = 0; i < o.length; i++)
             Objects.requireNonNull(o[i]);
     }
 
-    public static void requireNonNull(Object o)
+    public static void exists(Object o)
     {
         Objects.requireNonNull(o);
     }
 
-    public static void requireNotEmpty(boolean[] o)
+    public static void notEmpty(boolean[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(char[] o)
+    public static void notEmpty(char[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(byte[] o)
+    public static void notEmpty(byte[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(short[] o)
+    public static void notEmpty(short[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(int[] o)
+    public static void notEmpty(int[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(long[] o)
+    public static void notEmpty(long[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(float[] o)
+    public static void notEmpty(float[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(double[] o)
+    public static void notEmpty(double[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireNotEmpty(Object[] o)
+    public static void notEmpty(Object[] o)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
-    public static void requireArraySize(boolean[] o, int size)
+    public static void ofSize(boolean[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(char[] o, int size)
+    public static void ofSize(char[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(byte[] o, int size)
+    public static void ofSize(byte[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(short[] o, int size)
+    public static void ofSize(short[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(int[] o, int size)
+    public static void ofSize(int[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(long[] o, int size)
+    public static void ofSize(long[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(float[] o, int size)
+    public static void ofSize(float[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(double[] o, int size)
+    public static void ofSize(double[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireArraySize(Object[] o, int size)
+    public static void ofSize(Object[] o, int size)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void requireOfType(Object o, Class<?> type)
+    public static void ofSize(Object o, Class<?> type)
     {
-        requireNonNull(o);
+        exists(o);
         if (o.getClass().equals(type)) throw new InvalidArgument("Invalid class type { expected '%d', received '%d' }", o
                 .getClass().getName(), type.getName());
     }
 
     public static <T> boolean isTrue(Predicate<T> p, T t)
     {
-        requireNonNull(p);
+        exists(p);
         return true == p.test(t);
     }
 
-    public static void requireCollectionSize(List<Method> l, int size)
+    public static void ofSize(List<Method> l, int size)
     {
-        requireNonNull(l);
+        exists(l);
         if (l.size() != size) throw new InvalidArgument("Invalid collection size { expected '%d', received '%d' }", size,
                 l.size());
     }

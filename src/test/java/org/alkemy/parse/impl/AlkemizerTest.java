@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -87,16 +89,26 @@ public class AlkemizerTest
     }
 
     @Test(expected = InvalidArgument.class)
-    public void testNodeConstructor() throws NoSuchFieldException, SecurityException, IllegalAccessException
+    public void testNodeConstructorWithArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
         final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
         final TestAlkemizer tc = ctor.newInstance(1, "foo");
 
         assertThat(1, is(tc.foo));
         assertThat("foo", is(tc.bar));
-        
+
         // throws invalid argument ex.
         ctor.newInstance(1, 2, 3);
+    }
+
+    public void testNodeConstructorNoArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
+    {
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
+        final TestAlkemizer tc = ctor.newInstance();
+
+        assertThat(tc, is(not(nullValue())));
+        assertThat(-1, is(tc.foo));
+        assertThat("baz", is(tc.bar));
     }
 
     @Test

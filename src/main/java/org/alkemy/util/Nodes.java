@@ -37,6 +37,7 @@ public class Nodes
         private E data;
         private ArborescenceBuilder<E> parent;
         private List<ArborescenceBuilder<E>> children;
+        private int depth;
 
         ArborescenceBuilder(ArborescenceBuilder<E> parent, E data)
         {
@@ -64,24 +65,59 @@ public class Nodes
             {
                 node = node.parent;
             }
-            return node.drainTo(new ArborescenceNodeImpl<>(), true);
+            return (calculateDepths(node)).drainTo(new ArborescenceNodeImpl<>(), true);
         }
 
+        private ArborescenceBuilder<E> calculateDepths(ArborescenceBuilder<E> e)
+        {
+            updateDepth(e, new IntRef());
+            return e;
+        }
+
+        private ArborescenceBuilder<E> updateDepth(ArborescenceBuilder<E> e, IntRef ir)
+        {
+            if (e.children != null)
+            {
+                for (int i = 0; i < e.children.size(); i++)
+                {
+                    IntRef ir2 = new IntRef();
+                    updateDepth(e.children.get(i), ir2);
+                    ir2.i++;
+                    ir.i = Math.max(ir.i, ir2.i);
+                    e.depth = ir.i;
+                }
+            }
+            else
+            {
+                e.depth = 0;
+            }
+            return e;
+        }
+
+        // TODO: Probably bring this inside the calculateDepths.
+        // We need new IntRefs for each element in the for each and access them after every iteration.
         private Node<E> drainTo(ArborescenceNodeImpl<E> parent, boolean isRoot)
         {
             parent.data = data;
             parent.parent = isRoot ? null : parent;
-
             if (children != null)
             {
-                parent.children = children.stream().map(b -> b.drainTo(new ArborescenceNodeImpl<E>(), false)).collect(Collectors.toList());
+                parent.children = children.stream().map(b -> b.drainTo(new ArborescenceNodeImpl<E>(), false))
+                        .collect(Collectors.toList());
+                parent.depth = depth;
             }
             else
             {
                 parent.children = Collections.emptyList();
+                parent.depth = depth;
             }
             return parent;
         }
+    }
+
+    static class IntRef
+    {
+        int i;
     }
 
     static class ArborescenceNodeImpl<E> implements Node<E>
@@ -89,6 +125,7 @@ public class Nodes
         private E data;
         private Node<E> parent;
         private List<Node<E>> children;
+        private int depth;
 
         @Override
         public Node<E> parent()
@@ -114,6 +151,11 @@ public class Nodes
             return !children.isEmpty();
         }
 
+        @Override
+        public int branchDepth()
+        {
+            return depth;
+        }
 
         @Override
         public void traverse(Consumer<Node<? extends E>> c)
@@ -124,7 +166,7 @@ public class Nodes
         /**
          * Consumption order is children first, in order of appearance.
          * <p>
-         * Example: children = { c1 = { c1.c1, c1.c2, c1.c3 }, c2, c3 = { c3.c1 } }, test(c1.c2) & test(c3) fail, rest succeed. 
+         * Example: children = { c1 = { c1.c1, c1.c2, c1.c3 }, c2, c3 = { c3.c1 } }, test(c1.c2) & test(c3) fail, rest succeed.
          * <p>
          * <code>keepProcessingOnFailure = true</code>
          * <ol>
@@ -181,9 +223,10 @@ public class Nodes
                 }
             });
         }
-        
+
         @Override
-        public void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p, boolean keepProcessingOnFailure)
+        public void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p,
+                boolean keepProcessingOnFailure)
         {
             children().forEach(e ->
             {
