@@ -152,6 +152,9 @@ public class AlkemizerTest
     @Test
     public void performanceAccesingStrategies() throws Throwable
     {
+        System.out.println("**** Compare accessing / creating fiels (1e7 iterations) ****");
+        
+        final Field field = clazz.getDeclaredField("bar");
         final Method method = clazz.getDeclaredMethod("get$$bar");
         final MethodHandle handle = methodHandle(clazz, "get$$bar");
         final Function<Object, String> function = LambdaRefHelper.ref2MemberGetter(handle, Object.class, String.class);
@@ -204,27 +207,19 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
-        System.out.println("Reflection: " + Measure.measure(() ->
+        System.out.println("Reflection (get): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                String.class.cast(field.get(tc));
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("Reflection (call get$$bar): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
                 String.class.cast(method.invoke(tc));
-            }
-        }) / 1000000 + " ms");
-
-        System.out.println("create$$instance: " + Measure.measure(() ->
-        {
-            for (int i = 0; i < ITER; i++)
-            {
-                ctor.newInstance(1, "two");
-            }
-        }) / 1000000 + " ms");
-        
-        System.out.println("Direct access: " + Measure.measure(() ->
-        {
-            for (int i = 0; i < ITER; i++)
-            {
-                TestAlkemizerCompiledVersion.create$$instance(1, "two");
             }
         }) / 1000000 + " ms");
         
@@ -236,6 +231,24 @@ public class AlkemizerTest
                 tce.get$$bar();
             }
         }) / 1000000 + " ms");
+
+        System.out.println("create$$instance: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                ctor.newInstance(1, "two");
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("Direct access (call static factory): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                TestAlkemizerCompiledVersion.create$$instance(1, "two");
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("**** Compare end ****");
     }
 
     @Test
