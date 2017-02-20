@@ -20,9 +20,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -37,8 +37,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.alkemy.ValueAccessor;
+import org.alkemy.annotations.Order;
 import org.alkemy.exception.InvalidArgument;
-import org.alkemy.parse.impl.Alkemizer.RefList;
+import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsDeclaration;
+import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsOrder;
 import org.alkemy.util.Measure;
 import org.alkemy.util.ObjIntFunction;
 import org.junit.BeforeClass;
@@ -59,14 +61,28 @@ public class AlkemizerTest
     {
         final Method m = clazz.getMethod(Alkemizer.CREATE_INSTANCE, Object[].class);
         assertThat(Modifier.isStatic(m.getModifiers()), is(true));
-
-        final Annotation[][] as = m.getParameterAnnotations();
-
-        assertThat(as.length, is(1));
-        assertThat(as[0].length, is(1));
-
-        final RefList refs = RefList.class.cast(as[0][0]);
-        assertThat(Arrays.asList(refs.value()), is(Arrays.asList(new String[] { "foo", "bar" })));
+    }
+    
+    @Test
+    public void alkemizeOrderAnnotation()
+    {
+        assertTrue(clazz.isAnnotationPresent(Order.class));
+        final Order order = clazz.getAnnotation(Order.class);
+        assertThat(Arrays.asList(order.value()), is(Arrays.asList(new String[] { "foo", "bar" })));
+    }
+    
+    @Test
+    public void nodeConstructorArgsPreserveOrder() throws IllegalAccessException, SecurityException
+    {
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsOrder.class);
+        ctor.newInstance(1, "a");
+    }
+    
+    @Test
+    public void nodeConstructorArgsInDeclarationOrder() throws IllegalAccessException, SecurityException
+    {
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsDeclaration.class);
+        ctor.newInstance("a", 1);
     }
 
     @Test

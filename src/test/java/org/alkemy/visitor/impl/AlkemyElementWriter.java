@@ -23,7 +23,6 @@ import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 
-// This is buggy. Behavior is only guaranteed if elements are ordered (@Order) in declaration order.
 public class AlkemyElementWriter implements AlkemyNodeVisitor
 {
     private AlkemyElementVisitor<?> aev;

@@ -26,7 +26,7 @@ public class Alkemist
 
     Alkemist(AlkemyLoadingCache cache, AlkemyNodeVisitor anv)
     {
-        Assertions.exist(cache, anv);
+        Assertions.existAll(cache, anv);
 
         this.cache = cache;
         this.anv = anv;
@@ -41,20 +41,20 @@ public class Alkemist
 
     public static <T> T process(T t, AlkemyNodeVisitor anv)
     {
-        Assertions.exist(t, anv);
+        Assertions.existAll(t, anv);
         anv.visit(AlkemyParsers.fieldParser().parse(t.getClass()), t);
         return t;
     }
     
     public <T> T create(Class<T> clazz)
     {
-        Assertions.exist(clazz, anv);
+        Assertions.existAll(clazz, anv);
         return clazz.cast(anv.visit(cache.get(clazz)));
     }
     
     public static <T> T create(Class<T> clazz, AlkemyNodeVisitor anv)
     {
-        Assertions.exist(clazz, anv);
+        Assertions.existAll(clazz, anv);
         return clazz.cast(anv.visit(AlkemyParsers.fieldParser().parse(clazz)));
     }
 }

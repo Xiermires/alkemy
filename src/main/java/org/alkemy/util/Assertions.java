@@ -18,14 +18,14 @@ package org.alkemy.util;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
+import org.alkemy.exception.AlkemyException;
 import org.alkemy.exception.InvalidArgument;
 
 // program with assertions having control over the exceptions types.
 public class Assertions
 {
-    public static void exist(Object... o)
+    public static void existAll(Object... o)
     {
         for (int i = 0; i < o.length; i++)
             Objects.requireNonNull(o[i]);
@@ -151,10 +151,10 @@ public class Assertions
                 .getClass().getName(), type.getName());
     }
 
-    public static <T> boolean isTrue(Predicate<T> p, T t)
+    public static <T> void isTrue(boolean expr, String errorMessage)
     {
-        exists(p);
-        return true == p.test(t);
+        if (!expr)
+            throw new AlkemyException(errorMessage);
     }
 
     public static void ofSize(List<Method> l, int size)

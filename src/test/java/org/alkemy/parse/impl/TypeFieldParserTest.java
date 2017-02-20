@@ -16,7 +16,6 @@
 package org.alkemy.parse.impl;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -25,8 +24,6 @@ import java.util.List;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.parse.AlkemyParser;
-import org.alkemy.util.Node;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TypeFieldParserTest
@@ -72,27 +69,4 @@ public class TypeFieldParserTest
 
         assertThat("This is an example of ordered alkemyElements ", is(sb.toString()));
     }
-
-    @Test
-    @Ignore
-    // According to the spec Class#getFile, this test can succeed or fail.
-    public void testUnordered() throws IOException, InstantiationException, IllegalAccessException
-    {
-        final AlkemyParser parser = AlkemyParsers.fieldParser();
-        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
-        final Node<AbstractAlkemyElement<?>> parsedElements = parser.parse(TestUnordered.class);
-
-        parsedElements.drainTo(result);
-
-        assertThat(result.size(), is(5));
-
-        StringBuilder sb = new StringBuilder();
-        final TestUnordered tu = new TestUnordered();
-        result.forEach(e ->
-        {
-            sb.append(e.get(tu)).append(" ");
-        });
-        assertThat("Hello 0 World 1 true ", is(not(sb.toString())));
-    }
-
 }

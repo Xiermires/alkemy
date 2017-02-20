@@ -18,14 +18,14 @@ package org.alkemy.parse.impl;
 import org.alkemy.annotations.Order;
 import org.alkemy.util.PassThrough.Bar;
 
-@Order({ "s1", "s2", "s3", "s4", "s5", "s6", "s7" })
+@Order({ "s2", "s1", "s3", "s4", "s7", "s6", "s5" })
 public class TestOrdered
 {
     @Bar
-    String s1 = "This";
+    String s1 = "is";
 
     @Bar
-    String s2 = "is";
+    String s2 = "This";
 
     @Bar
     String s3 = "an";
@@ -34,11 +34,11 @@ public class TestOrdered
     String s4 = "example";
 
     @Bar
-    String s5 = "of";
+    String s5 = "alkemyElements";
 
     @Bar
     String s6 = "ordered";
 
     @Bar
-    String s7 = "alkemyElements";
+    String s7 = "of";
 }

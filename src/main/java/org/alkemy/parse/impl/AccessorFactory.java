@@ -103,7 +103,7 @@ class AccessorFactory
         @Override
         public String targetName()
         {
-            Assertions.exist(ref);
+            Assertions.exists(ref);
             return ref.getClass().getTypeName();
         }
     }

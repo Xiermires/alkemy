@@ -43,20 +43,21 @@ import static org.objectweb.asm.Opcodes.SIPUSH;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.AlkemyNode;
+import org.alkemy.annotations.Order;
 import org.alkemy.util.Assertions;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -77,12 +78,14 @@ public class Alkemizer extends ClassVisitor
 
     private static final Pattern DESC = Pattern.compile("^L(.+\\/.+)+;$");
     private static final Logger log = LoggerFactory.getLogger(Alkemizer.class);
-    
+
     private final List<AlkemizableField> alkemizableFields = new ArrayList<>();
     private final Set<String> alkemizableAnnotations = new HashSet<>();
     private final Set<String> nonAlkemizableAnnotations = new HashSet<>();
 
     private final String className;
+    private boolean ordered;
+    private Map<String, Integer> orderedFieldNames = new HashMap<String, Integer>(); // the values inside @Order if defined
 
     private Alkemizer(String className, ClassVisitor cv)
     {
@@ -96,8 +99,14 @@ public class Alkemizer extends ClassVisitor
         {
             final ClassReader cr = new ClassReader(classBytes);
             final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-            cr.accept(new Alkemizer(cr.getClassName(), cw), ClassReader.SKIP_FRAMES);
-            return cw.toByteArray();
+            try
+            {
+                cr.accept(new Alkemizer(cr.getClassName(), cw), ClassReader.SKIP_FRAMES);
+                return cw.toByteArray();
+            }
+            catch (Exception e) // error while alkemizing. Return the original class.
+            {
+            }
         }
         return classBytes;
     }
@@ -113,6 +122,17 @@ public class Alkemizer extends ClassVisitor
     }
 
     @Override
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible)
+    {
+        if (Order.class.getName().equals(toQualifiedNameFromDesc(desc)))
+        {
+            ordered = true;
+            return new OrderValueReader(orderedFieldNames, super.visitAnnotation(desc, visible));
+        }
+        return super.visitAnnotation(desc, visible);
+    }
+
+    @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
     {
         final FieldVisitor fv = super.visitField(access, name, desc, signature, value);
@@ -124,20 +144,26 @@ public class Alkemizer extends ClassVisitor
     {
         if (!alkemizableFields.isEmpty())
         {
-            try
-            {
-                appendNodeConstructor();
-                appendIsInstrumented();
-                appendGetters();
-                appendSetters();
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            appendOrder();
+            appendNodeConstructor();
+            appendIsInstrumented();
+            appendGetters();
+            appendSetters();
         }
-
         super.visitEnd();
+    }
+
+    // forces field declaration order if none specified.
+    private void appendOrder()
+    {
+        if (!ordered)
+        {
+            final AnnotationVisitor av = super.visitAnnotation("Lorg/alkemy/annotations/Order;", true);
+            final AnnotationVisitor aav = av.visitArray("value");
+            alkemizableFields.forEach(af -> aav.visit(null, af.name));
+            aav.visitEnd();
+            av.visitEnd();
+        }
     }
 
     private void appendIsInstrumented()
@@ -156,16 +182,10 @@ public class Alkemizer extends ClassVisitor
         final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, "create$$instance", "([Ljava/lang/Object;)"
                 + classNameAsDesc(className), null, null);
 
-        final AnnotationVisitor av = mv.visitParameterAnnotation(0, "Lorg/alkemy/parse/impl/Alkemizer$RefList;", true);
-        final AnnotationVisitor aav = av.visitArray("value");
-        alkemizableFields.forEach(af -> aav.visit(null, af.name));
-        aav.visitEnd();
-        av.visitEnd();
-        
         mv.visitCode();
         final Label l0 = new Label();
         mv.visitLabel(l0);
-        
+
         // Boundary check (throws InvalidArgument).
         mv.visitVarInsn(ALOAD, 0);
         visitArgsPosToLoad(alkemizableFields.size(), mv);
@@ -183,6 +203,12 @@ public class Alkemizer extends ClassVisitor
         // need this label for the local variables
         final Label l2 = new Label();
         mv.visitLabel(l2);
+
+        if (ordered)
+        {
+            checkFieldNames(alkemizableFields, orderedFieldNames);
+            sortByOrder(alkemizableFields, orderedFieldNames);
+        }
 
         for (int i = 0; i < alkemizableFields.size(); i++)
         {
@@ -214,6 +240,22 @@ public class Alkemizer extends ClassVisitor
 
         mv.visitMaxs(0, 0);
         mv.visitEnd();
+    }
+
+    private void checkFieldNames(List<AlkemizableField> alkemizableFields, Map<String, Integer> orderedFieldNames)
+    {
+        final List<String> names = alkemizableFields.stream().map(af -> af.name).collect(Collectors.toList());
+        if (names.size() != orderedFieldNames.size()) throw new Stop(); // invalid definition
+
+        if (!names.containsAll(orderedFieldNames.keySet())) throw new Stop(); // invalid definition
+    }
+
+    private void sortByOrder(List<AlkemizableField> alkemizableFields, Map<String, Integer> orderedFieldNames)
+    {
+        Collections.sort(alkemizableFields, (lhs, rhs) ->
+        {
+            return Integer.compare(orderedFieldNames.get(lhs.name), orderedFieldNames.get(rhs.name));
+        });
     }
 
     private void appendGetters()
@@ -337,11 +379,13 @@ public class Alkemizer extends ClassVisitor
         }
     }
 
+    // dots
     static String toQualifiedNameFromDesc(String desc)
     {
         return toClassNameFromDesc(desc).replace('/', '.');
     }
 
+    // slashes
     static String toClassNameFromDesc(String desc)
     {
         final Matcher matcher = DESC.matcher(desc);
@@ -353,7 +397,7 @@ public class Alkemizer extends ClassVisitor
     {
         return "L" + className + ";";
     }
-    
+
     static class ClassCaster
     {
         final String name;
@@ -365,7 +409,7 @@ public class Alkemizer extends ClassVisitor
             this.method = castMethod;
         }
     }
-    
+
     static class FieldAnnotationVisitor extends FieldVisitor
     {
         private final String name;
@@ -472,6 +516,31 @@ public class Alkemizer extends ClassVisitor
         }
     }
 
+    static class OrderValueReader extends AnnotationVisitor
+    {
+        int i = 0;
+        Map<String, Integer> m;
+
+        public OrderValueReader(Map<String, Integer> m, AnnotationVisitor av)
+        {
+            super(Opcodes.ASM5, av);
+            this.m = m;
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name)
+        {
+            return new OrderValueReader(m, super.visitArray(name));
+        }
+
+        @Override
+        public void visit(String name, Object value)
+        {
+            m.put(String.valueOf(value), i++);
+            super.visit(name, value);
+        }
+    }
+
     static class AlkemizableField
     {
         private final String name;
@@ -484,21 +553,18 @@ public class Alkemizer extends ClassVisitor
         }
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.PARAMETER })
-    static @interface RefList
-    {
-        String[] value();
-    }
-    
-    
     // Compile check so changing conditions doesn't miss this class.
-    // If changed, change also the instrumentation boundary check. 
+    // If changed, change also the instrumentation boundary check.
     public static class Proxy
     {
         public static void ofSize(Object[] o, int i)
         {
             Assertions.ofSize(o, i);
         }
+    }
+
+    static class Stop extends RuntimeException
+    {
+        private static final long serialVersionUID = 1L;
     }
 }

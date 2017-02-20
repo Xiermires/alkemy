@@ -15,22 +15,27 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import org.alkemy.util.PassThrough.Bar;
+import org.alkemy.annotations.Order;
+import org.alkemy.util.PassThrough.Foo;
 
-public class TestUnordered
+public class TestCreateInstanceParamPreserveOrder
 {
-    @Bar
-    String s1;
+    @Order({ "b", "a" })
+    public static class FollowsOrder
+    {
+        @Foo
+        String a;
+
+        @Foo
+        int b;
+    }
     
-    @Bar
-    int i2;
-    
-    @Bar
-    String s3;
-        
-    @Bar
-    long l4;
-    
-    @Bar
-    Boolean s5;
+    public static class FollowsDeclaration
+    {
+        @Foo
+        String a;
+
+        @Foo
+        int b;
+    }
 }
