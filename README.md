@@ -1,6 +1,8 @@
 # alkemy
 From Al"ch"emy. "Purify, mature and perfect certain objects."
 
+v0.7 (still dev.)
+
 --------
 Overview
 --------
@@ -9,15 +11,63 @@ Overview
 2. Write visitors
 3. Alkemize
 
+
+-----------
+Description
+-----------
+
+This library allows to qualify types through user defined annotations 
+and parse them into a directed rooted tree (this process will be referred as Alkemization).
+
+Once alkemized, any concrete instance of that type can be imbued with different 
+properties / behaviours through visitor classes (visit node / visit element).
+
+A type can define several different qualifiers, which will alkemize into different alkemy elements. 
+Alkemy elements can be supported by one / many visitors. 
+
+
+-------
+Insides 
+-------
+
+This library instruments the classes and wrap the generated code using lambdas. 
+If lambdas are unable to be created, the library fallbacks to reflection (which is considerably slower).
+
+The instrumentation happens transparently to the user through the agent-tools library. 
+It is important to remark though, that due to the instrumentation restrictions,
+this library should start up before any of the alkemized classes are used !! (can't modify the stack of loaded classes).
+
+
+-----------
+Performance 
+-----------
+
+The performance of the lambda operations is around 20 times slower than regular code (reflection is around 200 times slower). 
+This measurements might vary between different machines.
+
+The framework add significant overhead (processing 1 million of simple objects ranges from 200-450 ms).
+
+Performance can be significantly improved in some cases by writing specific visitors.
+
+This is due to three factors:
+
+1. A convenient AlkemyElement#newInstance(Object... args) method is included where each argument represents an alkemy element within the type. 
+2. The args order of the newInstance method preserves the alkemy element declaration order / or the user specified order through the @Order annotation. 
+2. Nodes include a branchDepth() method which indicates how many jumps are required from itself to the furthest children in the branch. 
+
+Combining this three concepts, we can write node visitors that instantiate nodes at almost new() speed. 
+Notice that a node with branch depth of 1 is flat (no grand children), and can handle the tree as a list and call newInstance(...) directly.
+
+
 --------
 Example
 --------
 
 It is probably easier to understand how-to use this library through an example. 
 
-This particular example can be found in : 'org.alkemy.example.RandomGenerator'
+This particular example can be found in : 'org.alkemy.example.RandomGenerator' (other examples can be found in the test classes)
 
-The test class.
+Alkemizing this the test results into : root (TestClass) -> { leaf (TestClass.i), leaf (TestClass.d) } }.
 
 ```java
 public class TestClass
@@ -30,6 +80,8 @@ public class TestClass
 }
 ```
 
+And then we can instantiate an Alkemist and imbue properties to the alkemized tree through a visitor.
+
 The visitor, in this case a very simple RandomGenerator which uses xorshift64.
 
 ```java
@@ -39,11 +91,16 @@ public class RandomGenerator
     @Test
     public void generateRandoms()
     {
+		// Build an Alkemist with a single visitor (XorRandomGenerator)
         final Alkemist alkemist = new AlkemistBuilder().visitor(new XorRandomGenerator()).build();
-        final TestClass tc = new TestClass();
+        
+		// Create a raw class we want to alkemize
+		final TestClass tc = new TestClass();
 
+		// Visit TestClass.class alkemization and imbue XorRandomGenerator properties into tc.
         alkemist.process(tc);
         
+		// No between matcher / gt, lt are left / right open.
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10)))); 
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));
     }
