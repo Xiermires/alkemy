@@ -16,6 +16,7 @@
 package org.alkemy.visitor.impl;
 
 import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
@@ -25,17 +26,21 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
 {
     private AlkemyElementVisitor<?> aev;
     private boolean includeNullNodes;
+    private boolean instantiateNodes;
+    private boolean visitNodes;
 
-    AlkemyPostorderVisitor(AlkemyElementVisitor<?> aev, boolean includeNullNodes)
+    AlkemyPostorderVisitor(AlkemyElementVisitor<?> aev, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
     {
         this.aev = aev;
         this.includeNullNodes = includeNullNodes;
+        this.instantiateNodes = instantiateNodes;
+        this.visitNodes = visitNodes;
     }
 
     public static <E extends AbstractAlkemyElement<E>> AlkemyNodeVisitor create(AlkemyElementVisitor<E> aev,
-            boolean includeNullNodes)
+            boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
     {
-        return new AlkemyPostorderVisitor(aev, includeNullNodes);
+        return new AlkemyPostorderVisitor(aev, includeNullNodes, instantiateNodes, visitNodes);
     }
 
     @Override
@@ -61,22 +66,19 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
     {
         if (e.hasChildren())
         {
-            final Object node = e.data().get(parent);
+            final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes); 
             if (includeNullNodes || node != null)
             {
                 e.children().forEach(c ->
                 {
                     processBranch(c, c.data().get(node));
                 });
-                e.data().accept(aev, e.data().get(parent));
+                if (visitNodes) e.data().accept(aev, e.data().get(parent));
             }
         }
         else
         {
-            if (aev.accepts(e.data().visitorType()))
-            {
-                e.data().accept(aev, parent);
-            }
+            e.data().accept(aev, parent);
         }
     }
 }

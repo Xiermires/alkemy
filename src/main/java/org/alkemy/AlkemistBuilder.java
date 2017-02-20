@@ -24,14 +24,13 @@ import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
-import org.alkemy.visitor.impl.AlkemyElementWriter;
 import org.alkemy.visitor.impl.AlkemyPreorderVisitor;
 
 public class AlkemistBuilder
 {
     public enum Mode
     {
-        PREORDER_EXISTING, PREORDER_ALL, WRITE
+        PREORDER, POSTORDER
     };
 
     private AlkemyLexer<AnnotatedElement> lexer = null;
@@ -57,17 +56,17 @@ public class AlkemistBuilder
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
-        return new Alkemist(cache, AlkemyPreorderVisitor.create(aev, true));
+        return new Alkemist(cache, AlkemyPreorderVisitor.create(aev, true, false, true));
     }
 
-    public Alkemist build(Mode mode)
+    public Alkemist build(Configuration conf)
     {
-        Assertions.exists(mode);
+        Assertions.exists(conf);
         
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
-        return new Alkemist(cache, createAlkemyNodeVisitor(mode, aev));
+        return new Alkemist(cache, createAlkemyNodeVisitor(conf, aev));
     }
 
     public Alkemist build(AlkemyNodeVisitor anv)
@@ -80,17 +79,31 @@ public class AlkemistBuilder
         return new Alkemist(cache, anv);
     }
 
-    private AlkemyNodeVisitor createAlkemyNodeVisitor(Mode mode, AlkemyElementVisitor<?> aev)
+    private AlkemyNodeVisitor createAlkemyNodeVisitor(Configuration conf, AlkemyElementVisitor<?> aev)
     {
-        switch (mode)
+        switch (conf.mode)
         {
-            case PREORDER_EXISTING:
-                return AlkemyPreorderVisitor.create(aev, false);
-            case PREORDER_ALL:
-                return AlkemyPreorderVisitor.create(aev, true);
-            case WRITE:
-                return new AlkemyElementWriter(aev);
+            case PREORDER:
+                return AlkemyPreorderVisitor.create(aev, conf.includeNullNodes, conf.instantiateNodes, conf.visitNodes);
+            case POSTORDER:
+                return AlkemyPreorderVisitor.create(aev, conf.includeNullNodes, conf.instantiateNodes, conf.visitNodes);
         }
-        throw new AlkemyException("Invalid mode '%s'", mode.name()); // should never happen
+        throw new AlkemyException("Invalid mode '%s'", conf.mode.name()); // should never happen
+    }
+    
+    public static class Configuration
+    {
+        Mode mode;
+        boolean includeNullNodes;
+        boolean instantiateNodes;
+        boolean visitNodes;
+        
+        public Configuration(Mode mode, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+        {
+            this.mode = mode;
+            this.includeNullNodes = includeNullNodes;
+            this.instantiateNodes = instantiateNodes;
+            this.visitNodes = visitNodes;
+        }
     }
 }

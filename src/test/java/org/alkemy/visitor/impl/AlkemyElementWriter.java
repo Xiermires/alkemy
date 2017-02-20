@@ -51,7 +51,7 @@ public class AlkemyElementWriter implements AlkemyNodeVisitor
                 e.children().forEach(processNode(childParams));
                 if (!childParams.unsupported)
                 {
-                    params.add(e.data().accept(aev, childParams.get()));
+                    params.add(e.data().newInstance(childParams.get()));
                 }
             }
             else

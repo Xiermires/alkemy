@@ -104,36 +104,75 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
 
     public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v)
     {
-        final T t = map(v);
-        return v.visit(t);
+        if (cacheAcceptedRef())
+        {
+            final T t = map(v);
+            return t != null ? v.visit(t) : null;
+        }
+        else return v.visit(v.map(new AlkemyElement(this)));
     }
-    
+
     public <T extends AbstractAlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent)
     {
-        final T t = map(v);
-        v.visit(t, parent);
+        if (cacheAcceptedRef())
+        {
+            final T t = map(v);
+            if (t != null)
+            {
+                v.visit(t, parent);
+            }
+        }
+        else v.visit(v.map(new AlkemyElement(this)), parent);
     }
 
     public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v, Object... args)
     {
-        final T t = map(v);
-        return v.visit(t, args);
+        if (cacheAcceptedRef())
+        {
+            final T t = map(v);
+            return t != null ? v.visit(t, args) : null;
+        }
+        else return v.visit(v.map(new AlkemyElement(this)), args);
     }
-    
+
     public <T extends AbstractAlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent, Object... args)
     {
-        final T t = map(v);
-        v.visit(t, parent, args);
+        if (cacheAcceptedRef())
+        {
+            final T t = map(v);
+            if (t != null)
+            {
+                v.visit(t, parent, args);
+            }
+        }
+        else v.visit(v.map(new AlkemyElement(this)), parent, args);
     }
-    
-    private Object cachedRef = null;
-    
+
     @SuppressWarnings("unchecked")
-    // safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
-    // extend otherwise.
     protected <T extends AbstractAlkemyElement<T>> T map(AlkemyElementVisitor<T> v)
     {
-        return (T) (cachedRef == null ? (cachedRef = v.map(new AlkemyElement(this))) : cachedRef);
+        if (cacheRef != null)
+        {
+            return (T) cacheRef;
+        }
+        else if (node)
+        {
+            return v.map(new AlkemyElement(this)); // do not cache nodes. Different AEVs might be visiting this node.
+        }
+        else
+        {
+            return (T) (v.accepts(visitorType) ? (cacheRef = v.map(new AlkemyElement(this))) : null);
+        }
+    }
+
+    private Object cacheRef = null;
+
+    // By default, mapped elements are cached.
+    // That is safe so long v#map() maps statically { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
+    // Extend this method to return false otherwise.
+    protected boolean cacheAcceptedRef()
+    {
+        return true;
     }
 
     public boolean isOrdered()
@@ -145,7 +184,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     {
         return node;
     }
-    
+
     @Override
     public String toString()
     {

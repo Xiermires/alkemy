@@ -13,37 +13,20 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.visitor;
+package org.alkemy.util;
 
 import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 
-public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>>
+public class AlkemyUtils
 {
-    default Object visit(E element)
+    public static Object getNodeInstance(Node<? extends AbstractAlkemyElement<?>> e, Object parent, boolean createIfNull)
     {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E element, Object parent)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default Object visit(E node, Object... args)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E node, Object parent, Object... args)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-
-    E map(AlkemyElement e);
-    
-    default boolean accepts(Class<?> type)
-    {
-        return getClass().equals(type);
+        Object node = e.data().get(parent);
+        if (createIfNull && node == null)
+        {
+            node = e.data().newInstance();
+            e.data().set(node, parent);
+        }
+        return node;
     }
 }

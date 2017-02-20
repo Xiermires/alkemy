@@ -29,8 +29,8 @@ import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
-import org.alkemy.AlkemistBuilder.Mode;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.util.AbstractAlkemyValueProvider;
 import org.alkemy.util.Measure;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyValueProvider;
@@ -43,32 +43,16 @@ public class AlkemyVisitorTests
     public void testReadAnObject()
     {
         final ObjectReader or = new ObjectReader(new Stack<Integer>());
-        Alkemist.process(new TestReader(), AlkemyPreorderVisitor.create(or, false));
+        Alkemist.process(new TestReader(), AlkemyPreorderVisitor.create(or, false, false, true));
 
         assertThat(or.stack.size(), is(8));
-    }
-
-    @Test
-    public void testWriteAnObjectUsingCustomWriter()
-    {
-        final TestWriter tc = Alkemist.create(TestWriter.class, new AlkemyElementWriter(new ObjectWriter(
-                new Constant<AlkemyElement>(55))));
-
-        assertThat(tc.a, is(55));
-        assertThat(tc.b, is(55));
-        assertThat(tc.c, is(55));
-        assertThat(tc.d, is(55));
-        assertThat(tc.na.a, is(55));
-        assertThat(tc.na.b, is(55));
-        assertThat(tc.nb.c, is(55));
-        assertThat(tc.nb.d, is(55));
     }
 
     @Test
     public void testWriteAnObjUsingPreorderVisitor()
     {
         final TestWriter tc = Alkemist.create(TestWriter.class, new AlkemyPreorderVisitor(new ObjectWriter(
-                new Constant<AlkemyElement>(55)), true));
+                new Constant<AlkemyElement>(55)), true, true, false));
 
         assertThat(tc.a, is(55));
         assertThat(tc.b, is(55));
@@ -83,8 +67,7 @@ public class AlkemyVisitorTests
     @Test
     public void performanceWriteAnObjectUsingCustomWriter() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new ObjectWriter(new Constant<AlkemyElement>(55))).build(
-                Mode.WRITE);
+        final Alkemist alkemist = new AlkemistBuilder().build(new AlkemyElementWriter(new ObjectWriter(new Constant<AlkemyElement>(55))));
         System.out.println("Create 1e6 objects (custom): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
@@ -98,7 +81,7 @@ public class AlkemyVisitorTests
     public void performanceWriteAnObjUsingPreorderVisitor() throws Throwable
     {
         final Alkemist alkemist = new AlkemistBuilder().build(new AlkemyPreorderVisitor(new ObjectWriter(
-                new Constant<AlkemyElement>(55)), true));
+                new Constant<AlkemyElement>(55)), true, true, false));
         System.out.println("Create 1e6 objects (preorder): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
@@ -116,9 +99,9 @@ public class AlkemyVisitorTests
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
-        
-        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, false));
-        
+
+        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, false, false, true));
+
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
@@ -137,9 +120,9 @@ public class AlkemyVisitorTests
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
-        
-        Alkemist.process(tr, AlkemyPostorderVisitor.create(ns, false));
-        
+
+        Alkemist.process(tr, AlkemyPostorderVisitor.create(ns, false, false, true));
+
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -158,9 +141,9 @@ public class AlkemyVisitorTests
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
-        
-        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, true));
-        
+
+        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, true, false, true));
+
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
@@ -185,9 +168,9 @@ public class AlkemyVisitorTests
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
-        
-        Alkemist.process(new TestReader(), AlkemyPostorderVisitor.create(ns, true));
-        
+
+        Alkemist.process(new TestReader(), AlkemyPostorderVisitor.create(ns, true, false, true));
+
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -258,14 +241,7 @@ public class AlkemyVisitorTests
         @Override
         public void visit(AlkemyElement e, Object parent)
         {
-            if (e.isNode())
-            {
-                e.set(e.newInstance(), parent);
-            }
-            else
-            {
-                e.set(avp.getValue(e), parent);
-            }
+            e.set(avp.getValue(e), parent);
         }
 
         @Override
@@ -326,7 +302,7 @@ public class AlkemyVisitorTests
         {
             return e;
         }
-        
+
         @Override
         public boolean accepts(Class<?> type)
         {

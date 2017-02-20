@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.visitor.impl;
+package org.alkemy.util;
 
 import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.exception.AlkemyException;
