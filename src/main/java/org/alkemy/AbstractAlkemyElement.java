@@ -145,6 +145,12 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     {
         return node;
     }
+    
+    @Override
+    public String toString()
+    {
+        return valueAccessor.targetName();
+    }
 
     public static class AlkemyElement extends AbstractAlkemyElement<AlkemyElement>
     {

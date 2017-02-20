@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.util.Assertions;
 
 class AccessorFactory
 {
@@ -102,7 +103,8 @@ class AccessorFactory
         @Override
         public String targetName()
         {
-            throw new AlkemyException(""); // TODO (??)
+            Assertions.exist(ref);
+            return ref.getClass().getTypeName();
         }
     }
 

@@ -58,7 +58,7 @@ public class MethodHandleFactory
             final Consumer<Object> setter = (Consumer<Object>) ref2StaticSetter(
                     methodHandle(clazz, Alkemizer.getSetterName(f.getName()), f.getType()), clazz, f.getType());
 
-            mha = new StaticFieldLambdaBasedAccessor(f.getName(), f.getType(), getter, setter);
+            mha = new StaticFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(), getter, setter);
         }
         else
         {
@@ -67,7 +67,7 @@ public class MethodHandleFactory
             final BiConsumer<Object, Object> setter = (BiConsumer<Object, Object>) ref2MemberSetter(
                     methodHandle(clazz, Alkemizer.getSetterName(f.getName()), f.getType()), clazz, f.getType());
 
-            mha = new MemberFieldLambdaBasedAccessor(f.getName(), f.getType(), getter, setter);
+            mha = new MemberFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(), getter, setter);
         }
         return mha;
     }

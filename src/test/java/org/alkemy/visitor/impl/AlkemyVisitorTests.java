@@ -119,13 +119,13 @@ public class AlkemyVisitorTests
         
         Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, false));
         
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
-        assertThat(ns.names.pop(), is("na"));
-        assertThat(ns.names.pop(), is("d"));
-        assertThat(ns.names.pop(), is("c"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.d"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
         assertTrue(ns.names.isEmpty());
     }
 
@@ -140,13 +140,13 @@ public class AlkemyVisitorTests
         
         Alkemist.process(tr, AlkemyPostorderVisitor.create(ns, false));
         
-        assertThat(ns.names.pop(), is("na"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
-        assertThat(ns.names.pop(), is("d"));
-        assertThat(ns.names.pop(), is("c"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.d"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
         assertTrue(ns.names.isEmpty());
     }
 
@@ -161,19 +161,19 @@ public class AlkemyVisitorTests
         
         Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, true));
         
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
-        assertThat(ns.names.pop(), is("na2"));
-        assertThat(ns.names.pop(), is("d"));
-        assertThat(ns.names.pop(), is("c"));
-        assertThat(ns.names.pop(), is("nb"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
-        assertThat(ns.names.pop(), is("na"));
-        assertThat(ns.names.pop(), is("d"));
-        assertThat(ns.names.pop(), is("c"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedB.d"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedB.c"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.nb"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.d"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
         assertTrue(ns.names.isEmpty());
     }
 
@@ -188,19 +188,19 @@ public class AlkemyVisitorTests
         
         Alkemist.process(new TestReader(), AlkemyPostorderVisitor.create(ns, true));
         
-        assertThat(ns.names.pop(), is("na2"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
-        assertThat(ns.names.pop(), is("nb"));
-        assertThat(ns.names.pop(), is("d"));
-        assertThat(ns.names.pop(), is("c"));
-        assertThat(ns.names.pop(), is("na"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
-        assertThat(ns.names.pop(), is("d"));
-        assertThat(ns.names.pop(), is("c"));
-        assertThat(ns.names.pop(), is("b"));
-        assertThat(ns.names.pop(), is("a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.nb"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedB.d"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedB.c"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.d"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
         assertTrue(ns.names.isEmpty());
     }
 

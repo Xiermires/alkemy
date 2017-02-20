@@ -32,26 +32,27 @@ public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
         this.includeNullNodes = includeNullNodes;
     }
 
-    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeVisitor create(AlkemyElementVisitor<E> aev, boolean includeNullNodes)
+    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeVisitor create(AlkemyElementVisitor<E> aev,
+            boolean includeNullNodes)
     {
         return new AlkemyPreorderVisitor(aev, includeNullNodes);
     }
-    
+
     @Override
     public Object visit(Node<? extends AbstractAlkemyElement<?>> root)
     {
         Assertions.exists(root);
-        
-        final Object instance = root.data().newInstance();        
+
+        final Object instance = root.data().newInstance();
         root.children().forEach(c -> processBranch(c, instance));
         return instance;
     }
-    
+
     @Override
     public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object raw)
     {
         Assertions.exists(root);
-        
+
         root.children().forEach(c -> processBranch(c, raw));
         return raw;
     }
