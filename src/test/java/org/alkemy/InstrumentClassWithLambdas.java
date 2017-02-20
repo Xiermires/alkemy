@@ -41,9 +41,9 @@ import org.junit.runners.model.RunnerBuilder;
  * <p>
  * By wrapping the offending test classes in a Suite, we can force the instrumentation in the suite before the class is loaded.
  */
-public class InstrumentClassWithLambdasSuite extends Suite
+public class InstrumentClassWithLambdas extends Suite
 {
-    public InstrumentClassWithLambdasSuite(Class<?> klass, RunnerBuilder builder) throws InitializationError
+    public InstrumentClassWithLambdas(Class<?> klass, RunnerBuilder builder) throws InitializationError
     {
         super(builder, klass, instrumentGetClassNames(klass));
     }

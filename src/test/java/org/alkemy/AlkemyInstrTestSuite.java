@@ -15,18 +15,16 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.InstrumentClassWithLambdasSuite.Instr;
-import org.alkemy.InstrumentClassWithLambdasSuite.InstrumentableLambdaClasses;
+import org.alkemy.InstrumentClassWithLambdas.Instr;
+import org.alkemy.InstrumentClassWithLambdas.InstrumentableLambdaClasses;
 import org.alkemy.parse.impl.AlkemizerCTF;
 import org.junit.runner.RunWith;
 
-@RunWith(InstrumentClassWithLambdasSuite.class)
+@RunWith(InstrumentClassWithLambdas.class)
 @InstrumentableLambdaClasses(//
 testClassNames = { "org.alkemy.AlkemistTest", //
         "org.alkemy.parse.impl.AlkemizerTest", //
-        "org.alkemy.parse.impl.TypeFieldParserTest", //
-        "org.alkemy.common.IndexedElementTest", //
-        "org.alkemy.common.LabelledElementTest", //
+        "org.alkemy.parse.impl.TypeFieldParserTest",
         "org.alkemy.visitor.impl.AlkemyVisitorTests", //
         "org.alkemy.example.RandomGenerator" //
 }, //
@@ -36,8 +34,7 @@ instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.parse.impl.TestClass", //
         "org.alkemy.parse.impl.TestNode", //
         "org.alkemy.parse.impl.TestOrdered", //
-        "org.alkemy.parse.impl.TestUnordered", //
-        "org.alkemy.common.TestClass", //
+        "org.alkemy.parse.impl.TestUnordered",
         "org.alkemy.example.TestClass", //
         "org.alkemy.visitor.impl.TestClass", //
         "org.alkemy.visitor.impl.TestWriter", //
@@ -46,6 +43,6 @@ instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.visitor.impl.TestReader$NestedB", //
         "org.alkemy.visitor.impl.TestWriter$NestedA", //
         "org.alkemy.visitor.impl.TestWriter$NestedB" }, ctf = AlkemizerCTF.class))
-public class AlkemizerTestSuite
+public class AlkemyInstrTestSuite
 {
 }
