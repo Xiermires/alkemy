@@ -48,6 +48,7 @@ import org.junit.Test;
 
 public class AlkemizerTest
 {
+    private static final int ITER = 10000000; // 1e7
     static Class<?> clazz;
 
     @BeforeClass
@@ -155,11 +156,12 @@ public class AlkemizerTest
         final MethodHandle handle = methodHandle(clazz, "get$$bar");
         final Function<Object, String> function = LambdaRefHelper.ref2MemberGetter(handle, Object.class, String.class);
         final ValueAccessor accessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("bar"));
-
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
+        
         final TestAlkemizer tc = new TestAlkemizer();
 
         // warm up
-        for (int i = 0; i < 1000000; i++)
+        for (int i = 0; i < ITER; i++)
         {
             @SuppressWarnings("unused")
             String bar = (String) handle.invokeExact(tc);
@@ -171,7 +173,7 @@ public class AlkemizerTest
 
         System.out.println("MethodHandle#invokeExact(): " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
             {
                 @SuppressWarnings("unused")
                 String bar = (String) handle.invokeExact(tc);
@@ -180,7 +182,7 @@ public class AlkemizerTest
 
         System.out.println("MethodHandle#invoke(): " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
             {
                 String.class.cast(handle.invoke(tc));
             }
@@ -188,7 +190,7 @@ public class AlkemizerTest
 
         System.out.println("LambdaMetaFactory (TestClass)String: " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
             {
                 function.apply(tc);
             }
@@ -196,7 +198,7 @@ public class AlkemizerTest
 
         System.out.println("Accessor (TestClass)String: " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
             {
                 accessor.get(tc);
             }
@@ -204,16 +206,32 @@ public class AlkemizerTest
 
         System.out.println("Reflection: " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
             {
                 String.class.cast(method.invoke(tc));
             }
         }) / 1000000 + " ms");
 
-        final TestAlkemizerCompiledVersion tce = new TestAlkemizerCompiledVersion(-1, "baz");
+        System.out.println("create$$instance: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                ctor.newInstance(1, "two");
+            }
+        }) / 1000000 + " ms");
+        
         System.out.println("Direct access: " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
+            {
+                TestAlkemizerCompiledVersion.create$$instance(1, "two");
+            }
+        }) / 1000000 + " ms");
+        
+        final TestAlkemizerCompiledVersion tce = new TestAlkemizerCompiledVersion(-1, "baz");
+        System.out.println("Direct access (getter): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
             {
                 tce.get$$bar();
             }
@@ -230,7 +248,7 @@ public class AlkemizerTest
         final TestAlkemizer tc = new TestAlkemizer();
 
         // warm up
-        for (int i = 0; i < 1000000; i++)
+        for (int i = 0; i < ITER; i++)
         {
             @SuppressWarnings("unused")
             int foo = f1.apply(tc);
@@ -239,7 +257,7 @@ public class AlkemizerTest
 
         System.out.println("LambdaMetaFactory (TestClass)Integer: " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
             {
                 f1.apply(tc).intValue();
             }
@@ -247,7 +265,7 @@ public class AlkemizerTest
 
         System.out.println("LambdaMetaFactory (TestClass)int: " + Measure.measure(() ->
         {
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < ITER; i++)
             {
                 f2.apply(tc);
             }

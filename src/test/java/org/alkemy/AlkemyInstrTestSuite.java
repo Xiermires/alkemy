@@ -29,6 +29,7 @@ testClassNames = { "org.alkemy.AlkemistTest", //
         "org.alkemy.example.RandomGenerator" //
 }, //
 instrs = @Instr(classNames = { "org.alkemy.TestClass", //
+        "org.alkemy.TestFastVisitor", //
         "org.alkemy.TestDeepCopy", //
         "org.alkemy.parse.impl.TestAlkemizer", //
         "org.alkemy.parse.impl.TestClass", //

@@ -106,6 +106,7 @@ public class Alkemizer extends ClassVisitor
             }
             catch (Exception e) // error while alkemizing. Return the original class.
             {
+                log.trace("Error while alkemizing. Keep non modified version.", e);
             }
         }
         return classBytes;

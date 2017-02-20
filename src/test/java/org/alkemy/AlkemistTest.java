@@ -21,6 +21,10 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,9 +32,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Measure;
+import org.alkemy.util.Node;
 import org.alkemy.util.PassThrough;
+import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.AlkemyNodeVisitor;
 import org.junit.Test;
 
 // Alkemist usage examples.
@@ -180,5 +190,130 @@ public class AlkemistTest
                 alkemist.process(tc);
             }
         }) / 1000000 + " ms");
+    }
+    
+    @Test
+    public void peformanceFastVisitorAssign() throws Throwable
+    {
+        final Alkemist alkemist = new AlkemistBuilder().build(new FastVisitorConcept());
+        final TestFastVisitor fvc = new TestFastVisitor();
+
+        System.out.println("Fast visitor 1e7 assign: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                alkemist.process(fvc);
+            }
+        }) / 1000000 + " ms");
+    }
+    
+    @Test
+    public void peformanceFastVisitorCreate() throws Throwable
+    {
+        final Alkemist alkemist = new AlkemistBuilder().build(new FastVisitorConcept());
+
+        System.out.println("Fast visitor 1e6 create (10 fields): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                alkemist.create(TestFastVisitor.class);
+            }
+        }) / 1000000 + " ms");
+    }
+    
+    // Clumsy impl. of a fast set / get visitor.
+    // Takes advantage of static alkemization.
+    static class FastVisitorConcept implements AlkemyNodeVisitor, AlkemyElementVisitor<IdxElement>
+    {
+        final String[] source = new String[] { "two", "one", "zero", "five", "four", "three", "six", "seven", "nine", "eight" };
+        
+        int map = 0;
+        int arg = 0;
+        IdxElement[] mapped = null;
+        Object[] args;
+        
+        // create
+        @Override
+        public Object visit(Node<? extends AbstractAlkemyElement<?>> node)
+        {
+            args = args != null ? args : new Object[node.children().size()];
+            
+            if (mapped == null) // this happens once
+            {
+                mapped = new IdxElement[node.children().size()];
+                node.children().forEach(c -> {
+                    args[arg++] = c.data().accept(this);
+                });
+            }
+            else // fast assign
+            {
+                for (int i=0; i<mapped.length; i++)
+                {
+                    args[i] = visit(mapped[i]);
+                }
+            }
+            return node.data().newInstance(args);
+        }
+        
+        // create
+        @Override
+        public Object visit(IdxElement element)
+        {
+            return source[element.idx];
+        }
+        
+        // assign
+        @Override
+        public Object visit(Node<? extends AbstractAlkemyElement<?>> node, Object raw)
+        {
+            if (mapped == null)
+            {
+                mapped = new IdxElement[node.children().size()];
+                node.children().forEach(c -> {
+                    c.data().accept(this, raw);
+                });
+            }
+            else
+            {
+                for (int i=0; i<mapped.length; i++)
+                {
+                    visit(mapped[i], raw);
+                }
+            }
+            return raw;
+        }
+
+        // assign
+        @Override
+        public void visit(IdxElement element, Object parent)
+        {
+            element.set(source[element.idx], parent);
+        }
+        
+        @Override
+        public IdxElement map(AlkemyElement e)
+        {
+            return (mapped[map++] = new IdxElement(e));
+        }
+    }
+    
+    static class IdxElement extends AbstractAlkemyElement<IdxElement>
+    {
+        int idx;
+        
+        protected IdxElement(AbstractAlkemyElement<?> other)
+        {
+            super(other);
+            idx = other.desc().getAnnotation(Idx.class).value();
+        }
+        
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD })
+    @AlkemyLeaf(FastVisitorConcept.class)
+    static @interface Idx
+    {
+        int value();
     }
 }

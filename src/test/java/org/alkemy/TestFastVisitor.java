@@ -13,58 +13,39 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy;
 
-import org.alkemy.util.PassThrough.Foo;
+import org.alkemy.AlkemistTest.Idx;
 
-public class TestAlkemizerCompiledVersion
+public class TestFastVisitor
 {
-    TestAlkemizerCompiledVersion()
-    {   
-    }
+    @Idx(2)
+    String a;
+
+    @Idx(1)
+    String b;
+
+    @Idx(0)
+    String c;
+
+    @Idx(5)
+    String d;
+   
+    @Idx(4)
+    String e;
     
-    public TestAlkemizerCompiledVersion(int foo, String bar)
-    {
-        this.foo = foo;
-        this.bar = bar;
-    }
+    @Idx(3)
+    String f;
     
-    @Foo
-    private int foo = -1;
+    @Idx(6)
+    String g;
     
-    @Foo
-    private String bar;
+    @Idx(7)
+    String h;
     
-    public static TestAlkemizerCompiledVersion create$$instance(int foo, String bar)
-    {
-        final TestAlkemizerCompiledVersion tacv = new TestAlkemizerCompiledVersion();
-        tacv.foo = foo;
-        tacv.bar = bar;
-        return tacv;
-    }
+    @Idx(9)
+    String i;
     
-    public static boolean is$$instrumented()
-    {
-        return true;
-    }
-    
-    public int get$$foo()
-    {
-        return foo;
-    }
-    
-    public void set$$foo(final int foo)
-    {
-        this.foo = foo;
-    }
-    
-    public String get$$bar()
-    {
-        return bar;
-    }
-    
-    public void set$$bar(final String bar)
-    {
-        this.bar = bar;
-    }
+    @Idx(8)
+    String j;    
 }
