@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import org.agenttools.AgentTools;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyParser;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 
 import com.google.common.cache.CacheBuilder;

@@ -25,11 +25,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Stack;
 
-import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AlkemyParsers;
+import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.util.AbstractAlkemyValueProvider;
 import org.alkemy.util.Measure;
 import org.alkemy.visitor.AlkemyElementVisitor;
@@ -43,7 +44,7 @@ public class AlkemyVisitorTests
     public void testReadAnObject()
     {
         final ObjectReader or = new ObjectReader(new Stack<Integer>());
-        Alkemist.process(new TestReader(), AlkemyPreorderVisitor.create(or, false, false, true));
+        Alkemist.process(new TestReader(), AlkemyPreorderVisitor.create(or, false, false, true), AlkemyParsers.fieldParser());
 
         assertThat(or.stack.size(), is(8));
     }
@@ -52,7 +53,7 @@ public class AlkemyVisitorTests
     public void testWriteAnObjUsingPreorderVisitor()
     {
         final TestWriter tc = Alkemist.create(TestWriter.class, new AlkemyPreorderVisitor(new ObjectWriter(
-                new Constant<AlkemyElement>(55)), true, true, false));
+                new Constant<AlkemyElement>(55)), true, true, false), AlkemyParsers.fieldParser());
 
         assertThat(tc.a, is(55));
         assertThat(tc.b, is(55));
@@ -100,7 +101,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, false, false, true));
+        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, false, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -121,7 +122,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(tr, AlkemyPostorderVisitor.create(ns, false, false, true));
+        Alkemist.process(tr, AlkemyPostorderVisitor.create(ns, false, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -142,7 +143,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, true, false, true));
+        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, true, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -169,7 +170,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(new TestReader(), AlkemyPostorderVisitor.create(ns, true, false, true));
+        Alkemist.process(new TestReader(), AlkemyPostorderVisitor.create(ns, true, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));

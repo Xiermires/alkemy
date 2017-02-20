@@ -16,8 +16,8 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.Map;
 
-import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AlkemyElementFactory;
 import org.alkemy.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
@@ -25,23 +25,26 @@ import org.alkemy.util.AnnotationUtils;
 public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AnnotatedElement>
 {
     private TypeFieldAlkemyElementFactory()
-    {   
+    {
     }
-    
+
     public static AlkemyElementFactory<AnnotatedElement> create()
     {
         return new TypeFieldAlkemyElementFactory();
     }
-    
+
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, Map<String, Object> context)
     {
-        return AbstractAlkemyElement.create(desc, AccessorFactory.notSupported(), valueAccessor, AnnotationUtils.findVisitorType(desc), false, false);
+        return AbstractAlkemyElement.create(desc, AccessorFactory.notSupported(), valueAccessor,
+                AnnotationUtils.findVisitorType(desc), false, context);
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, boolean ordered)
+    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
+            ValueAccessor valueAccessor, Class<?> nodeType, Map<String, Object> context)
     {
-        return AbstractAlkemyElement.create(desc, valueConstructor, valueAccessor, AnnotationUtils.findVisitorType(desc), true, ordered);
+        return AbstractAlkemyElement.create(desc, valueConstructor, valueAccessor, AnnotationUtils.findVisitorType(desc), true,
+                context);
     }
 }

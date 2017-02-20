@@ -20,8 +20,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>

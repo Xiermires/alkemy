@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.alkemy.util;
 
-import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.visitor.AlkemyValueProvider;
 
 import com.google.common.collect.ImmutableMap;

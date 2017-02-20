@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.InvalidOrder;
 import org.alkemy.parse.AlkemyLexer;
@@ -47,13 +46,16 @@ class TypeFieldParser implements AlkemyParser
     @Override
     public Node<AbstractAlkemyElement<?>> parse(Class<?> type)
     {
+        final HashMap<String, Object> context = new HashMap<>();
         return _parse(
                 type,
                 Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]),
-                        AccessorFactory.createConstructor(type), AccessorFactory.createSelfAccessor(), type, type.isAnnotationPresent(Order.class)))).build();
+                        AccessorFactory.createConstructor(type), AccessorFactory.createSelfAccessor(), type, context)), context)
+                .build();
     }
 
-    private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent)
+    private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent,
+            Map<String, Object> context)
     {
         if (Object.class.equals(type))
         {
@@ -61,20 +63,20 @@ class TypeFieldParser implements AlkemyParser
         }
         else
         {
-            _parse(type.getSuperclass(), parent);
+            _parse(type.getSuperclass(), parent, context);
         }
 
         for (final Field f : sortIfRequired(type.getDeclaredFields(), type.getAnnotation(Order.class), type))
         {
             if (lexer.isLeaf(f))
             {
-                parent.addChild(lexer.createLeaf(f, AccessorFactory.createAccessor(f)));
+                parent.addChild(lexer.createLeaf(f, AccessorFactory.createAccessor(f), context));
             }
             else if (lexer.isNode(f))
             {
                 _parse(f.getType(),
                         parent.addChild(lexer.createNode(f, AccessorFactory.createConstructor(f.getType()),
-                                AccessorFactory.createAccessor(f), f.getType(), type.isAnnotationPresent(Order.class))));
+                                AccessorFactory.createAccessor(f), f.getType(), context)), context);
             }
         }
         return parent;

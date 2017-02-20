@@ -26,6 +26,16 @@ import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 import org.alkemy.visitor.impl.AlkemyPreorderVisitor;
 
+/**
+ * The {@link Alkemist} class builder.
+ * <p>
+ * This class allows to configure an {@link Alkemist} before it can start processing elements.
+ * <p>
+ * Each generated alkemist includes its own cache. Each tree has a context, therefore the need of cache isolation between
+ * alkemists.
+ * <p>
+ * TODO enable multiple visitors. 
+ */
 public class AlkemistBuilder
 {
     public enum Mode
@@ -42,17 +52,16 @@ public class AlkemistBuilder
     {
     }
 
-    // TODO: addVisitor(...)
     public AlkemistBuilder visitor(AlkemyElementVisitor<?> aev)
     {
         this.aev = aev;
         return this;
     }
-    
+
     public Alkemist build()
     {
         Assertions.exists(aev);
-        
+
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
@@ -62,7 +71,7 @@ public class AlkemistBuilder
     public Alkemist build(Configuration conf)
     {
         Assertions.exists(conf);
-        
+
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
@@ -72,7 +81,7 @@ public class AlkemistBuilder
     public Alkemist build(AlkemyNodeVisitor anv)
     {
         Assertions.exists(anv);
-        
+
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
@@ -90,14 +99,26 @@ public class AlkemistBuilder
         }
         throw new AlkemyException("Invalid mode '%s'", conf.mode.name()); // should never happen
     }
-    
+
     public static class Configuration
     {
         Mode mode;
         boolean includeNullNodes;
         boolean instantiateNodes;
         boolean visitNodes;
-        
+
+        /**
+         * Creates a traversing configuration.
+         * 
+         * @param mode
+         *            the traverse order
+         * @param includeNullNodes
+         *            include children of null nodes
+         * @param instantiateNodes
+         *            instantiate null nodes before processing them
+         * @param visitNodes
+         *            handle nodes to the AlkemyElementVisitor
+         */
         public Configuration(Mode mode, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
         {
             this.mode = mode;

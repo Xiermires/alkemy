@@ -13,13 +13,14 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.Map;
 
+import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.parse.impl.NodeConstructor;
 import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
@@ -30,17 +31,17 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     private final NodeConstructor nodeConstructor;
     private final Class<? extends AlkemyElementVisitor<?>> visitorType;
     private final boolean node;
-    private final boolean ordered;
+    private final Map<String, Object> context;
 
     AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, boolean ordered)
+            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, Map<String, Object> context)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
         this.nodeConstructor = nodeConstructor;
         this.visitorType = visitorType;
         this.node = node;
-        this.ordered = ordered;
+        this.context = context;
     }
 
     protected AbstractAlkemyElement(AbstractAlkemyElement<?> other)
@@ -52,13 +53,13 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         this.nodeConstructor = other.nodeConstructor;
         this.visitorType = other.visitorType;
         this.node = other.node;
-        this.ordered = other.ordered;
+        this.context = other.context;
     }
 
-    public static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, boolean ordered)
+    static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, Map<String, Object> context)
     {
-        return new AlkemyElement(desc, nodeConstructor, valueAccessor, visitorType, node, ordered);
+        return new AlkemyElement(desc, nodeConstructor, valueAccessor, visitorType, node, context);
     }
 
     public AnnotatedElement desc()
@@ -175,14 +176,17 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return true;
     }
 
-    public boolean isOrdered()
-    {
-        return ordered;
-    }
-
     public boolean isNode()
     {
         return node;
+    }
+
+    /**
+     * A shared context between all nodes in a tree.
+     */
+    public Map<String, Object> getContext()
+    {
+        return context;
     }
 
     @Override
@@ -201,9 +205,9 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
 
         AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-                Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, boolean ordered)
+                Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, Map<String, Object> context)
         {
-            super(desc, nodeConstructor, valueAccessor, visitorType, node, ordered);
+            super(desc, nodeConstructor, valueAccessor, visitorType, node, context);
         }
     }
 }

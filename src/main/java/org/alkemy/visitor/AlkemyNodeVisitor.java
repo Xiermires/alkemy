@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.visitor;
 
-import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 
 public interface AlkemyNodeVisitor

@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy;
 
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 import org.objenesis.Objenesis;

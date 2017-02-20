@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.visitor;
 
-import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 
 public interface AlkemyValueProvider<E extends AbstractAlkemyElement<E>>
 {

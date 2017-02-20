@@ -22,11 +22,35 @@ import java.lang.annotation.Target;
 
 import org.alkemy.visitor.AlkemyElementVisitor;
 
+/**
+ * A marker which indicates the annotated annotation annotates itself an alkemy element.
+ * 
+ * <code> 
+ * 
+    <br>@Retention(RetentionPolicy.RUNTIME)
+    <br>@Target(ElementType.ANNOTATION_TYPE)
+    <br>@AlkemyLeaf(...)
+    <br>@interface Marker
+    {...}
+    <br>
+    <br>public class Foo
+    <br>{
+    <br>    @Marker
+    <br>    int foo;
+        
+    <br>    @Marker
+    <br>    int bar;
+    <br>}
+    <br><br>// creates a directed rooted tree as follows : root (Foo.class) -> { Foo.foo, Foo.bar }
+    <br>AlkemyParsers.fieldParser().parse(Foo.class); 
+  
+ * </code>
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface AlkemyLeaf
 {
-    /*
+    /**
      * Why using a rawtype instead of using something like {@code Class<? extends AlkemyElementVisitor<?>>} ?
      * <p>
      * Using a rawtype allows defining generic parameters in implementations of the AlkemyElementVisitor.
@@ -83,8 +107,9 @@ public @interface AlkemyLeaf
      * As safe as defining {@code Class<? extends AlkemyElementVisitor<?>>}. The {@link AlkemyElementVisitor} interface <br>
      * defines the typing restrictions, which we will inherit here as well.
      * <p>
-     * Using a rawtype here, leads to an unchecked cast when retrieving the value of the class, see {@link AnnotationUtils#findVisitorType}.
+     * Using a rawtype here, leads to an unchecked cast when retrieving the value of the class, see
+     * {@link AnnotationUtils#findVisitorType}.
      */
     @SuppressWarnings("rawtypes")
-    Class<? extends AlkemyElementVisitor> value();
+    Class<? extends AlkemyElementVisitor> value(); // TODO remove(??): This is just syntax sugar. Shall it go away (??).
 }

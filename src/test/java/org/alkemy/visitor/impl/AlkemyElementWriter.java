@@ -18,7 +18,7 @@ package org.alkemy.visitor.impl;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;

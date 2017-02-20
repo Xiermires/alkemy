@@ -16,8 +16,8 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.Map;
 
-import org.alkemy.AbstractAlkemyElement;
 import org.alkemy.AlkemyElementFactory;
 import org.alkemy.ValueAccessor;
 import org.alkemy.annotations.AlkemyNode;
@@ -32,12 +32,12 @@ class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
     {
         this.factory = factory;
     }
-    
+
     static AlkemyLexer<AnnotatedElement> create(AlkemyElementFactory<AnnotatedElement> factory)
     {
         return new TypeFieldLexer(factory);
     }
-    
+
     @Override
     public boolean isNode(AnnotatedElement desc)
     {
@@ -52,14 +52,15 @@ class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
     }
 
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, Map<String, Object> context)
     {
-        return factory.createLeaf(desc, valueAccessor);
+        return factory.createLeaf(desc, valueAccessor, context);
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, boolean ordered)
+    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
+            ValueAccessor valueAccessor, Class<?> nodeType, Map<String, Object> context)
     {
-        return factory.createNode(desc, valueConstructor, valueAccessor, nodeType, ordered);
+        return factory.createNode(desc, valueConstructor, valueAccessor, nodeType, context);
     }
 }

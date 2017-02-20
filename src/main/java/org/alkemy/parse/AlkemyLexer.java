@@ -15,8 +15,10 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
-import org.alkemy.AbstractAlkemyElement;
+import java.util.Map;
+
 import org.alkemy.ValueAccessor;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.NodeConstructor;
 
 public interface AlkemyLexer<T>
@@ -34,10 +36,10 @@ public interface AlkemyLexer<T>
     /**
      * Creates an unbound {@link AbstractAlkemyElement} for this leaf.
      */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor);
+    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, Map<String, Object> context);
 
     /**
      * Creates an unbound {@link AbstractAlkemyElement} for this node.
      */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, boolean ordered);
+    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, Map<String, Object> context);
 }

@@ -15,13 +15,16 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
-import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 
+/**
+ * Traverses the directed rooted tree in post-order, branch children first, branch node later.
+ */
 public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
 {
     private AlkemyElementVisitor<?> aev;
@@ -66,7 +69,7 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
     {
         if (e.hasChildren())
         {
-            final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes); 
+            final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes);
             if (includeNullNodes || node != null)
             {
                 e.children().forEach(c ->

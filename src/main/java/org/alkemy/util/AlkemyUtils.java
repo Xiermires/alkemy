@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.util;
 
-import org.alkemy.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 
 public class AlkemyUtils
 {

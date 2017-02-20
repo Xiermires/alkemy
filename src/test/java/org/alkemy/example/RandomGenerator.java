@@ -27,11 +27,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.alkemy.AbstractAlkemyElement;
-import org.alkemy.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
 import org.alkemy.annotations.AlkemyLeaf;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.junit.Test;

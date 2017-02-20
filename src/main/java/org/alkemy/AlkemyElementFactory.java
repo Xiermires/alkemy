@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.alkemy;
 
+import java.util.Map;
+
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.NodeConstructor;
 
 public interface AlkemyElementFactory<T>
@@ -22,10 +25,10 @@ public interface AlkemyElementFactory<T>
     /**
      * Creates an alkemy element for this target.
      */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor);
+    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, Map<String, Object> context);
 
     /**
      * Creates an alkemy element node for this target.
      */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, boolean ordered);
+    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, Map<String, Object> context);
 }
