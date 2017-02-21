@@ -46,12 +46,12 @@ public class RandomGenerator
         final TestClass tc = new TestClass();
 
         alkemist.process(tc);
-        
-        assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10)))); 
+
+        assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));
     }
-    
-    // The visitor that works on the AlkemyElements. 
+
+    // The visitor that works on the AlkemyElements.
     static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement>
     {
         @Override
@@ -65,14 +65,20 @@ public class RandomGenerator
         {
             return new RandomElement(e);
         }
-        
+
+        @Override
+        public boolean accepts(Class<?> type)
+        {
+            return Random.class == type;
+        }
+
         protected double nextDouble(double min, double max)
         {
             return min + (nextDouble() * ((max - min)));
         }
-        
+
         private long seed = System.nanoTime();
-        
+
         /**
          * Return an uniformly distributed double number between (0-1).
          * <p>
@@ -112,7 +118,7 @@ public class RandomGenerator
             super(other);
 
             final Random a = other.desc().getAnnotation(Random.class);
-            Assertions.exists(a); 
+            Assertions.exists(a);
 
             min = a.min();
             max = a.max();
@@ -122,7 +128,7 @@ public class RandomGenerator
     // The visitor marker
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
-    @AlkemyLeaf(XorRandomGenerator.class)
+    @AlkemyLeaf(Random.class)
     @interface Random
     {
         double min();

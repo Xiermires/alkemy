@@ -50,12 +50,12 @@ public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement
     @Override
     public boolean accepts(Class<?> type)
     {
-        return PropertyConcatenation.class.equals(type);
+        return Foo.class == type;
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
-    @AlkemyLeaf(PropertyConcatenation.class)
+    @AlkemyLeaf(Foo.class)
     public @interface Foo
     {
     }

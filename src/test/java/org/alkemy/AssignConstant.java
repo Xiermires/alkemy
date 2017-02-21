@@ -48,12 +48,12 @@ public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
     @Override
     public boolean accepts(Class<?> type)
     {
-        return AssignConstant.class.equals(type);
+        return Bar.class.equals(type);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
-    @AlkemyLeaf(AssignConstant.class)
+    @AlkemyLeaf(Bar.class)
     public @interface Bar
     {
     }

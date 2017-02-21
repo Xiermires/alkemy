@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 
@@ -23,23 +24,27 @@ import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.impl.AlkemyControllerVisitor;
+import org.alkemy.visitor.impl.AlkemyPostorderVisitor;
+import org.alkemy.visitor.impl.AlkemyPreorderVisitor;
 
 public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
 {
     private final AnnotatedElement desc;
     private final ValueAccessor valueAccessor;
     private final NodeConstructor nodeConstructor;
-    private final Class<? extends AlkemyElementVisitor<?>> visitorType;
+    private final Class<? extends Annotation> alkemyType;
     private final boolean node;
     private final Map<String, Object> context;
 
     AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, Map<String, Object> context)
+            Class<? extends Annotation> alkemyType, boolean node, Map<String, Object> context)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
         this.nodeConstructor = nodeConstructor;
-        this.visitorType = visitorType;
+        this.alkemyType = alkemyType;
         this.node = node;
         this.context = context;
     }
@@ -51,15 +56,15 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
         this.nodeConstructor = other.nodeConstructor;
-        this.visitorType = other.visitorType;
+        this.alkemyType = other.alkemyType;
         this.node = other.node;
         this.context = other.context;
     }
 
     static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, Map<String, Object> context)
+            Class<? extends Annotation> alkemyType, boolean node, Map<String, Object> context)
     {
-        return new AlkemyElement(desc, nodeConstructor, valueAccessor, visitorType, node, context);
+        return new AlkemyElement(desc, nodeConstructor, valueAccessor, alkemyType, node, context);
     }
 
     public AnnotatedElement desc()
@@ -67,9 +72,9 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return desc;
     }
 
-    public Class<? extends AlkemyElementVisitor<?>> visitorType()
+    public Class<? extends Annotation> alkemyType()
     {
-        return visitorType;
+        return alkemyType;
     }
 
     @Override
@@ -81,7 +86,10 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     @Override
     public <T> T newInstance(Object... args) throws AlkemyException
     {
-        if (node) { return nodeConstructor.newInstance(args); }
+        if (node)
+        {
+            return nodeConstructor.newInstance(args);
+        }
         throw new AlkemyException("Alkemy elements w/o children cannot be instantiated");
     }
 
@@ -103,6 +111,29 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return valueAccessor.targetName();
     }
 
+    // Maintain a view of the element for disable cacheAcceptedRef() scenarios.
+    private AlkemyElement view;
+
+    private AlkemyElement view()
+    {
+        return view != null ? view : new AlkemyElement(this);
+    }
+
+    /**
+     * Use this accept method to work on an element which is not linked to any concrete instance of a class.
+     * <p>
+     * If the visitor doesn't {@link AlkemyElementVisitor#accepts(Class)} this element, element is not processed and returns null.
+     * <p>
+     * The accept methods are used to bridge between {@link AlkemyNodeVisitor}, which traverses a tree of unknown
+     * {@link AbstractAlkemyElement} implementations, and an {@link AlkemyElementVisitor} which requires an explicit
+     * {@link AbstractAlkemyElement} type. Multi-purpose node visitors, such as the {@link AlkemyPreorderVisitor}, the
+     * {@link AlkemyPostorderVisitor} and the {@link AlkemyControllerVisitor}, use this method to avoid any casting between
+     * {@link AbstractAlkemyElement} types.
+     * <p>
+     * Whenever a {@link AlkemyNodeVisitor} handles known {@link AbstractAlkemyElement} implementations, these methods are not
+     * required and the node visitor can directly
+     * <code>alkemyElementVisitor.visit(new ConcreteAlkemyElement(node<impl>.data())</code>.
+     */
     public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v)
     {
         if (cacheAcceptedRef())
@@ -110,10 +141,15 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
             final T t = map(v);
             return t != null ? v.visit(t) : null;
         }
-        else return v.visit(v.map(new AlkemyElement(this)));
+        else return v.visit(v.map(view()));
     }
 
-    public <T extends AbstractAlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent)
+    /**
+     * As {@link #accept(AlkemyElementVisitor)} but working on an element bound to a parent object.
+     * <p>
+     * Returns true if the visitor could accept this element.
+     */
+    public <T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<T> v, Object parent)
     {
         if (cacheAcceptedRef())
         {
@@ -123,9 +159,14 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
                 v.visit(t, parent);
             }
         }
-        else v.visit(v.map(new AlkemyElement(this)), parent);
+        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent);
+        else return false;
+        return true;
     }
 
+    /**
+     * As {@link #accept(AlkemyElementVisitor)} but accepting extra parameters.
+     */
     public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v, Object... args)
     {
         if (cacheAcceptedRef())
@@ -133,10 +174,15 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
             final T t = map(v);
             return t != null ? v.visit(t, args) : null;
         }
-        else return v.visit(v.map(new AlkemyElement(this)), args);
+        else return v.visit(v.map(view()), args);
     }
 
-    public <T extends AbstractAlkemyElement<T>> void accept(AlkemyElementVisitor<T> v, Object parent, Object... args)
+    /**
+     * As {@link #accept(AlkemyElementVisitor, Object)} but accepting extra parameters.
+     * <p>
+     * Returns true if the visitor could accept this element.
+     */
+    public <T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<T> v, Object parent, Object... args)
     {
         if (cacheAcceptedRef())
         {
@@ -146,7 +192,9 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
                 v.visit(t, parent, args);
             }
         }
-        else v.visit(v.map(new AlkemyElement(this)), parent, args);
+        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent, args);
+        else return false;
+        return true;
     }
 
     @SuppressWarnings("unchecked")
@@ -162,7 +210,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
         else
         {
-            return (T) (v.accepts(visitorType) ? (cacheRef = v.map(new AlkemyElement(this))) : null);
+            return (T) (v.accepts(alkemyType) ? (cacheRef = v.map(view())) : null);
         }
     }
 
@@ -205,9 +253,9 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
 
         AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-                Class<? extends AlkemyElementVisitor<?>> visitorType, boolean node, Map<String, Object> context)
+                Class<? extends Annotation> alkemyType, boolean node, Map<String, Object> context)
         {
-            super(desc, nodeConstructor, valueAccessor, visitorType, node, context);
+            super(desc, nodeConstructor, valueAccessor, alkemyType, node, context);
         }
     }
 }

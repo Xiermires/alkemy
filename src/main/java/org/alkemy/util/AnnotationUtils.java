@@ -22,28 +22,29 @@ import java.util.List;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.visitor.AlkemyElementVisitor;
 
 public class AnnotationUtils
 {
-    @SuppressWarnings("unchecked") // safe, see AlkemyLeaf#value().
-    public static Class<? extends AlkemyElementVisitor<?>> findVisitorType(AnnotatedElement ae)
+    public static Class<? extends Annotation> findVisitorType(AnnotatedElement ae)
     {
         final List<Pair<Annotation, AlkemyLeaf>> visitors = AnnotationUtils.getAnnotationsQualifiedAs(ae, AlkemyLeaf.class);
-        
-        if (visitors.size() > 1) // TODO: temporary restriction. Allow one visitor type per AlkemyElement only.
+
+        // TODO: temporary restriction. Allow one visitor type per AlkemyElement only.
+        if (visitors.size() > 1)
         {
             throw new AlkemyException("Invalid configuration. Multiple alkemy visitors defined for a single element.");
         }
-        return visitors.isEmpty() ? null : (Class<? extends AlkemyElementVisitor<?>>) visitors.get(0).second.value(); 
+        return visitors.isEmpty() ? null : visitors.get(0).second.value();
     }
-    
-    private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(AnnotatedElement target, Class<QualifyingType> type)
+
+    private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(
+            AnnotatedElement target, Class<QualifyingType> type)
     {
         return getAnnotationsQualifiedAs(target.getAnnotations(), type);
     }
 
-    private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(Annotation[] as, Class<QualifyingType> type)
+    private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(
+            Annotation[] as, Class<QualifyingType> type)
     {
         final List<Pair<Annotation, QualifyingType>> pairs = new ArrayList<Pair<Annotation, QualifyingType>>();
         for (final Annotation a : as)

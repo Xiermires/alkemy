@@ -291,6 +291,12 @@ public class AlkemistTest
         }
         
         @Override
+        public boolean accepts(Class<?> type)
+        {
+            return Idx.class == type;
+        }
+        
+        @Override
         public IdxElement map(AlkemyElement e)
         {
             return (mapped[map++] = new IdxElement(e));
@@ -311,7 +317,7 @@ public class AlkemistTest
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
-    @AlkemyLeaf(FastVisitorConcept.class)
+    @AlkemyLeaf(Idx.class)
     static @interface Idx
     {
         int value();

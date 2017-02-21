@@ -80,7 +80,7 @@ public class AlkemyElementWriter implements AlkemyNodeVisitor
 
         void tryAdd(Node<? extends AbstractAlkemyElement<?>> e)
         {
-            if (aev.accepts(e.data().visitorType()))
+            if (aev.accepts(e.data().alkemyType()))
             {
                 params[c++] = e.data().accept(aev);
             }

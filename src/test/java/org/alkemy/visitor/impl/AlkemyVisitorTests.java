@@ -29,12 +29,13 @@ import org.alkemy.Alkemist;
 import org.alkemy.AlkemistBuilder;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.AbstractAlkemyValueProvider;
 import org.alkemy.util.Measure;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyValueProvider;
+import org.alkemy.visitor.impl.AlkemyVisitorTests.ObjectReader.Bar;
 import org.alkemy.visitor.impl.TestReader.NestedA;
 import org.junit.Test;
 
@@ -213,12 +214,12 @@ public class AlkemyVisitorTests
         @Override
         public boolean accepts(Class<?> type)
         {
-            return ObjectReader.class.equals(type);
+            return Bar.class == type;
         }
 
         @Retention(RetentionPolicy.RUNTIME)
         @Target({ ElementType.FIELD })
-        @AlkemyLeaf(ObjectReader.class)
+        @AlkemyLeaf(Bar.class)
         public @interface Bar
         {
         }
@@ -260,12 +261,12 @@ public class AlkemyVisitorTests
         @Override
         public boolean accepts(Class<?> type)
         {
-            return ObjectWriter.class.equals(type);
+            return Foo.class.equals(type);
         }
 
         @Retention(RetentionPolicy.RUNTIME)
         @Target({ ElementType.FIELD })
-        @AlkemyLeaf(ObjectWriter.class)
+        @AlkemyLeaf(Foo.class)
         public @interface Foo
         {
         }
@@ -307,7 +308,7 @@ public class AlkemyVisitorTests
         @Override
         public boolean accepts(Class<?> type)
         {
-            return ObjectReader.class.equals(type);
+            return Bar.class == type;
         }
     }
 }

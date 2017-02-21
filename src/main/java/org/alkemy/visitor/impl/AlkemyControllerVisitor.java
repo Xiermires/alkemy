@@ -13,37 +13,11 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.visitor;
+package org.alkemy.visitor.impl;
 
-import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.visitor.AlkemyNodeVisitor;
 
-public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>>
+public class AlkemyControllerVisitor implements AlkemyNodeVisitor
 {
-    default Object visit(E element)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E element, Object parent)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default Object visit(E node, Object... args)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E node, Object parent, Object... args)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-
-    E map(AlkemyElement e);
-    
-    default boolean accepts(Class<?> type)
-    {
-        return true;
-    }
+    // TODO AlkemyControllerVisitor.
 }
