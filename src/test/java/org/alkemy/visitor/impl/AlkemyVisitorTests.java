@@ -74,7 +74,7 @@ public class AlkemyVisitorTests
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.create(TestClass.class);
+                alkemist.delegateToNodeVisitor(TestClass.class);
             }
         }) / 1000000 + " ms");
     }
@@ -88,7 +88,7 @@ public class AlkemyVisitorTests
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.create(TestClass.class);
+                alkemist.process(TestClass.class);
             }
         }) / 1000000 + " ms");
     }

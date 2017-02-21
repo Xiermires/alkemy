@@ -216,7 +216,7 @@ public class AlkemistTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.create(TestFastVisitor.class);
+                alkemist.delegateToNodeVisitor(TestFastVisitor.class);
             }
         }) / 1000000 + " ms");
     }
@@ -264,23 +264,23 @@ public class AlkemistTest
         
         // assign
         @Override
-        public Object visit(Node<? extends AbstractAlkemyElement<?>> node, Object raw)
+        public Object visit(Node<? extends AbstractAlkemyElement<?>> node, Object parent, Object... args)
         {
             if (mapped == null)
             {
                 mapped = new IdxElement[node.children().size()];
                 node.children().forEach(c -> {
-                    c.data().accept(this, raw);
+                    c.data().accept(this, parent);
                 });
             }
             else
             {
                 for (int i=0; i<mapped.length; i++)
                 {
-                    visit(mapped[i], raw);
+                    visit(mapped[i], parent);
                 }
             }
-            return raw;
+            return parent;
         }
 
         // assign

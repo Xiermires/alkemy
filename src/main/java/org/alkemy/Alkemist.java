@@ -21,8 +21,10 @@ import java.util.function.Supplier;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.AlkemyParser;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
+import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor;
 
@@ -61,26 +63,56 @@ public class Alkemist
         anv.visit(cache.get(t.getClass()), t);
         return t;
     }
+    
+    /**
+     * As {@link #process(Object)} but including parameters.
+     */
+    public <T> T process(T t, Object... args)
+    {
+        Assertions.exists(t);
+        anv.visit(cache.get(t.getClass()), t, args);
+        return t;
+    }
 
     /**
      * Parses the type of T in search of Alkemizations, creates an instance of type T and delegates its processing to the
      * underlying visitors.
      */
-    public <T> T create(Class<T> clazz)
+    public <T> T process(Class<T> clazz)
+    {
+        Assertions.existAll(clazz, anv);
+        final Node<? extends AbstractAlkemyElement<?>> node = cache.get(clazz);
+        return clazz.cast(anv.visit(node, node.data().newInstance()));
+    }
+
+    /**
+     * As {@link #process(Class)} but including parameters.
+     */
+    public <T> T process(Class<T> clazz, Object... args)
+    {
+        Assertions.existAll(clazz, args);
+        final Node<? extends AbstractAlkemyElement<?>> node = cache.get(clazz);
+        return clazz.cast(anv.visit(node, node.data().newInstance(), args));
+    }
+
+    /**
+     * Delegates any decision regarding the class to this Alkemist {@link AlkemyNodeVisitor}.
+     */
+    public <T> T delegateToNodeVisitor(Class<T> clazz)
     {
         Assertions.existAll(clazz, anv);
         return clazz.cast(anv.visit(cache.get(clazz)));
     }
 
     /**
-     * Similar to {@link #create(Class)} but including a parameter.
+     * As {@link #delegateToNodeVisitor(Class)} but including parameters.
      */
-    public <T> T map(Class<T> clazz, Object arg)
+    public <T> T delegateToNodeVisitor(Class<T> clazz, Object... args)
     {
-        Assertions.existAll(clazz, arg);
-        return clazz.cast(anv.visit(cache.get(clazz), arg));
+        Assertions.existAll(clazz, args);
+        return clazz.cast(anv.visit(cache.get(clazz), args));
     }
-
+    
     /**
      * Returns an iterable of type R mapped from a collection of items of type T.
      * <p>
@@ -147,7 +179,7 @@ public class Alkemist
      * <p>
      * This method doesn't use any caching system and shouldn't be used for repeating tasks.
      * <p>
-     * See {@link #create(Class)}
+     * See {@link #process(Class)}
      */
     public static <T> T process(T t, AlkemyNodeVisitor anv, AlkemyParser parser)
     {
@@ -262,7 +294,7 @@ public class Alkemist
         @Override
         public T next()
         {
-            final T t = alkemist.create(type);
+            final T t = alkemist.process(type);
             return t;
         }
     }
@@ -293,7 +325,7 @@ public class Alkemist
         {
             final T t = items.next();
             before.accept(t);
-            return alkemist.create(type);
+            return alkemist.process(type);
         }
     }
 }

@@ -25,7 +25,7 @@ public interface AlkemyNodeVisitor
         throw new UnsupportedOperationException("Not implemented.");
     }
     
-    default Object visit(Node<? extends AbstractAlkemyElement<?>> node, Object arg)
+    default Object visit(Node<? extends AbstractAlkemyElement<?>> node, Object parent, Object... args)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }

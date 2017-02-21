@@ -26,7 +26,7 @@ public class ObjectCopier<T> implements AlkemyNodeVisitor
     private Objenesis objenesis = new ObjenesisStd();
     
     @Override
-    public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object orig)
+    public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object orig, Object... args)
     {
         final Object dest = objenesis.newInstance(orig.getClass());
         visit(root, orig, dest);
