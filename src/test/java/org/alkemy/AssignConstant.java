@@ -34,7 +34,7 @@ public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
     }
 
     @Override
-    public void visit(AlkemyElement e, Object parent)
+    public void visitArgs(AlkemyElement e, Object parent, Object... args)
     {
         e.set(t, parent);
     }

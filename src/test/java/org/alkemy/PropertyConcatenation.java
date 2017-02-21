@@ -36,7 +36,7 @@ public class PropertyConcatenation implements AlkemyElementVisitor<AlkemyElement
     }
 
     @Override
-    public void visit(AlkemyElement e, Object parent)
+    public void visitArgs(AlkemyElement e, Object parent, Object... args)
     {
         sb.append(e.get(parent));
     }

@@ -157,8 +157,8 @@ public class Assertions
         for (Class<?> type : types)
             if (o.getClass().equals(type)) return;
 
-        throw new InvalidArgument("Invalid class type { expected '%s', received '%s' }", o.getClass().getName(), Arrays.asList(
-                types).toString());
+        throw new InvalidArgument("Invalid class type { expected '%s', received '%s' }", Arrays.asList(
+                types).toString(), o.getClass().getName());
     }
 
     public static <T> void isTrue(boolean expr, String errorMessage)

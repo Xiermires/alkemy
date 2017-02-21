@@ -61,11 +61,11 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
     {
         Assertions.exists(root);
 
-        root.children().forEach(c -> processBranch(c, parent));
+        root.children().forEach(c -> processBranch(c, parent, args));
         return parent;
     }
 
-    private void processBranch(Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    private void processBranch(Node<? extends AbstractAlkemyElement<?>> e, Object parent, Object... args)
     {
         if (e.hasChildren())
         {
@@ -76,12 +76,12 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
                 {
                     processBranch(c, c.data().get(node));
                 });
-                if (visitNodes) e.data().accept(aev, e.data().get(parent));
+                if (visitNodes) e.data().acceptArgs(aev, e.data().get(parent), args);
             }
         }
         else
         {
-            e.data().accept(aev, parent);
+            e.data().acceptArgs(aev, parent, args);
         }
     }
 }

@@ -200,7 +200,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public void visit(AlkemyElement e, Object parent)
+        public void visitArgs(AlkemyElement e, Object parent, Object... args)
         {
             if (!e.isNode()) stack.push(Integer.valueOf((int) e.get(parent)));
         }
@@ -241,7 +241,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public void visit(AlkemyElement e, Object parent)
+        public void visitArgs(AlkemyElement e, Object parent, Object... args)
         {
             e.set(avp.getValue(e), parent);
         }
@@ -294,7 +294,7 @@ public class AlkemyVisitorTests
         final Stack<String> names = new Stack<String>();
 
         @Override
-        public void visit(AlkemyElement e, Object parent)
+        public void visitArgs(AlkemyElement e, Object parent, Object... args)
         {
             names.add(e.targetName());
         }

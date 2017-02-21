@@ -61,24 +61,24 @@ public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
     {
         Assertions.exists(root);
 
-        root.children().forEach(c -> processBranch(c, parent));
+        root.children().forEach(c -> processBranch(c, parent, args));
         return parent;
     }
 
-    private void processBranch(Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    private void processBranch(Node<? extends AbstractAlkemyElement<?>> e, Object parent, Object... args)
     {
         if (e.hasChildren())
         {
             final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes);
             if (includeNullNodes || node != null)
             {
-                if (visitNodes) e.data().accept(aev, parent);
+                if (visitNodes) e.data().acceptArgs(aev, parent, args);
                 e.children().forEach(c -> processBranch(c, e.data().get(parent)));
             }
         }
         else
         {
-            e.data().accept(aev, parent);
+            e.data().acceptArgs(aev, parent, args);
         }
     }
 }
