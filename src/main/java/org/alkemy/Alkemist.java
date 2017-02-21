@@ -16,10 +16,10 @@
 package org.alkemy;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
@@ -53,7 +53,7 @@ public class Alkemist
     }
 
     /**
-     * Parses the type of T in search of Alkemizations and delegates them to the included visitors.
+     * Parses the type of T in search of Alkemizations and delegates its processing to the underlying visitors.
      */
     public <T> T process(T t)
     {
@@ -63,7 +63,8 @@ public class Alkemist
     }
 
     /**
-     * Parses the type of T in search of Alkemizations and creates an instance of type T, appropriately filled by the supported visitors.
+     * Parses the type of T in search of Alkemizations, creates an instance of type T and delegates its processing to the
+     * underlying visitors.
      */
     public <T> T create(Class<T> clazz)
     {
@@ -71,20 +72,67 @@ public class Alkemist
         return clazz.cast(anv.visit(cache.get(clazz)));
     }
 
+    /**
+     * Similar to {@link #create(Class)} but including a parameter.
+     */
+    public <T> T map(Class<T> clazz, Object arg)
+    {
+        Assertions.existAll(clazz, arg);
+        return clazz.cast(anv.visit(cache.get(clazz), arg));
+    }
+
+    /**
+     * Returns an iterable of type R mapped from a collection of items of type T.
+     * <p>
+     * There is a 1:1 relation between T and R items.
+     * <p>
+     * Items are lazily fetched and the before consumer is called always before the mapping proceeds.
+     */
+    public <T, R> Iterable<R> iterable(Class<R> type, Consumer<T> before, Iterable<T> items)
+    {
+        return new MapIterable<T, R>(this, type, before, items.iterator());
+    }
+
+    /**
+     * Returns an iterable of type T. The items in the returned iterable might be new, or the provided items modified.
+     * <p>
+     * There is a 1:1 relation between input and output iterables.
+     * <p>
+     * Items are lazily fetched.
+     */
     public <T> Iterable<T> iterable(Iterable<T> items)
     {
-        return new AlkemistIterable<T>(this, items.iterator());
+        return new ProcessIterable<T>(this, items.iterator());
     }
-    
+
+    /**
+     * Returns an iterable of type T. The items are lazily generated on each {@link Iterator#next()} call until the hasNext function returns false.
+     */
     public <T> Iterable<T> iterable(Class<T> type, Supplier<Boolean> hasNext)
     {
-        return new AlkemistIterable<T>(this, type, hasNext);
+        return new CreateIterable<T>(this, type, hasNext);
     }
-    
+
     /**
-     * Syntax sugar to avoid the {@link AlkemistBuilder} syntax overhead. 
+     * See {@link #iterable(Class, Consumer, Iterable)}
+     */
+    public <T, R> Iterable<R> iterable(Class<R> type, Consumer<T> before, Iterator<T> items)
+    {
+        return new MapIterable<T, R>(this, type, before, items);
+    }
+
+    /**
+     * See {@link #iterable(Iterable)}
+     */
+    public <T> Iterable<T> iterable(Iterator<T> items)
+    {
+        return new ProcessIterable<T>(this, items);
+    }
+
+    /**
+     * Syntax sugar to avoid the {@link AlkemistBuilder} syntax overhead.
      * <p>
-     * This method doesn't use any caching system and shouldn't be used for repeating tasks. 
+     * This method doesn't use any caching system and shouldn't be used for repeating tasks.
      * <p>
      * See {@link #process(Object)}
      */
@@ -95,9 +143,9 @@ public class Alkemist
     }
 
     /**
-     * Syntax sugar to avoid the {@link AlkemistBuilder} syntax overhead. 
+     * Syntax sugar to avoid the {@link AlkemistBuilder} syntax overhead.
      * <p>
-     * This method doesn't use any caching system and shouldn't be used for repeating tasks. 
+     * This method doesn't use any caching system and shouldn't be used for repeating tasks.
      * <p>
      * See {@link #create(Class)}
      */
@@ -107,63 +155,78 @@ public class Alkemist
         anv.visit(parser.parse(t.getClass()), t);
         return t;
     }
-    
-    static class AlkemistIterable<T> implements Iterable<T>
+
+    static class ProcessIterable<T> implements Iterable<T>
     {
-        enum Mode { PROCESS, CREATE };
-        
-        private final Alkemist theAlkemist;
-        private final Iterator<T> theItems;
-        private final Class<T> theType;
-        private final Supplier<Boolean> theEnd;
-        
-        private final Mode mode;
-        
-        AlkemistIterable(Alkemist alkmst, Iterator<T> items)
+        private final Alkemist alkemist;
+        private final Iterator<T> items;
+
+        ProcessIterable(Alkemist alkemist, Iterator<T> items)
         {
-            theAlkemist = alkmst;
-            theItems = items;
-            theType = null;
-            theEnd = null;
-            
-            mode = Mode.PROCESS;
+            this.alkemist = alkemist;
+            this.items = items;
         }
-        
-        AlkemistIterable(Alkemist alkmst, Class<T> type, Supplier<Boolean> hasNext)
-        {
-            theAlkemist = alkmst;
-            theItems = null;
-            theType = type;
-            theEnd = hasNext;
-            
-            mode = Mode.CREATE;
-        }
-        
+
         @Override
         public Iterator<T> iterator()
         {
-            switch (mode)
-            {
-                case PROCESS:
-                    return new AlkemistProcessIterator<T>(theAlkemist, theItems);
-                case CREATE:
-                    return new AlkemistCreateIterator<T>(theAlkemist, theType, theEnd);
-            }
-            throw new AlkemyException("Undefined enum '%d'", mode.name()); // should never happen
+            return new ProcessIterator<T>(alkemist, items);
         }
     }
-    
-    static class AlkemistProcessIterator<T> implements Iterator<T>
+
+    static class CreateIterable<T> implements Iterable<T>
+    {
+        private final Alkemist alkemist;
+        private final Class<T> type;
+        private final Supplier<Boolean> hasNext;
+
+        CreateIterable(Alkemist alkemist, Class<T> type, Supplier<Boolean> hasNext)
+        {
+            this.alkemist = alkemist;
+            this.type = type;
+            this.hasNext = hasNext;
+        }
+
+        @Override
+        public Iterator<T> iterator()
+        {
+            return new CreateIterator<T>(alkemist, type, hasNext);
+        }
+    }
+
+    static class MapIterable<T, R> implements Iterable<R>
+    {
+        private final Alkemist alkemist;
+        private final Class<R> type;
+        private final Consumer<T> before;
+        private final Iterator<T> items;
+
+        MapIterable(Alkemist alkemist, Class<R> type, Consumer<T> before, Iterator<T> items)
+        {
+            this.alkemist = alkemist;
+            this.type = type;
+            this.before = before;
+            this.items = items;
+        }
+
+        @Override
+        public Iterator<R> iterator()
+        {
+            return new MapIterator<T, R>(alkemist, type, before, items);
+        }
+    }
+
+    static class ProcessIterator<T> implements Iterator<T>
     {
         private final Alkemist theAlkemist;
         private final Iterator<T> theItems;
-        
-        AlkemistProcessIterator(Alkemist alkmst, Iterator<T> items)
+
+        ProcessIterator(Alkemist alkmst, Iterator<T> items)
         {
             theAlkemist = alkmst;
             theItems = items;
         }
-        
+
         @Override
         public boolean hasNext()
         {
@@ -176,31 +239,61 @@ public class Alkemist
             return theAlkemist.process(theItems.next());
         }
     }
-    
-    static class AlkemistCreateIterator<T> implements Iterator<T>
+
+    static class CreateIterator<T> implements Iterator<T>
     {
-        private final Alkemist theAlkemist;
-        private final Class<T> theType;
-        private final Supplier<Boolean> theEnd;
-        
-        AlkemistCreateIterator(Alkemist alkmst, Class<T> type, Supplier<Boolean> hasNext)
+        private final Alkemist alkemist;
+        private final Class<T> type;
+        private final Supplier<Boolean> hasNext;
+
+        CreateIterator(Alkemist alkemist, Class<T> type, Supplier<Boolean> hasNext)
         {
-            theAlkemist = alkmst;
-            theType = type;
-            theEnd = hasNext;
+            this.alkemist = alkemist;
+            this.type = type;
+            this.hasNext = hasNext;
         }
-        
+
         @Override
         public boolean hasNext()
         {
-            return theEnd.get();
+            return hasNext.get();
         }
 
         @Override
         public T next()
         {
-            final T t = theAlkemist.create(theType);
+            final T t = alkemist.create(type);
             return t;
+        }
+    }
+
+    static class MapIterator<T, R> implements Iterator<R>
+    {
+        private final Alkemist alkemist;
+        private final Class<R> type;
+        private final Consumer<T> before;
+        private final Iterator<T> items;
+
+        MapIterator(Alkemist alkemist, Class<R> type, Consumer<T> before, Iterator<T> items)
+        {
+            this.alkemist = alkemist;
+            this.type = type;
+            this.before = before;
+            this.items = items;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return items.hasNext();
+        }
+
+        @Override
+        public R next()
+        {
+            final T t = items.next();
+            before.accept(t);
+            return alkemist.create(type);
         }
     }
 }

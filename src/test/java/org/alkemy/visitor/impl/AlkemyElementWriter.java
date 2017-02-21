@@ -37,7 +37,7 @@ public class AlkemyElementWriter implements AlkemyNodeVisitor
     {
         final Parameters params = new Parameters(aev, root.children().size());
         root.children().forEach(processNode(params));
-        return root.data().accept(aev, params.get());
+        return root.data().acceptArgs(aev, params.get());
     }
 
     private Consumer<? super Node<? extends AbstractAlkemyElement<?>>> processNode(Parameters params)

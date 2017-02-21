@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.alkemy.util;
 
-import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 import org.alkemy.exception.AlkemyException;
@@ -144,23 +144,49 @@ public class Assertions
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
-    public static void ofSize(Object o, Class<?> type)
+    public static void ofSize(Collection<?> l, int size)
+    {
+        exists(l);
+        if (l.size() != size)
+            throw new InvalidArgument("Invalid collection size { expected '%d', received '%d' }", size, l.size());
+    }
+
+    public static void ofListedType(Object o, Class<?>... types)
     {
         exists(o);
-        if (o.getClass().equals(type)) throw new InvalidArgument("Invalid class type { expected '%d', received '%d' }", o
-                .getClass().getName(), type.getName());
+        for (Class<?> type : types)
+            if (o.getClass().equals(type)) return;
+
+        throw new InvalidArgument("Invalid class type { expected '%s', received '%s' }", o.getClass().getName(), Arrays.asList(
+                types).toString());
     }
 
     public static <T> void isTrue(boolean expr, String errorMessage)
     {
-        if (!expr)
-            throw new AlkemyException(errorMessage);
+        if (!expr) throw new AlkemyException(errorMessage);
     }
 
-    public static void ofSize(List<Method> l, int size)
+    public static void lessEqualThan(long lhs, long rhs)
     {
-        exists(l);
-        if (l.size() != size) throw new InvalidArgument("Invalid collection size { expected '%d', received '%d' }", size,
-                l.size());
+        if (lhs <= rhs) return;
+        throw new InvalidArgument("Invalid argument { expected less or equal than '%d', received '%d' }", rhs, lhs);
+    }
+
+    public static void lessThan(long lhs, long rhs)
+    {
+        if (lhs < rhs) return;
+        throw new InvalidArgument("Invalid argument { expected less than '%d', received '%d' }", rhs, lhs);
+    }
+    
+    public static void greaterEqualThan(long lhs, long rhs)
+    {
+        if (lhs >= rhs) return;
+        throw new InvalidArgument("Invalid argument { expected greater or equal than '%d', received '%d' }", rhs, lhs);
+    }
+
+    public static void greaterThan(long lhs, long rhs)
+    {
+        if (lhs > rhs) return;
+        throw new InvalidArgument("Invalid argument { expected greater than '%d', received '%d' }", rhs, lhs);
     }
 }

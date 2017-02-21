@@ -99,6 +99,16 @@ public class AlkemistBuilder
         }
         throw new AlkemyException("Invalid mode '%s'", conf.mode.name()); // should never happen
     }
+    
+    /**
+     * Pre-order access. Visit nulls / Instantiates nodes. Doesn't visit nodes.
+     */
+    public static final Configuration STANDARD_WRITE = new Configuration(Mode.PREORDER, true, true, false);
+    
+    /**
+     * Pre-order access. Doesn't include nulls / Doesnt't instantiate nodes. Doesn't visit nodes.
+     */
+    public static final Configuration STANDARD_READ = new Configuration(Mode.PREORDER, false, false, false);
 
     public static class Configuration
     {

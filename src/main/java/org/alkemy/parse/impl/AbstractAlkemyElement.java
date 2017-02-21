@@ -167,14 +167,14 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     /**
      * As {@link #accept(AlkemyElementVisitor)} but accepting extra parameters.
      */
-    public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v, Object... args)
+    public <T extends AbstractAlkemyElement<T>> Object acceptArgs(AlkemyElementVisitor<T> v, Object... args)
     {
         if (cacheAcceptedRef())
         {
             final T t = map(v);
-            return t != null ? v.visit(t, args) : null;
+            return t != null ? v.visitArgs(t, args) : null;
         }
-        else return v.visit(v.map(view()), args);
+        else return v.visitArgs(v.map(view()), args);
     }
 
     /**
@@ -182,17 +182,17 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      * <p>
      * Returns true if the visitor could accept this element.
      */
-    public <T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<T> v, Object parent, Object... args)
+    public <T extends AbstractAlkemyElement<T>> boolean acceptArgs(AlkemyElementVisitor<T> v, Object parent, Object... args)
     {
         if (cacheAcceptedRef())
         {
             final T t = map(v);
             if (t != null)
             {
-                v.visit(t, parent, args);
+                v.visitArgs(t, parent, args);
             }
         }
-        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent, args);
+        else if (v.accepts(alkemyType)) v.visitArgs(v.map(view()), parent, args);
         else return false;
         return true;
     }

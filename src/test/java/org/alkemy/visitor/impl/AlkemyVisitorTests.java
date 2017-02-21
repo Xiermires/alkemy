@@ -247,7 +247,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public Object visit(AlkemyElement e, Object... args)
+        public Object visitArgs(AlkemyElement e, Object... args)
         {
             return e.newInstance(args);
         }
