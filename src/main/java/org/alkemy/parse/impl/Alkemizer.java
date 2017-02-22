@@ -204,17 +204,11 @@ public class Alkemizer extends ClassVisitor
                 + classNameAsDesc(className), null, null);
 
         mv.visitCode();
-        final Label l0 = new Label();
-        mv.visitLabel(l0);
-
-        // Boundary check (throws InvalidArgument).
-        mv.visitVarInsn(ALOAD, 0);
-        visitArgsPosToLoad(alkemizableFields.size(), mv);
-        mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/Alkemizer$Proxy", "ofSize", "([Ljava/lang/Object;I)V", false);
 
         // TODO 1: document "a visible non-args ctor is required for the instrumented version."
         // TODO 2: detect it and do not create the ctor.
-        mv.visitLabel(new Label());
+        final Label l0 = new Label();
+        mv.visitLabel(l0);
         mv.visitTypeInsn(NEW, className);
         mv.visitInsn(DUP);
         mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
@@ -621,11 +615,6 @@ public class Alkemizer extends ClassVisitor
     // If any changes in the behaviour, change also the instrumentation accordingly.
     public static class Proxy
     {
-        public static void ofSize(Object[] o, int i)
-        {
-            Assertions.ofSize(o, i);
-        }
-
         public static Object toEnum(Class<?> type, Object value)
         {
             return AlkemyUtils.toEnum(type, value);

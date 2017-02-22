@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 
 import org.alkemy.ValueAccessor;
 import org.alkemy.annotations.Order;
-import org.alkemy.exception.InvalidArgument;
+import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.impl.TestAlkemizer.Lorem;
 import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsDeclaration;
 import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsOrder;
@@ -107,7 +107,7 @@ public class AlkemizerTest
         assertThat(methodNames, hasItems("get$$foo", "get$$bar", "set$$foo", "set$$bar", "get$$ipsum", "set$$ipsum", "get$$dolor", "set$$dolor"));
     }
 
-    @Test(expected = InvalidArgument.class)
+    @Test(expected = AlkemyException.class)
     public void testNodeConstructorWithArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
         final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);

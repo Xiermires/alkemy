@@ -55,11 +55,7 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
                 return argsCtor.newInstance(args);
             }
         }
-        catch (InvalidArgument e)
-        {
-            throw e;
-        }
-        catch (Throwable e) // TODO.
+        catch (Throwable e) 
         {
             throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays.asList(args), type);
         }
