@@ -15,31 +15,40 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.exception.AccessException;
-import org.alkemy.exception.AlkemyException;
+import org.alkemy.AssignConstant.Bar;
+import org.alkemy.PropertyConcatenation.Foo;
+import org.alkemy.annotations.Order;
 
-public interface ValueAccessor
+@Order({ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9" })
+public class TestClassNoInstr
 {
-    /**
-     * Returns the value type.
-     */
-    Class<?> type();
+    @Foo
+    String s0 = "0";
 
-    /**
-     * Returns the value.
-     * 
-     * @throws AlkemyException
-     *             If an error occurs while recovering the value.
-     */
-    Object get(Object parent) throws AlkemyException;
+    @Foo
+    String s1 = "1";
 
-    /**
-     * Sets a value.
-     * 
-     * @throws AccessException
-     *             If an error occurs while setting the value.
-     */
-    void set(Object value, Object parent) throws AlkemyException;
+    @Foo
+    String s2 = "2";
 
-    String targetName();
+    @Foo
+    String s3 = "3";
+
+    @Foo
+    String s4 = "4";
+
+    @Bar
+    String s5 = "5";
+
+    @Bar
+    String s6 = "6";
+
+    @Bar
+    String s7 = "7";
+
+    @Bar
+    String s8 = "8";
+
+    @Bar
+    String s9 = "9";
 }

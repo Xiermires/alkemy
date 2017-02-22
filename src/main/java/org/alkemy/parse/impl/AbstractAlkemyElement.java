@@ -51,7 +51,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
 
     protected AbstractAlkemyElement(AbstractAlkemyElement<?> other)
     {
-        Assertions.exists(other);
+        Assertions.nonNull(other);
 
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
@@ -84,7 +84,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     @Override
-    public <T> T newInstance(Object... args) throws AlkemyException
+    public Object newInstance(Object... args) throws AlkemyException
     {
         if (node)
         {

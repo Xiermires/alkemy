@@ -32,6 +32,7 @@ instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.TestFastVisitor", //
         "org.alkemy.TestDeepCopy", //
         "org.alkemy.parse.impl.TestAlkemizer", //
+        "org.alkemy.parse.impl.TestManyFields", //
         "org.alkemy.parse.impl.TestClass", //
         "org.alkemy.parse.impl.TestNode", //
         "org.alkemy.parse.impl.TestOrdered", //

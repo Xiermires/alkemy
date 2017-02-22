@@ -60,7 +60,7 @@ public class AlkemistBuilder
 
     public Alkemist build()
     {
-        Assertions.exists(aev);
+        Assertions.nonNull(aev);
 
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
@@ -70,7 +70,7 @@ public class AlkemistBuilder
 
     public Alkemist build(Configuration conf)
     {
-        Assertions.exists(conf);
+        Assertions.nonNull(conf);
 
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
@@ -80,7 +80,7 @@ public class AlkemistBuilder
 
     public Alkemist build(AlkemyNodeVisitor anv)
     {
-        Assertions.exists(anv);
+        Assertions.nonNull(anv);
 
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;

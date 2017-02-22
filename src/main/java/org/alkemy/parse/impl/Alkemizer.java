@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import static org.objectweb.asm.Opcodes.AALOAD;
+import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.annotations.Order;
+import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.Assertions;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -136,8 +137,27 @@ public class Alkemizer extends ClassVisitor
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
     {
+        boolean isStatic = (access & Opcodes.ACC_STATIC) != 0;
+        // If field is an object, check if it is an enum.
+        boolean isEnum = false;
+        if (desc.startsWith("L"))
+        {
+            try
+            {
+                final ClassReader cr = new ClassReader(toQualifiedNameFromDesc(desc));
+                final FindEnum cv = new FindEnum();
+                cr.accept(cv, ClassReader.SKIP_CODE);
+                isEnum = cv.isEnum;
+            }
+            catch (IOException e)
+            {
+                throw new Stop();
+            }
+        }
+
         final FieldVisitor fv = super.visitField(access, name, desc, signature, value);
-        return new FieldAnnotationVisitor(fv, name, desc, alkemizableFields, alkemizableAnnotations, nonAlkemizableAnnotations);
+        return new FieldAnnotationVisitor(fv, name, desc, alkemizableFields, alkemizableAnnotations, nonAlkemizableAnnotations,
+                isEnum, isStatic);
     }
 
     @Override
@@ -216,11 +236,20 @@ public class Alkemizer extends ClassVisitor
             final AlkemizableField af = alkemizableFields.get(i);
 
             mv.visitVarInsn(ALOAD, 1);
+            if (af.isEnum)
+            {
+                mv.visitLdcInsn(Type.getType(af.type));
+            }
             mv.visitVarInsn(ALOAD, 0);
             visitArgsPosToLoad(i, mv);
             mv.visitInsn(AALOAD);
 
             final ClassCaster classCaster = getCastClassForDesc(af.type);
+            if (af.isEnum)
+            {
+                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/Alkemizer$Proxy", "toEnum",
+                        "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false);
+            }
             mv.visitTypeInsn(CHECKCAST, classCaster.name);
             if (classCaster.method != null)
             {
@@ -247,7 +276,6 @@ public class Alkemizer extends ClassVisitor
     {
         final List<String> names = alkemizableFields.stream().map(af -> af.name).collect(Collectors.toList());
         if (names.size() != orderedFieldNames.size()) throw new Stop(); // invalid definition
-
         if (!names.containsAll(orderedFieldNames.keySet())) throw new Stop(); // invalid definition
     }
 
@@ -263,7 +291,7 @@ public class Alkemizer extends ClassVisitor
     {
         for (AlkemizableField af : alkemizableFields)
         {
-            appendGetter(af.name, af.type);
+            appendGetter(af.name, af.type, af.isStatic);
         }
     }
 
@@ -271,30 +299,40 @@ public class Alkemizer extends ClassVisitor
     {
         for (AlkemizableField af : alkemizableFields)
         {
-            appendSetter(af.name, af.type);
+            appendSetter(af.name, af.type, af.isEnum, af.isStatic);
         }
     }
 
-    private void appendGetter(String name, String desc)
+    private void appendGetter(String name, String desc, boolean isStatic)
     {
         final String methodName = getGetterName(name);
-        final MethodVisitor mv = super.visitMethod(ACC_PUBLIC, methodName, "()" + desc, null, null);
+        final MethodVisitor mv = super.visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "()" + desc, null, null);
 
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(GETFIELD, className, name, desc);
+        mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, className, name, desc);
         mv.visitInsn(Type.getType(desc).getOpcode(IRETURN));
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }
 
-    private void appendSetter(String name, String desc)
+    private void appendSetter(String name, String desc, boolean isEnum, boolean isStatic)
     {
         final String methodName = getSetterName(name);
-        final MethodVisitor mv = visitMethod(ACC_PUBLIC, methodName, "(" + desc + ")V", null, null);
+        final MethodVisitor mv = visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "(" + (isEnum ? "Ljava/lang/Object;" : desc) + ")V", null, null);
 
         mv.visitVarInsn(ALOAD, 0);
+        if (isEnum)
+        {
+            mv.visitLdcInsn(Type.getType("Lorg/alkemy/parse/impl/TestAlkemizer$Lorem;"));
+        }
         mv.visitVarInsn(Type.getType(desc).getOpcode(ILOAD), 1);
-        mv.visitFieldInsn(PUTFIELD, className, name, desc);
+        if (isEnum)
+        {
+            mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/Alkemizer$Proxy", "toEnum",
+                    "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false);
+            mv.visitTypeInsn(CHECKCAST, toClassNameFromDesc(desc));
+        }
+        mv.visitFieldInsn(isStatic ? PUTSTATIC : PUTFIELD, className, name, desc);
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
@@ -401,8 +439,8 @@ public class Alkemizer extends ClassVisitor
 
     static class ClassCaster
     {
-        final String name;
-        final String method;
+        private final String name;
+        private final String method;
 
         ClassCaster(String className, String castMethod)
         {
@@ -418,11 +456,13 @@ public class Alkemizer extends ClassVisitor
         private final List<AlkemizableField> alkemizables;
         private final Set<String> alkemizableAnnotations;
         private final Set<String> nonAlkemizableAnnotations;
+        private final boolean isEnum;
+        private final boolean isStatic;
 
         private AlkemizableField alkemizable;
 
         FieldAnnotationVisitor(FieldVisitor fv, String name, String type, List<AlkemizableField> alkemizables,
-                Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations)
+                Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations, boolean isEnum, boolean isStatic)
         {
             super(Opcodes.ASM5, fv);
 
@@ -431,6 +471,8 @@ public class Alkemizer extends ClassVisitor
             this.alkemizables = alkemizables;
             this.alkemizableAnnotations = alkemizableAnnotations;
             this.nonAlkemizableAnnotations = nonAlkemizableAnnotations;
+            this.isEnum = isEnum;
+            this.isStatic = isStatic;
         }
 
         @Override
@@ -440,7 +482,7 @@ public class Alkemizer extends ClassVisitor
             {
                 if (alkemizable == null)
                 {
-                    alkemizable = new AlkemizableField(name, type);
+                    alkemizable = new AlkemizableField(name, type, isEnum, isStatic);
                 }
             }
             return super.visitAnnotation(desc, visible);
@@ -487,6 +529,23 @@ public class Alkemizer extends ClassVisitor
         }
     };
 
+    static class FindEnum extends ClassVisitor
+    {
+        private boolean isEnum = false;
+
+        FindEnum()
+        {
+            super(Opcodes.ASM5);
+        }
+
+        @Override
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)
+        {
+            isEnum = (access & Opcodes.ACC_ENUM) != 0;
+            super.visit(version, access, name, signature, superName, interfaces);
+        }
+    }
+
     static class FindAnnotation extends ClassVisitor
     {
         private final Class<? extends Annotation> annotation;
@@ -519,8 +578,8 @@ public class Alkemizer extends ClassVisitor
 
     static class OrderValueReader extends AnnotationVisitor
     {
-        int i = 0;
-        Map<String, Integer> m;
+        private int i = 0;
+        private Map<String, Integer> m;
 
         public OrderValueReader(Map<String, Integer> m, AnnotationVisitor av)
         {
@@ -546,21 +605,30 @@ public class Alkemizer extends ClassVisitor
     {
         private final String name;
         private final String type;
+        private final boolean isEnum;
+        private final boolean isStatic;
 
-        AlkemizableField(String name, String type)
+        AlkemizableField(String name, String type, boolean isEnum, boolean isStatic)
         {
             this.name = name;
             this.type = type;
+            this.isEnum = isEnum;
+            this.isStatic = isStatic;
         }
     }
 
-    // Compile check so changing conditions doesn't miss this class.
-    // If changed, change also the instrumentation boundary check.
+    // Compile check so changing proxy'ed classes doesn't miss this class.
+    // If any changes in the behaviour, change also the instrumentation accordingly.
     public static class Proxy
     {
         public static void ofSize(Object[] o, int i)
         {
             Assertions.ofSize(o, i);
+        }
+
+        public static Object toEnum(Class<?> type, Object value)
+        {
+            return AlkemyUtils.toEnum(type, value);
         }
     }
 

@@ -16,10 +16,13 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.MemberFieldReflectionBasedAccessor;
+import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.StaticFieldReflectionBasedAccessor;
 import org.alkemy.util.Assertions;
 
 class AccessorFactory
@@ -48,7 +51,7 @@ class AccessorFactory
             }
             else
             {
-                return null;
+                return Modifier.isStatic(f.getModifiers()) ? new StaticFieldReflectionBasedAccessor(f) : new MemberFieldReflectionBasedAccessor(f);
             }
         }
         catch (IllegalAccessException | SecurityException e)
@@ -68,12 +71,12 @@ class AccessorFactory
             }
             else
             {
-                return null;
+                return new ReflectionBasedConstructorAccessor(type.getConstructor());
             }
         }
-        catch (IllegalAccessException | SecurityException e)
+        catch (IllegalAccessException | SecurityException | NoSuchMethodException e)
         {
-            // TODO (Class not public // Security)
+            // TODO (Class not public // No default ctor // Security)
             throw new RuntimeException("TODO", e);
         }
     }
@@ -103,7 +106,7 @@ class AccessorFactory
         @Override
         public String targetName()
         {
-            Assertions.exists(ref);
+            Assertions.nonNull(ref);
             return ref.getClass().getTypeName();
         }
     }
@@ -118,7 +121,7 @@ class AccessorFactory
         }
 
         @Override
-        public <T> T newInstance(Object... args) throws AlkemyException
+        public Object newInstance(Object... args) throws AlkemyException
         {
             throw new UnsupportedOperationException("Not supported for this type of element.");
         }

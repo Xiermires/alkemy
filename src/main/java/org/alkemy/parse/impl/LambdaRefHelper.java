@@ -164,7 +164,7 @@ public class LambdaRefHelper
         }
         catch (NoSuchMethodException e)
         {
-            log.debug(String.format("Type '%s' not instrumented, or error in the instrumentation.", clazz.getName()), e);
+            log.debug(String.format("Type '%s' not instrumented, or error in the instrumentation. Fallback to reflection.", clazz.getName()));
         }
         return null;
     }

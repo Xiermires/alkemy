@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.alkemy.util;
 
+import java.lang.reflect.Field;
+import java.util.function.BiConsumer;
+
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 
 public class AlkemyUtils
@@ -28,5 +31,26 @@ public class AlkemyUtils
             e.data().set(node, parent);
         }
         return node;
+    }
+    
+    public static void setEnum(Class<?> type, BiConsumer<Object, Object> setter, Object value, Object parent)
+    {
+        setter.accept(parent, toEnum(type, value));
+    }
+    
+    public static void setEnum(Field f, Object value, Object parent) throws IllegalArgumentException, IllegalAccessException
+    {
+        f.set(parent, toEnum(f.getType(), value));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" }) // caller responsibility 
+    public static Object toEnum(Class<?> type, Object value)
+    {
+        if (value instanceof String)
+        {
+            return Enum.valueOf((Class<? extends Enum>) type, (String) value);
+        }
+        else
+            return value;
     }
 }

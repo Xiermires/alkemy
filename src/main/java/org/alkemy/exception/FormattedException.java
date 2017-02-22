@@ -24,7 +24,7 @@ public abstract class FormattedException extends RuntimeException
         super(String.format(format, args).toString());
     }
     
-    protected FormattedException(String format, Exception cause, Object... args)
+    protected FormattedException(String format, Throwable cause, Object... args)
     {
         super(String.format(format, args).toString(), cause);
     }

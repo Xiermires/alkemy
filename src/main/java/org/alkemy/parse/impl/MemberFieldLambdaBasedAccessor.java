@@ -29,7 +29,7 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
     private final Class<?> type;
     private final Function<Object, ?> getter;
     private final BiConsumer<Object, Object> setter;
-    
+
     MemberFieldLambdaBasedAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
         this.name = name;

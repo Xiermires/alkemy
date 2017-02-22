@@ -13,33 +13,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.exception;
 
-import org.alkemy.exception.AccessException;
-import org.alkemy.exception.AlkemyException;
-
-public interface ValueAccessor
+public class TypeMismatch extends AlkemyException
 {
-    /**
-     * Returns the value type.
-     */
-    Class<?> type();
+    private static final long serialVersionUID = 1L;
 
-    /**
-     * Returns the value.
-     * 
-     * @throws AlkemyException
-     *             If an error occurs while recovering the value.
-     */
-    Object get(Object parent) throws AlkemyException;
+    public TypeMismatch(String message, Object[] args)
+    {
+        super(message, args);
+    }
 
-    /**
-     * Sets a value.
-     * 
-     * @throws AccessException
-     *             If an error occurs while setting the value.
-     */
-    void set(Object value, Object parent) throws AlkemyException;
-
-    String targetName();
+    public TypeMismatch(String message, Throwable cause, Object... args)
+    {
+        super(message, cause, args);
+    }
 }

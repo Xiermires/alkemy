@@ -25,135 +25,135 @@ import org.alkemy.exception.InvalidArgument;
 // program with assertions having control over the exceptions types.
 public class Assertions
 {
-    public static void existAll(Object... o)
+    public static void noneNull(Object... o)
     {
         for (int i = 0; i < o.length; i++)
             Objects.requireNonNull(o[i]);
     }
 
-    public static void exists(Object o)
+    public static void nonNull(Object o)
     {
         Objects.requireNonNull(o);
     }
 
     public static void notEmpty(boolean[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(char[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(byte[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(short[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(int[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(long[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(float[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(double[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void notEmpty(Object[] o)
     {
-        exists(o);
+        nonNull(o);
         if (o.length == 0) throw new ArrayIndexOutOfBoundsException();
     }
 
     public static void ofSize(boolean[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(char[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(byte[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(short[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(int[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(long[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(float[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(double[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(Object[] o, int size)
     {
-        exists(o);
+        nonNull(o);
         if (o.length != size) throw new InvalidArgument("Invalid array size { expected '%d', received '%d' }", size, o.length);
     }
 
     public static void ofSize(Collection<?> l, int size)
     {
-        exists(l);
+        nonNull(l);
         if (l.size() != size)
             throw new InvalidArgument("Invalid collection size { expected '%d', received '%d' }", size, l.size());
     }
 
     public static void ofListedType(Object o, Class<?>... types)
     {
-        exists(o);
+        nonNull(o);
         for (Class<?> type : types)
             if (o.getClass().equals(type)) return;
 
@@ -161,9 +161,9 @@ public class Assertions
                 types).toString(), o.getClass().getName());
     }
 
-    public static <T> void isTrue(boolean expr, String errorMessage)
+    public static <T> void isTrue(boolean expr, String format, Object... args)
     {
-        if (!expr) throw new AlkemyException(errorMessage);
+        if (!expr) throw new AlkemyException(format, args);
     }
 
     public static void lessEqualThan(long lhs, long rhs)

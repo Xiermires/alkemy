@@ -51,12 +51,14 @@ public class MethodHandleFactory
         final ValueAccessor mha;
         final Class<?> clazz = f.getDeclaringClass(); // TODO: Check inner classes.
 
+        // Enum setters are instrumented set$$enum_name(Object o) { ... } (the instrumented code allows String->Enum conversion).
+        final Class<?> useObjIfEnum = f.getType().isEnum() ? Object.class : f.getType();
         if (Modifier.isStatic(f.getModifiers()))
         {
             final Supplier<?> getter = ref2StaticGetter(methodHandle(clazz, Alkemizer.getGetterName(f.getName())), clazz,
                     f.getType());
             final Consumer<Object> setter = (Consumer<Object>) ref2StaticSetter(
-                    methodHandle(clazz, Alkemizer.getSetterName(f.getName()), f.getType()), clazz, f.getType());
+                    methodHandle(clazz, Alkemizer.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
             mha = new StaticFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(), getter, setter);
         }
@@ -65,7 +67,7 @@ public class MethodHandleFactory
             final Function<Object, ?> getter = (Function<Object, ?>) ref2MemberGetter(
                     methodHandle(clazz, Alkemizer.getGetterName(f.getName())), clazz, f.getType());
             final BiConsumer<Object, Object> setter = (BiConsumer<Object, Object>) ref2MemberSetter(
-                    methodHandle(clazz, Alkemizer.getSetterName(f.getName()), f.getType()), clazz, f.getType());
+                    methodHandle(clazz, Alkemizer.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
             mha = new MemberFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(), getter, setter);
         }

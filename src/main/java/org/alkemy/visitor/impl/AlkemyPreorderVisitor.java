@@ -49,7 +49,7 @@ public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
     @Override
     public Object visit(Node<? extends AbstractAlkemyElement<?>> root)
     {
-        Assertions.exists(root);
+        Assertions.nonNull(root);
 
         final Object instance = root.data().newInstance();
         root.children().forEach(c -> processBranch(c, instance));
@@ -59,7 +59,7 @@ public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
     @Override
     public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object parent, Object... args)
     {
-        Assertions.exists(root);
+        Assertions.nonNull(root);
 
         root.children().forEach(c -> processBranch(c, parent, args));
         return parent;

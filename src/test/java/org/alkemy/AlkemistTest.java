@@ -177,6 +177,22 @@ public class AlkemistTest
         }) / 1000000 + " ms");
     }
 
+
+    @Test
+    public void peformanceElementVisitorNoInstr() throws Throwable
+    {
+        final Alkemist alkemist = new AlkemistBuilder().visitor(new AssignConstant<String>("foo")).build();
+        final TestClassNoInstr tc = new TestClassNoInstr(); // do not include in the suite.
+
+        System.out.println("Assign 5e6 strings: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                alkemist.process(tc);
+            }
+        }) / 1000000 + " ms");
+    }
+    
     @Test
     public void peformanceTypeVisitor() throws Throwable
     {

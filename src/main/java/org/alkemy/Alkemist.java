@@ -48,7 +48,7 @@ public class Alkemist
 
     Alkemist(AlkemyLoadingCache cache, AlkemyNodeVisitor anv)
     {
-        Assertions.existAll(cache, anv);
+        Assertions.noneNull(cache, anv);
 
         this.cache = cache;
         this.anv = anv;
@@ -59,7 +59,7 @@ public class Alkemist
      */
     public <T> T process(T t)
     {
-        Assertions.exists(t);
+        Assertions.nonNull(t);
         anv.visit(cache.get(t.getClass()), t);
         return t;
     }
@@ -69,7 +69,7 @@ public class Alkemist
      */
     public <T> T process(T t, Object... args)
     {
-        Assertions.exists(t);
+        Assertions.nonNull(t);
         anv.visit(cache.get(t.getClass()), t, args);
         return t;
     }
@@ -80,7 +80,7 @@ public class Alkemist
      */
     public <T> T process(Class<T> clazz)
     {
-        Assertions.existAll(clazz, anv);
+        Assertions.noneNull(clazz, anv);
         final Node<? extends AbstractAlkemyElement<?>> node = cache.get(clazz);
         return clazz.cast(anv.visit(node, node.data().newInstance()));
     }
@@ -90,7 +90,7 @@ public class Alkemist
      */
     public <T> T process(Class<T> clazz, Object... args)
     {
-        Assertions.existAll(clazz, args);
+        Assertions.noneNull(clazz, args);
         final Node<? extends AbstractAlkemyElement<?>> node = cache.get(clazz);
         return clazz.cast(anv.visit(node, node.data().newInstance(), args));
     }
@@ -100,7 +100,7 @@ public class Alkemist
      */
     public <T> T delegateToNodeVisitor(Class<T> clazz)
     {
-        Assertions.existAll(clazz, anv);
+        Assertions.noneNull(clazz, anv);
         return clazz.cast(anv.visit(cache.get(clazz)));
     }
 
@@ -109,7 +109,7 @@ public class Alkemist
      */
     public <T> T delegateToNodeVisitor(Class<T> clazz, Object... args)
     {
-        Assertions.existAll(clazz, args);
+        Assertions.noneNull(clazz, args);
         return clazz.cast(anv.visit(cache.get(clazz), args));
     }
     
@@ -170,7 +170,7 @@ public class Alkemist
      */
     public static <T> T create(Class<T> clazz, AlkemyNodeVisitor anv, AlkemyParser parser)
     {
-        Assertions.existAll(clazz, anv);
+        Assertions.noneNull(clazz, anv);
         return clazz.cast(anv.visit(parser.parse(clazz)));
     }
 
@@ -183,7 +183,7 @@ public class Alkemist
      */
     public static <T> T process(T t, AlkemyNodeVisitor anv, AlkemyParser parser)
     {
-        Assertions.existAll(t, anv);
+        Assertions.noneNull(t, anv);
         anv.visit(parser.parse(t.getClass()), t);
         return t;
     }

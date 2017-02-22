@@ -23,7 +23,7 @@ public class ConditionsTest
     public void requiresNonNull()
     {
         Object o = null;
-        Assertions.exists(o);
+        Assertions.nonNull(o);
     }
     
     @Test(expected = ArrayIndexOutOfBoundsException.class)

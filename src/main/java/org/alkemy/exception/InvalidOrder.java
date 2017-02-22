@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.exception;
 
-public class InvalidOrder extends FormattedException
+public class InvalidOrder extends AlkemyException
 {
     private static final long serialVersionUID = 1l;
 

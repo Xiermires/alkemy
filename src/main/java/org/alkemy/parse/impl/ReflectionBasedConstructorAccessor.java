@@ -15,53 +15,48 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.function.Supplier;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.exception.InvalidArgument;
 
-public class StaticMethodLambdaBasedConstructor implements NodeConstructor
+public class ReflectionBasedConstructorAccessor implements NodeConstructor
 {
-    private final Class<?> type;
-    private final Supplier<?> noargsCtor;
-    private final NodeConstructorFunction argsCtor;
+    private final Constructor<?> ctor;
 
-    StaticMethodLambdaBasedConstructor(Class<?> type, Supplier<?> noargsCtor, NodeConstructorFunction argsCtor)
+    ReflectionBasedConstructorAccessor(Constructor<?> ctor)
     {
-        this.type = type;
-        this.noargsCtor = noargsCtor;
-        this.argsCtor = argsCtor;
-    }
-
-    @Override
-    public Class<?> type() throws AlkemyException
-    {
-        return type;
+        this.ctor = ctor;
     }
 
     @Override
     public Object newInstance(Object... args) throws AlkemyException
     {
+        if (args.length > 0)
+        {
+            throw new AccessException("Reflection based constructor of type '%s' expect no parameters, but received '%s'.",
+                    type(), Arrays.asList(args));
+        }
         try
         {
-            if (args.length == 0)
-            {
-                return noargsCtor.get();
-            }
-            else
-            {
-                return argsCtor.newInstance(args);
-            }
+            ctor.setAccessible(true);
+            return ctor.newInstance();
         }
-        catch (InvalidArgument e)
+        catch (final InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
-            throw e;
+            throw new AccessException("Couldn't create instance for constructor '%s'", e, ctor.getName());
         }
-        catch (Throwable e) // TODO.
+        finally
         {
-            throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays.asList(args), type);
+            ctor.setAccessible(false);
         }
+    }
+
+    @Override
+    public Class<?> type() throws AlkemyException
+    {
+        return ctor.getDeclaringClass();
     }
 }

@@ -20,10 +20,21 @@ import org.alkemy.util.PassThrough.Foo;
 
 public class TestAlkemizer
 {
+    enum Lorem
+    {
+        ipsum
+    };
+
     @Foo("foo")
     @Bar
     int foo = -1;
 
     @Bar(desc = "bar", id = 1001)
     String bar = "baz";
+
+    @Bar
+    Lorem ipsum;
+    
+    @Bar
+    float dolor;
 }

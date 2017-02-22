@@ -13,33 +13,62 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.parse.impl;
 
-import org.alkemy.exception.AccessException;
-import org.alkemy.exception.AlkemyException;
+import org.alkemy.util.PassThrough.Bar;
 
-public interface ValueAccessor
+public class TestManyFields
 {
-    /**
-     * Returns the value type.
-     */
-    Class<?> type();
-
-    /**
-     * Returns the value.
-     * 
-     * @throws AlkemyException
-     *             If an error occurs while recovering the value.
-     */
-    Object get(Object parent) throws AlkemyException;
-
-    /**
-     * Sets a value.
-     * 
-     * @throws AccessException
-     *             If an error occurs while setting the value.
-     */
-    void set(Object value, Object parent) throws AlkemyException;
-
-    String targetName();
+    @Bar
+    int a;
+    @Bar
+    int b;
+    @Bar
+    int c;
+    @Bar
+    int d;
+    @Bar
+    int e;
+    @Bar
+    int f;
+    @Bar
+    int g;
+    @Bar
+    int h;
+    @Bar
+    int i;
+    @Bar
+    int j;
+    @Bar
+    int k;
+    @Bar
+    int l;
+    @Bar
+    int m;
+    @Bar
+    int n;
+    @Bar
+    int o;
+    @Bar
+    int p;
+    @Bar
+    int q;
+    @Bar
+    int r;
+    @Bar
+    int s;
+    @Bar
+    int t;
+    @Bar
+    int u;
+    @Bar
+    int v;
+    @Bar
+    int w;
+    @Bar
+    int x;
+    @Bar
+    int y;
+    @Bar
+    int z;
 }

@@ -118,7 +118,7 @@ public class RandomGenerator
             super(other);
 
             final Random a = other.desc().getAnnotation(Random.class);
-            Assertions.exists(a);
+            Assertions.nonNull(a);
 
             min = a.min();
             max = a.max();

@@ -34,5 +34,5 @@ public interface NodeConstructor
      * @throws AlkemyException
      *             If an error occurs while creating the class instance.
      */
-    <T> T newInstance(Object... args) throws AlkemyException;
+    Object newInstance(Object... args) throws AlkemyException;
 }
