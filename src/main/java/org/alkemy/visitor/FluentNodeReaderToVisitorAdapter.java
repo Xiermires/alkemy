@@ -13,21 +13,30 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.visitor;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.NodeConstructor;
-import org.alkemy.util.TypedTable;
+import org.alkemy.util.Node;
+import org.alkemy.visitor.AlkemyNodeReader.FluentAlkemyNodeReader;
+import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
 
-public interface AlkemyElementFactory<T>
+/**
+ * Adapter between a fluent reader and a fluent visitor to access the Iterable functionality.
+ */
+public class FluentNodeReaderToVisitorAdapter<R> implements FluentAlkemyNodeReader<R>, FluentAlkemyNodeVisitor<R>
 {
-    /**
-     * Creates an alkemy element for this target.
-     */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
+    private final FluentAlkemyNodeReader<R> reader;
+    private final AlkemyElementVisitor<?> aev;
 
-    /**
-     * Creates an alkemy element node for this target.
-     */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, TypedTable context);
+    FluentNodeReaderToVisitorAdapter(FluentAlkemyNodeReader<R> reader, AlkemyElementVisitor<?> aev)
+    {
+        this.reader = reader;
+        this.aev = aev;
+    }
+    
+    @Override
+    public R visit(Node<? extends AbstractAlkemyElement<?>> node, R parameter)
+    {
+        return reader.accept(aev, node, parameter);
+    }
 }

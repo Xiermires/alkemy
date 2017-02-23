@@ -13,11 +13,34 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.visitor;
 
-public interface Bound<T>
+import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.util.Node;
+
+/**
+ * Adapter between a reader and a visitor to access the Iterable functionality.
+ */
+class NodeReaderToVisitorAdapter<R, P> implements AlkemyNodeReader<R, P>, AlkemyNodeVisitor<R, P>
 {
-    void bind(T t);
-    
-    T bound();
+    private final AlkemyNodeReader<R, P> reader;
+    private final AlkemyElementVisitor<?> aev;
+
+    NodeReaderToVisitorAdapter(AlkemyNodeReader<R, P> reader, AlkemyElementVisitor<?> aev)
+    {
+        this.reader = reader;
+        this.aev = aev;
+    }
+
+    @Override
+    public R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+    {
+        return reader.accept(aev, node, retType);
+    }
+
+    @Override
+    public R visit(Node<? extends AbstractAlkemyElement<?>> node, P parameter, Class<R> retType)
+    {
+        return reader.accept(aev, node, parameter, retType);
+    }
 }

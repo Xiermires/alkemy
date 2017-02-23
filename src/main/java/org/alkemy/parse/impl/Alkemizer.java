@@ -73,6 +73,23 @@ import org.objectweb.asm.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Instrumentation class focused on the alkemization of fields.
+ * <p>
+ * It does the following:
+ * <ul>
+ * <li>Creates a marker method : 'public static boolean is$$instrumented() { return true; }' (this can allow enabling / disabling
+ * the instr. version on runtime).
+ * <li>Creates an {@link Order} annotation with the declaration order of the fields, or leave it untouched if present.
+ * <li>Creates a public static factory for the type : 'public static TypeClass create$$instance(Object[] args) { ... }', where the
+ * args follow the order established in the {@link Order} annotation.
+ * <li>Creates for each alkemized member a getter and a setter 'public fieldType get$$fieldName() { ... }' && 'public void
+ * set$$fieldName(fieldType newValue) { ... }'
+ * <li>Creates for each alkemized static member a getter and a setter 'public static fieldType get$$fieldName() { ... }' &&
+ * 'public static void set$$fieldName(fieldType newValue) { ... }'
+ * <li>Conversions && castings (wrapper -> primitive && String -> enum).
+ * </ul>
+ */
 public class Alkemizer extends ClassVisitor
 {
     static final String IS_INSTRUMENTED = "is$$instrumented";
@@ -301,7 +318,8 @@ public class Alkemizer extends ClassVisitor
     private void appendGetter(String name, String desc, boolean isStatic)
     {
         final String methodName = getGetterName(name);
-        final MethodVisitor mv = super.visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "()" + desc, null, null);
+        final MethodVisitor mv = super.visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "()" + desc,
+                null, null);
 
         mv.visitVarInsn(ALOAD, 0);
         mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, className, name, desc);
@@ -313,7 +331,8 @@ public class Alkemizer extends ClassVisitor
     private void appendSetter(String name, String desc, boolean isEnum, boolean isStatic)
     {
         final String methodName = getSetterName(name);
-        final MethodVisitor mv = visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "(" + (isEnum ? "Ljava/lang/Object;" : desc) + ")V", null, null);
+        final MethodVisitor mv = visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "("
+                + (isEnum ? "Ljava/lang/Object;" : desc) + ")V", null, null);
 
         mv.visitVarInsn(ALOAD, 0);
         if (isEnum)

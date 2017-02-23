@@ -54,9 +54,18 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
                 return argsCtor.newInstance(args);
             }
         }
-        catch (Throwable e) 
+        catch (Throwable e)
         {
-            throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays.asList(args), type);
+            throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e,
+                    Arrays.asList(args), type);
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked") // safe
+    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        final Object v = newInstance(args);
+        return v == null || type == v.getClass() ? (T) v : null;
     }
 }

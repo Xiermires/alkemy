@@ -20,31 +20,24 @@ import java.util.function.Supplier;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeReader;
+import org.alkemy.visitor.AlkemyNodeReader.FluentAlkemyNodeReader;
 
-public class AlkemyElementWriter implements AlkemyNodeReader
+public class AlkemyElementWriter<R> implements FluentAlkemyNodeReader<R>
 {
-    private AlkemyElementVisitor<?> aev;
-
-    public AlkemyElementWriter(AlkemyElementVisitor<?> aev)
-    {
-        this.aev = aev;
-    }
-
     @Override
-    public Object accept(Node<? extends AbstractAlkemyElement<?>> root)
+    public R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> root, Class<R> retType)
     {
         final Parameters params = new Parameters(aev, root.children().size());
-        root.children().forEach(c -> processNode(c, params));
-        return root.data().newInstance(params.get());
+        root.children().forEach(c -> processNode(aev, c, params));
+        return root.data().safeNewInstance(retType, params.get());
     }
 
-    private void processNode(Node<? extends AbstractAlkemyElement<?>> e, Parameters params)
+    private void processNode(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters params)
     {
         if (e.hasChildren())
         {
             final Parameters childParams = new Parameters(aev, e.children().size());
-            e.children().forEach(c -> processNode(c, childParams));
+            e.children().forEach(c -> processNode(aev, c, childParams));
             if (!childParams.unsupported)
             {
                 params.add(e.data().newInstance(childParams.get()));

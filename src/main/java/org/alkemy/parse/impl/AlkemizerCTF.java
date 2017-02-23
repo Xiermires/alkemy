@@ -19,6 +19,9 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
+/**
+ * The class transformer responsible of instrumenting alkemized classes.
+ */
 public class AlkemizerCTF implements ClassFileTransformer
 {
     @Override

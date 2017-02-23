@@ -35,7 +35,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.alkemy.ValueAccessor;
 import org.alkemy.util.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -34,11 +34,11 @@ import java.util.function.Supplier;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Measure;
 import org.alkemy.util.Node;
 import org.alkemy.util.PassThrough;
-import org.alkemy.visitor.AlkemyNodeReader;
+import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
+import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
 import org.junit.Test;
 
 // Alkemist usage examples.
@@ -47,10 +47,9 @@ public class AlkemistTest
     @Test
     public void testConcat()
     {
-        final PropertyConcatenation concat = new PropertyConcatenation();
-        final Alkemist alkemist = new AlkemistBuilder().visitor(concat).build();
         final TestClass tc = new TestClass();
-        alkemist.process(tc);
+        final PropertyConcatenation concat = new PropertyConcatenation();
+        new FluentAlkemyPreorderReader<>(false, false, false).accept(concat, Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat("01234", is(concat.get()));
     }
@@ -58,10 +57,9 @@ public class AlkemistTest
     @Test
     public void testAssign()
     {
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new AssignConstant<String>("bar")).build();
-
         final TestClass tc = new TestClass();
-        alkemist.process(tc);
+        new FluentAlkemyPreorderReader<>(false, false, false).accept(new AssignConstant<String>("bar"),
+                Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat(tc.s0, is("0"));
         assertThat(tc.s1, is("1"));
@@ -85,7 +83,7 @@ public class AlkemistTest
         tdc.testClass = tc;
 
         final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<>();
-        final TestDeepCopy copy = Alkemist.process(tdc, copier, AlkemyParsers.fieldParser());
+        final TestDeepCopy copy = copier.visit(Alkemy.nodes().get(TestDeepCopy.class), tdc);
 
         assertThat(copy.testClass, is(not(nullValue())));
         assertThat(copy.testClass.s0, is("0"));
@@ -101,31 +99,35 @@ public class AlkemistTest
     }
 
     @Test
-    public void testIterableProcess()
+    public void testFluentIterable()
     {
         final TestClass tc1 = new TestClass();
         final TestClass tc2 = new TestClass();
         tc1.s0 = "foo";
         tc2.s1 = "bar";
-
-        final Alkemist alkemist = new AlkemistBuilder().build(new ObjectCopier<TestDeepCopy>());
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final ObjectCopier<TestClass> oc = new ObjectCopier<TestClass>();
 
         final List<String> s0s1 = new ArrayList<>();
-        for (TestClass tc : alkemist.iterable(Arrays.asList(tc1, tc2)))
+        for (TestClass tc : oc.iterable(node, Arrays.asList(tc1, tc2)))
         {
             s0s1.add(tc.s0);
             s0s1.add(tc.s1);
         }
-        assertThat(s0s1, contains("foo", "1", "0", "bar"));
 
+        assertThat(s0s1, contains("foo", "1", "0", "bar"));
         final StringBuilder sb = new StringBuilder();
-        alkemist.iterable(Arrays.asList(tc1, tc2)).forEach(e -> sb.append(e.s0).append(e.s1));
+        oc.iterable(node, Arrays.asList(tc1, tc2)).forEach(e -> sb.append(e.s0).append(e.s1));
         assertThat(sb.toString(), is("foo10bar"));
+
     }
 
     @Test
-    public void testIterableCreate()
+    public void testCreateIterable()
     {
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final AssignConstant<String> aev = new AssignConstant<String>("foo");
         final Supplier<Boolean> upTo100 = new Supplier<Boolean>()
         {
             int i = 0;
@@ -136,15 +138,14 @@ public class AlkemistTest
                 return i++ < 100;
             }
         };
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new AssignConstant<String>("foo")).build();
-
+        
         final Set<TestClass> created = new HashSet<>();
-        for (TestClass tc : alkemist.iterable(TestClass.class, upTo100))
+        for (TestClass tc : anv.iterable(aev, node, upTo100, TestClass.class))
         {
             created.add(tc);
         }
-        assertThat(created.size(), is(100));
 
+        assertThat(created.size(), is(100));
         for (TestClass tc : created)
         {
             assertThat(tc.s0, is("0"));
@@ -163,14 +164,16 @@ public class AlkemistTest
     @Test
     public void peformanceElementVisitor() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new AssignConstant<String>("foo")).build();
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final AssignConstant<String> aev = new AssignConstant<String>("foo");
         final TestClass tc = new TestClass();
 
         System.out.println("Assign 5e6 strings: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(tc);
+                anv.accept(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -178,14 +181,16 @@ public class AlkemistTest
     @Test
     public void peformanceElementVisitorNoInstr() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new AssignConstant<String>("foo")).build();
+        final FluentAlkemyPreorderReader<TestClassNoInstr> anv = new FluentAlkemyPreorderReader<>(false, false, false);
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClassNoInstr.class);
+        final AssignConstant<String> aev = new AssignConstant<String>("foo");
         final TestClassNoInstr tc = new TestClassNoInstr(); // do not include in the suite.
 
         System.out.println("Assign 5e6 strings: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(tc);
+                anv.accept(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -193,14 +198,16 @@ public class AlkemistTest
     @Test
     public void peformanceTypeVisitor() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new PassThrough()).build();
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final PassThrough aev = new PassThrough();
         final TestClass tc = new TestClass();
 
         System.out.println("Visiting 1e6 types: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(tc);
+                anv.accept(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -208,14 +215,15 @@ public class AlkemistTest
     @Test
     public void peformanceFastVisitorAssign() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build(new FastSameFlatObjConcept());
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
+        final FastSameFlatObjConcept<TestFastVisitor> fsfoc = new FastSameFlatObjConcept<>();
         final TestFastVisitor fvc = new TestFastVisitor();
 
         System.out.println("Fast visitor 1e7 assign: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.process(fvc);
+                fsfoc.visit(node, fvc);
             }
         }) / 1000000 + " ms");
     }
@@ -223,30 +231,32 @@ public class AlkemistTest
     @Test
     public void peformanceFastVisitorCreate() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build(new FastSameFlatObjConcept());
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
+        final FastSameFlatObjConcept<Object> fsfoc = new FastSameFlatObjConcept<>();
 
         System.out.println("Fast visitor 1e6 create (10 fields): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                alkemist.delegateToNodeVisitor(TestFastVisitor.class);
+                fsfoc.visit(node, Object.class);
             }
         }) / 1000000 + " ms");
     }
 
     // Fast impl. of a fast set / get.
     // Takes advantage of static alkemization.
-    static class FastSameFlatObjConcept implements AlkemyNodeReader
+    static class FastSameFlatObjConcept<R> implements FluentAlkemyNodeVisitor<R>
     {
         // The source provider
-        private final String[] source = new String[] { "two", "one", "zero", "five", "four", "three", "six", "seven", "nine", "eight" };
+        private final String[] source = new String[] { "two", "one", "zero", "five", "four", "three", "six", "seven", "nine",
+                "eight" };
 
         private IdxElement[] mapped = null;
         private Object[] args;
 
         // create
         @Override
-        public Object accept(Node<? extends AbstractAlkemyElement<?>> node)
+        public R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
         {
             args = args != null ? args : new Object[node.children().size()];
             if (mapped == null) // map once
@@ -257,12 +267,12 @@ public class AlkemistTest
             {
                 args[i] = source[mapped[i].idx];
             }
-            return node.data().newInstance(args);
+            return node.data().safeNewInstance(retType, args);
         }
 
         // assign
         @Override
-        public Object accept(Node<? extends AbstractAlkemyElement<?>> node, Object parent, Object... args)
+        public R visit(Node<? extends AbstractAlkemyElement<?>> node, R parent)
         {
             if (mapped == null)
             {
@@ -275,7 +285,7 @@ public class AlkemistTest
             }
             return parent;
         }
-        
+
         private IdxElement[] map(Node<? extends AbstractAlkemyElement<?>> node)
         {
             final IdxElement[] mapped = new IdxElement[node.children().size()];

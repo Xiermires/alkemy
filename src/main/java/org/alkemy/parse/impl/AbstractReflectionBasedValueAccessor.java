@@ -18,7 +18,6 @@ package org.alkemy.parse.impl;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
-import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.exception.TypeMismatch;

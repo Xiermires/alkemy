@@ -17,23 +17,24 @@ package org.alkemy;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
-import org.alkemy.visitor.AlkemyNodeReader;
+import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements AlkemyNodeReader
+public class ObjectCopier<T> implements FluentAlkemyNodeVisitor<T>
 {
     private Objenesis objenesis = new ObjenesisStd();
     
     @Override
-    public Object accept(Node<? extends AbstractAlkemyElement<?>> root, Object orig, Object... args)
+    public T visit(Node<? extends AbstractAlkemyElement<?>> root, T orig)
     {
-        final Object dest = objenesis.newInstance(orig.getClass());
-        visit(root, orig, dest);
+        @SuppressWarnings("unchecked")
+        final T dest = (T) objenesis.newInstance(orig.getClass());
+        deepCopy(root, orig, dest);
         return dest;
     }
 
-    private Object visit(Node<? extends AbstractAlkemyElement<?>> e, Object orig, Object dest)
+    private Object deepCopy(Node<? extends AbstractAlkemyElement<?>> e, Object orig, Object dest)
     {
         e.children().forEach(n ->
         {
@@ -42,7 +43,7 @@ public class ObjectCopier<T> implements AlkemyNodeReader
             {
                 final Object vd = objenesis.newInstance(n.data().type());
                 n.data().set(vd, dest);
-                visit(n, vo, vd);
+                deepCopy(n, vo, vd);
             }
             else
             {

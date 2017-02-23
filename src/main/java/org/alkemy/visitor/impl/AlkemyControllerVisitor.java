@@ -17,7 +17,7 @@ package org.alkemy.visitor.impl;
 
 import org.alkemy.visitor.AlkemyNodeReader;
 
-public class AlkemyControllerVisitor implements AlkemyNodeReader
+public class AlkemyControllerVisitor implements AlkemyNodeReader<Object, Object>
 {
     // TODO AlkemyControllerVisitor.
 }

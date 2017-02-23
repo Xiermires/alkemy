@@ -17,8 +17,6 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.AlkemyElementFactory;
-import org.alkemy.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
 import org.alkemy.util.TypedTable;
 

@@ -27,13 +27,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.alkemy.Alkemist;
-import org.alkemy.AlkemistBuilder;
+import org.alkemy.Alkemy;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
 import org.junit.Test;
 
 // Injecting random generated values
@@ -42,10 +42,8 @@ public class RandomGenerator
     @Test
     public void generateRandoms()
     {
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new XorRandomGenerator()).build();
         final TestClass tc = new TestClass();
-
-        alkemist.process(tc);
+        new FluentAlkemyPreorderReader<TestClass>(false, false, false).accept(new XorRandomGenerator(), Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));

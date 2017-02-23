@@ -17,8 +17,6 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.AlkemyElementFactory;
-import org.alkemy.ValueAccessor;
 import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.util.AnnotationUtils;

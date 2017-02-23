@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.agenttools.AgentTools;
+import org.alkemy.Alkemy.NodeFactory;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
@@ -29,7 +30,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
-class AlkemyLoadingCache
+class AlkemyNodes implements NodeFactory
 {
     // TODO: Allow external configuration
     private static final int MAXIMUM_BYTE_SIZE = 2 * 1024 * 1024;
@@ -39,7 +40,7 @@ class AlkemyLoadingCache
     // Keep a cached version of created AlkemyTypeVisitor to enhance performance.
     private final LoadingCache<Class<?>, Node<? extends AbstractAlkemyElement<?>>> cache;
 
-    AlkemyLoadingCache(AlkemyParser parser)
+    AlkemyNodes(AlkemyParser parser)
     {
         this.parser = parser;
 
@@ -61,7 +62,8 @@ class AlkemyLoadingCache
         return parser.parse(type);
     }
 
-    Node<? extends AbstractAlkemyElement<?>> get(Class<?> type)
+    @Override
+    public Node<? extends AbstractAlkemyElement<?>> get(Class<?> type)
     {
         try
         {

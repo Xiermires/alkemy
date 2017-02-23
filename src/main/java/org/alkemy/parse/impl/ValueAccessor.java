@@ -15,11 +15,39 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-/**
- * Lambda wrapper for the {@link Alkemizer#CREATE_INSTANCE} method.
- */
-@FunctionalInterface
-public interface NodeConstructorFunction
+import org.alkemy.exception.AccessException;
+import org.alkemy.exception.AlkemyException;
+
+public interface ValueAccessor
 {
-    Object newInstance(Object... args);
+    /**
+     * Returns the value type.
+     */
+    Class<?> type();
+
+    /**
+     * Returns the value.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while recovering the value.
+     */
+    Object get(Object parent) throws AlkemyException;
+
+    /**
+     * Returns the value if is exactly of type T (not assignable!), null otherwise.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while recovering the value.
+     */
+    <T> T safeGet(Object parent, Class<T> type) throws AlkemyException;
+    
+    /**
+     * Sets a value.
+     * 
+     * @throws AccessException
+     *             If an error occurs while setting the value.
+     */
+    void set(Object value, Object parent) throws AlkemyException;
+
+    String targetName();
 }

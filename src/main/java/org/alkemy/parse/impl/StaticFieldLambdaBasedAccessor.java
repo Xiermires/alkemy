@@ -18,7 +18,6 @@ package org.alkemy.parse.impl;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 

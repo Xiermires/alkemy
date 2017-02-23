@@ -35,4 +35,12 @@ public interface NodeConstructor
      *             If an error occurs while creating the class instance.
      */
     Object newInstance(Object... args) throws AlkemyException;
+    
+    /**
+     * Returns a new instance of the class if is exactly of type T (not assignable!), null otherwise.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while creating the class instance.
+     */
+    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException;
 }

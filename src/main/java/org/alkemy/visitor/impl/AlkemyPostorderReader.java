@@ -20,52 +20,25 @@ import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeReader;
 
 /**
  * Traverses the directed rooted tree in post-order, branch children first, branch node later.
  */
-public class AlkemyPostorderReader implements AlkemyNodeReader
+public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
 {
-    private AlkemyElementVisitor<?> aev;
     private boolean includeNullNodes;
     private boolean instantiateNodes;
     private boolean visitNodes;
 
-    AlkemyPostorderReader(AlkemyElementVisitor<?> aev, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+    public AlkemyPostorderReader(boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
     {
-        this.aev = aev;
         this.includeNullNodes = includeNullNodes;
         this.instantiateNodes = instantiateNodes;
         this.visitNodes = visitNodes;
     }
 
-    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeReader create(AlkemyElementVisitor<E> aev,
-            boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
-    {
-        return new AlkemyPostorderReader(aev, includeNullNodes, instantiateNodes, visitNodes);
-    }
-
     @Override
-    public Object accept(Node<? extends AbstractAlkemyElement<?>> root)
-    {
-        Assertions.nonNull(root);
-
-        final Object instance = root.data().newInstance();
-        root.children().forEach(c -> processBranch(c, instance));
-        return instance;
-    }
-
-    @Override
-    public Object accept(Node<? extends AbstractAlkemyElement<?>> root, Object parent, Object... args)
-    {
-        Assertions.nonNull(root);
-
-        root.children().forEach(c -> processBranch(c, parent, args));
-        return parent;
-    }
-
-    private void processBranch(Node<? extends AbstractAlkemyElement<?>> e, Object parent, Object... args)
+    protected void processBranch(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent, Object... parameter)
     {
         if (e.hasChildren())
         {
@@ -74,14 +47,34 @@ public class AlkemyPostorderReader implements AlkemyNodeReader
             {
                 e.children().forEach(c ->
                 {
-                    processBranch(c, c.data().get(node));
+                    processBranch(aev, c, c.data().get(node), parameter);
                 });
-                if (visitNodes) e.data().accept(aev, e.data().get(parent), args);
+                if (visitNodes) e.data().accept(aev, e.data().get(parent));
             }
         }
         else
         {
-            e.data().accept(aev, parent, args);
+            e.data().accept(aev, parent);
+        }
+    }
+    
+    /**
+     * Fluent version.
+     */
+    public static class FluentAlkemyPostorderReader<R> extends AlkemyPostorderReader<R, R> implements FluentAlkemyNodeReader<R>
+    {
+        public FluentAlkemyPostorderReader(boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+        {
+            super(includeNullNodes, instantiateNodes, visitNodes);
+        }
+
+        @Override
+        public R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> root, R parent)
+        {
+            Assertions.nonNull(root);
+
+            root.children().forEach(c -> processBranch(aev, c, parent));
+            return parent;
         }
     }
 }

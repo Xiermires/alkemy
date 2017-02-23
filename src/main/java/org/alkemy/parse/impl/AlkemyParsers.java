@@ -17,27 +17,32 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.AlkemyElementFactory;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 
+/**
+ * Common parser implementations.
+ */
 public class AlkemyParsers
 {
     private AlkemyParsers()
-    {   
+    {
     }
-    
+
     public static AlkemyLexer<AnnotatedElement> fieldLexer()
     {
         final AlkemyElementFactory<AnnotatedElement> elementFactory = TypeFieldAlkemyElementFactory.create();
         return TypeFieldLexer.create(elementFactory);
     }
-    
+
+    /**
+     * See {@link TypeFieldParser}
+     */
     public static AlkemyParser fieldParser()
     {
         return TypeFieldParser.create(fieldLexer());
     }
-    
+
     public static AlkemyParser fieldParser(AlkemyLexer<AnnotatedElement> lexer)
     {
         return TypeFieldParser.create(lexer);

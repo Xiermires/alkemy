@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.alkemy.ValueAccessor;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.impl.TestAlkemizer.Lorem;

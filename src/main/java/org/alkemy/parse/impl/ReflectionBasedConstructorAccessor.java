@@ -53,6 +53,14 @@ public class ReflectionBasedConstructorAccessor implements NodeConstructor
             ctor.setAccessible(false);
         }
     }
+    
+    @Override
+    @SuppressWarnings("unchecked") // safe
+    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        final Object v = newInstance(args);
+        return v == null || type == v.getClass() ? (T) v : null;
+    }
 
     @Override
     public Class<?> type() throws AlkemyException

@@ -15,9 +15,9 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
-import org.alkemy.ValueAccessor;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.NodeConstructor;
+import org.alkemy.parse.impl.ValueAccessor;
 import org.alkemy.util.TypedTable;
 
 public interface AlkemyLexer<T>

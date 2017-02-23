@@ -18,7 +18,6 @@ package org.alkemy.parse.impl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
@@ -96,17 +95,21 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     @Override
+    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        return nodeConstructor.safeNewInstance(type, args);
+    }
+
+    @Override
     public Object get(Object parent) throws AccessException
     {
         return valueAccessor.get(parent);
     }
-    
+
     @Override
-    @SuppressWarnings("unchecked") // safe
     public <T> T safeGet(Object parent, Class<T> type) throws AccessException
     {
-        final Object v = get(parent);
-        return v == null || type == v.getClass() ? (T) v : null;
+        return valueAccessor.safeGet(parent, type);
     }
 
     @Override

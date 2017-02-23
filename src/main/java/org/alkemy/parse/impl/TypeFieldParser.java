@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.InvalidOrder;
 import org.alkemy.parse.AlkemyLexer;
@@ -30,6 +31,25 @@ import org.alkemy.util.Node;
 import org.alkemy.util.Nodes;
 import org.alkemy.util.TypedTable;
 
+/**
+ * The main parser. It parses fields alkemizations (see {@link AlkemyLeaf}, as well as the {@link Order} annotation.
+ * <p>
+ * Example:
+ * 
+ * <pre>
+ * <code>
+ * @Order("bar", "foo")
+ * public class Foo 
+ * {
+ *  @Aggregate("weight")
+ *  double foo;
+ *  
+ *  @Mean("height")
+ *  double bar;
+ * }
+ * <code>
+ * The parser will create a tree with two leafs such as : Root (Foo) { Leaf (bar) , Leaf (foo) }
+ */
 class TypeFieldParser implements AlkemyParser
 {
     private final AlkemyLexer<AnnotatedElement> lexer;
