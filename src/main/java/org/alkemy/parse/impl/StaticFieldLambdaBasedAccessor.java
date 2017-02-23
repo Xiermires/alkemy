@@ -50,6 +50,14 @@ public class StaticFieldLambdaBasedAccessor implements ValueAccessor
     }
 
     @Override
+    @SuppressWarnings("unchecked") // safe
+    public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
+    {
+        final Object v = get(parent);
+        return v == null || type == v.getClass() ? (T) v : null;
+    }
+    
+    @Override
     public void set(Object value, Object unused) throws AccessException
     {
         setter.accept(value);

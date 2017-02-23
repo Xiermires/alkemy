@@ -16,13 +16,13 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.Map;
 
 import org.alkemy.AlkemyElementFactory;
 import org.alkemy.ValueAccessor;
 import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.util.AnnotationUtils;
+import org.alkemy.util.TypedTable;
 
 class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
 {
@@ -52,14 +52,14 @@ class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
     }
 
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, Map<String, Object> context)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
     {
         return factory.createLeaf(desc, valueAccessor, context);
     }
 
     @Override
     public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
-            ValueAccessor valueAccessor, Class<?> nodeType, Map<String, Object> context)
+            ValueAccessor valueAccessor, Class<?> nodeType, TypedTable context)
     {
         return factory.createNode(desc, valueConstructor, valueAccessor, nodeType, context);
     }

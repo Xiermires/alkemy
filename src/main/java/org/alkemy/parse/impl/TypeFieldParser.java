@@ -28,6 +28,7 @@ import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes;
+import org.alkemy.util.TypedTable;
 
 class TypeFieldParser implements AlkemyParser
 {
@@ -46,7 +47,7 @@ class TypeFieldParser implements AlkemyParser
     @Override
     public Node<AbstractAlkemyElement<?>> parse(Class<?> type)
     {
-        final HashMap<String, Object> context = new HashMap<>();
+        final TypedTable context = new TypedTable();
         return _parse(
                 type,
                 Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]),
@@ -55,7 +56,7 @@ class TypeFieldParser implements AlkemyParser
     }
 
     private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent,
-            Map<String, Object> context)
+            TypedTable context)
     {
         if (Object.class.equals(type))
         {

@@ -49,6 +49,14 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
     {
         return Objects.nonNull(parent) ? getter.apply(parent) : null;
     }
+    
+    @Override
+    @SuppressWarnings("unchecked") // safe
+    public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
+    {
+        final Object v = get(parent);
+        return v == null || type == v.getClass() ? (T) v : null;
+    }
 
     @Override
     public void set(Object value, Object parent) throws AccessException

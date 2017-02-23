@@ -108,6 +108,13 @@ class AccessorFactory
         {
             return ref != null ? ref.getClass().getTypeName() : null;
         }
+
+        @Override
+        @SuppressWarnings("unchecked") // safe
+        public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
+        {
+            return ref == null || type == ref.getClass() ? (T) ref : null;
+        }
     }
 
     static class UnsupportedConstructor implements NodeConstructor

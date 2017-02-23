@@ -39,7 +39,7 @@ public class AbstractReflectionBasedValueAccessor implements ValueAccessor
     }
 
     @Override
-    public Object get(Object parent)
+    public Object get(Object parent) throws AlkemyException
     {
         try
         {
@@ -55,6 +55,14 @@ public class AbstractReflectionBasedValueAccessor implements ValueAccessor
         {
             f.setAccessible(false);
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked") // safe
+    public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
+    {
+        final Object v = get(parent);
+        return v == null || type == v.getClass() ? (T) v : null;
     }
 
     @Override
@@ -112,6 +120,16 @@ public class AbstractReflectionBasedValueAccessor implements ValueAccessor
             else return null;
         }
 
+        @Override
+        public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
+        {
+            if (Objects.nonNull(parent))
+            {
+                return super.safeGet(parent, type);
+            }
+            else return null;
+        }
+        
         @Override
         public void set(Object value, Object parent) throws AccessException
         {

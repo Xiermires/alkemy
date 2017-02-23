@@ -17,17 +17,19 @@ package org.alkemy.parse.impl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.Map;
 
 import org.alkemy.ValueAccessor;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
+import org.alkemy.util.TypedTable;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
 import org.alkemy.visitor.impl.AlkemyControllerVisitor;
 import org.alkemy.visitor.impl.AlkemyPostorderReader;
 import org.alkemy.visitor.impl.AlkemyPreorderReader;
+
+import com.google.common.collect.Table;
 
 public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
 {
@@ -36,10 +38,10 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     private final NodeConstructor nodeConstructor;
     private final Class<? extends Annotation> alkemyType;
     private final boolean node;
-    private final Map<String, Object> context;
+    private final TypedTable context;
 
     AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends Annotation> alkemyType, boolean node, Map<String, Object> context)
+            Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
@@ -62,7 +64,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends Annotation> alkemyType, boolean node, Map<String, Object> context)
+            Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
     {
         return new AlkemyElement(desc, nodeConstructor, valueAccessor, alkemyType, node, context);
     }
@@ -97,6 +99,14 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     public Object get(Object parent) throws AccessException
     {
         return valueAccessor.get(parent);
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked") // safe
+    public <T> T safeGet(Object parent, Class<T> type) throws AccessException
+    {
+        final Object v = get(parent);
+        return v == null || type == v.getClass() ? (T) v : null;
     }
 
     @Override
@@ -199,7 +209,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     /**
      * A shared context between all nodes in a tree.
      */
-    public Map<String, Object> getContext()
+    public Table<String, Class<?>, Object> getContext()
     {
         return context;
     }
@@ -220,7 +230,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
 
         AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-                Class<? extends Annotation> alkemyType, boolean node, Map<String, Object> context)
+                Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
         {
             super(desc, nodeConstructor, valueAccessor, alkemyType, node, context);
         }

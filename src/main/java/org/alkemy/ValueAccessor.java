@@ -34,6 +34,14 @@ public interface ValueAccessor
     Object get(Object parent) throws AlkemyException;
 
     /**
+     * Returns the value if is exactly of type T (not assignable!), null otherwise.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while recovering the value.
+     */
+    <T> T safeGet(Object parent, Class<T> type) throws AlkemyException;
+    
+    /**
      * Sets a value.
      * 
      * @throws AccessException

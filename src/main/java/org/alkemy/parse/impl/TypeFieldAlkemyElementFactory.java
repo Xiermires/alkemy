@@ -16,11 +16,11 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.Map;
 
 import org.alkemy.AlkemyElementFactory;
 import org.alkemy.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
+import org.alkemy.util.TypedTable;
 
 public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AnnotatedElement>
 {
@@ -34,7 +34,7 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Annot
     }
 
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, Map<String, Object> context)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
     {
         return AbstractAlkemyElement.create(desc, AccessorFactory.notSupported(), valueAccessor,
                 AnnotationUtils.findVisitorType(desc), false, context);
@@ -42,7 +42,7 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Annot
 
     @Override
     public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
-            ValueAccessor valueAccessor, Class<?> nodeType, Map<String, Object> context)
+            ValueAccessor valueAccessor, Class<?> nodeType, TypedTable context)
     {
         return AbstractAlkemyElement.create(desc, valueConstructor, valueAccessor, AnnotationUtils.findVisitorType(desc), true,
                 context);

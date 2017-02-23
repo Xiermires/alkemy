@@ -15,20 +15,19 @@
  *******************************************************************************/
 package org.alkemy;
 
-import java.util.Map;
-
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.NodeConstructor;
+import org.alkemy.util.TypedTable;
 
 public interface AlkemyElementFactory<T>
 {
     /**
      * Creates an alkemy element for this target.
      */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, Map<String, Object> context);
+    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
 
     /**
      * Creates an alkemy element node for this target.
      */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, Map<String, Object> context);
+    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, TypedTable context);
 }
