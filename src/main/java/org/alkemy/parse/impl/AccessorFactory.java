@@ -23,7 +23,6 @@ import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.MemberFieldReflectionBasedAccessor;
 import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.StaticFieldReflectionBasedAccessor;
-import org.alkemy.util.Assertions;
 
 class AccessorFactory
 {
@@ -51,7 +50,8 @@ class AccessorFactory
             }
             else
             {
-                return Modifier.isStatic(f.getModifiers()) ? new StaticFieldReflectionBasedAccessor(f) : new MemberFieldReflectionBasedAccessor(f);
+                return Modifier.isStatic(f.getModifiers()) ? new StaticFieldReflectionBasedAccessor(f)
+                        : new MemberFieldReflectionBasedAccessor(f);
             }
         }
         catch (IllegalAccessException | SecurityException e)
@@ -88,7 +88,7 @@ class AccessorFactory
         @Override
         public Class<?> type() throws AlkemyException
         {
-            return ref.getClass();
+            return ref != null ? ref.getClass() : null;
         }
 
         @Override
@@ -106,8 +106,7 @@ class AccessorFactory
         @Override
         public String targetName()
         {
-            Assertions.nonNull(ref);
-            return ref.getClass().getTypeName();
+            return ref != null ? ref.getClass().getTypeName() : null;
         }
     }
 

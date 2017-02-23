@@ -23,8 +23,8 @@ import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor;
-import org.alkemy.visitor.impl.AlkemyPreorderVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
+import org.alkemy.visitor.impl.AlkemyPreorderReader;
 
 /**
  * The {@link Alkemist} class builder.
@@ -65,7 +65,7 @@ public class AlkemistBuilder
         lexer = lexer == null ? AlkemyParsers.fieldLexer() : lexer;
         parser = parser == null ? AlkemyParsers.fieldParser(lexer) : parser;
         cache = new AlkemyLoadingCache(parser);
-        return new Alkemist(cache, AlkemyPreorderVisitor.create(aev, true, false, true));
+        return new Alkemist(cache, AlkemyPreorderReader.create(aev, true, false, true));
     }
 
     public Alkemist build(Configuration conf)
@@ -78,7 +78,7 @@ public class AlkemistBuilder
         return new Alkemist(cache, createAlkemyNodeVisitor(conf, aev));
     }
 
-    public Alkemist build(AlkemyNodeVisitor anv)
+    public Alkemist build(AlkemyNodeReader anv)
     {
         Assertions.nonNull(anv);
 
@@ -88,14 +88,14 @@ public class AlkemistBuilder
         return new Alkemist(cache, anv);
     }
 
-    private AlkemyNodeVisitor createAlkemyNodeVisitor(Configuration conf, AlkemyElementVisitor<?> aev)
+    private AlkemyNodeReader createAlkemyNodeVisitor(Configuration conf, AlkemyElementVisitor<?> aev)
     {
         switch (conf.mode)
         {
             case PREORDER:
-                return AlkemyPreorderVisitor.create(aev, conf.includeNullNodes, conf.instantiateNodes, conf.visitNodes);
+                return AlkemyPreorderReader.create(aev, conf.includeNullNodes, conf.instantiateNodes, conf.visitNodes);
             case POSTORDER:
-                return AlkemyPreorderVisitor.create(aev, conf.includeNullNodes, conf.instantiateNodes, conf.visitNodes);
+                return AlkemyPreorderReader.create(aev, conf.includeNullNodes, conf.instantiateNodes, conf.visitNodes);
         }
         throw new AlkemyException("Invalid mode '%s'", conf.mode.name()); // should never happen
     }

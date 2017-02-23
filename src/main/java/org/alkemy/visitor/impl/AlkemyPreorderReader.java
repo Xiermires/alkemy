@@ -20,19 +20,19 @@ import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
 
 /**
  * Traverses the directed rooted tree in pre-order, in order of appearance.
  */
-public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
+public class AlkemyPreorderReader implements AlkemyNodeReader
 {
     private AlkemyElementVisitor<?> aev;
     private boolean includeNullNodes;
     private boolean instantiateNodes;
     private boolean visitNodes;
 
-    AlkemyPreorderVisitor(AlkemyElementVisitor<?> aev, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+    AlkemyPreorderReader(AlkemyElementVisitor<?> aev, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
     {
         this.aev = aev;
         this.includeNullNodes = includeNullNodes;
@@ -40,14 +40,14 @@ public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
         this.visitNodes = visitNodes;
     }
 
-    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeVisitor create(AlkemyElementVisitor<E> aev,
+    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeReader create(AlkemyElementVisitor<E> aev,
             boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
     {
-        return new AlkemyPreorderVisitor(aev, includeNullNodes, instantiateNodes, visitNodes);
+        return new AlkemyPreorderReader(aev, includeNullNodes, instantiateNodes, visitNodes);
     }
 
     @Override
-    public Object visit(Node<? extends AbstractAlkemyElement<?>> root)
+    public Object accept(Node<? extends AbstractAlkemyElement<?>> root)
     {
         Assertions.nonNull(root);
 
@@ -57,7 +57,7 @@ public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
     }
 
     @Override
-    public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object parent, Object... args)
+    public Object accept(Node<? extends AbstractAlkemyElement<?>> root, Object parent, Object... args)
     {
         Assertions.nonNull(root);
 
@@ -72,13 +72,13 @@ public class AlkemyPreorderVisitor implements AlkemyNodeVisitor
             final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes);
             if (includeNullNodes || node != null)
             {
-                if (visitNodes) e.data().acceptArgs(aev, parent, args);
+                if (visitNodes) e.data().accept(aev, parent, args);
                 e.children().forEach(c -> processBranch(c, e.data().get(parent)));
             }
         }
         else
         {
-            e.data().acceptArgs(aev, parent, args);
+            e.data().accept(aev, parent, args);
         }
     }
 }

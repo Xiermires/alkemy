@@ -18,14 +18,14 @@ package org.alkemy.visitor;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 
-public interface AlkemyNodeVisitor
+public interface AlkemyNodeReader
 {
-    default Object visit(Node<? extends AbstractAlkemyElement<?>> node)
+    default Object accept(Node<? extends AbstractAlkemyElement<?>> node)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
     
-    default Object visit(Node<? extends AbstractAlkemyElement<?>> node, Object parent, Object... args)
+    default Object accept(Node<? extends AbstractAlkemyElement<?>> node, Object parent, Object... args)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }

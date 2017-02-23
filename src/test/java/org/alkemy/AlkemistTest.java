@@ -34,13 +34,11 @@ import java.util.function.Supplier;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Measure;
 import org.alkemy.util.Node;
 import org.alkemy.util.PassThrough;
-import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
 import org.junit.Test;
 
 // Alkemist usage examples.
@@ -119,7 +117,7 @@ public class AlkemistTest
             s0s1.add(tc.s1);
         }
         assertThat(s0s1, contains("foo", "1", "0", "bar"));
-        
+
         final StringBuilder sb = new StringBuilder();
         alkemist.iterable(Arrays.asList(tc1, tc2)).forEach(e -> sb.append(e.s0).append(e.s1));
         assertThat(sb.toString(), is("foo10bar"));
@@ -177,7 +175,6 @@ public class AlkemistTest
         }) / 1000000 + " ms");
     }
 
-
     @Test
     public void peformanceElementVisitorNoInstr() throws Throwable
     {
@@ -192,7 +189,7 @@ public class AlkemistTest
             }
         }) / 1000000 + " ms");
     }
-    
+
     @Test
     public void peformanceTypeVisitor() throws Throwable
     {
@@ -207,11 +204,11 @@ public class AlkemistTest
             }
         }) / 1000000 + " ms");
     }
-    
+
     @Test
     public void peformanceFastVisitorAssign() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build(new FastVisitorConcept());
+        final Alkemist alkemist = new AlkemistBuilder().build(new FastSameFlatObjConcept());
         final TestFastVisitor fvc = new TestFastVisitor();
 
         System.out.println("Fast visitor 1e7 assign: " + Measure.measure(() ->
@@ -222,11 +219,11 @@ public class AlkemistTest
             }
         }) / 1000000 + " ms");
     }
-    
+
     @Test
     public void peformanceFastVisitorCreate() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build(new FastVisitorConcept());
+        final Alkemist alkemist = new AlkemistBuilder().build(new FastSameFlatObjConcept());
 
         System.out.println("Fast visitor 1e6 create (10 fields): " + Measure.measure(() ->
         {
@@ -236,101 +233,72 @@ public class AlkemistTest
             }
         }) / 1000000 + " ms");
     }
-    
-    // Clumsy impl. of a fast set / get visitor.
+
+    // Fast impl. of a fast set / get.
     // Takes advantage of static alkemization.
-    static class FastVisitorConcept implements AlkemyNodeVisitor, AlkemyElementVisitor<IdxElement>
+    static class FastSameFlatObjConcept implements AlkemyNodeReader
     {
-        final String[] source = new String[] { "two", "one", "zero", "five", "four", "three", "six", "seven", "nine", "eight" };
-        
-        int map = 0;
-        int arg = 0;
-        IdxElement[] mapped = null;
-        Object[] args;
-        
+        // The source provider
+        private final String[] source = new String[] { "two", "one", "zero", "five", "four", "three", "six", "seven", "nine", "eight" };
+
+        private IdxElement[] mapped = null;
+        private Object[] args;
+
         // create
         @Override
-        public Object visit(Node<? extends AbstractAlkemyElement<?>> node)
+        public Object accept(Node<? extends AbstractAlkemyElement<?>> node)
         {
             args = args != null ? args : new Object[node.children().size()];
-            
-            if (mapped == null) // this happens once
+            if (mapped == null) // map once
             {
-                mapped = new IdxElement[node.children().size()];
-                node.children().forEach(c -> {
-                    args[arg++] = c.data().accept(this);
-                });
+                mapped = map(node);
             }
-            else // fast assign
+            for (int i = 0; i < mapped.length; i++)
             {
-                for (int i=0; i<mapped.length; i++)
-                {
-                    args[i] = visit(mapped[i]);
-                }
+                args[i] = source[mapped[i].idx];
             }
             return node.data().newInstance(args);
-        }
-        
-        // create
-        @Override
-        public Object visit(IdxElement element)
-        {
-            return source[element.idx];
-        }
-        
-        // assign
-        @Override
-        public Object visit(Node<? extends AbstractAlkemyElement<?>> node, Object parent, Object... args)
-        {
-            if (mapped == null)
-            {
-                mapped = new IdxElement[node.children().size()];
-                node.children().forEach(c -> {
-                    c.data().accept(this, parent);
-                });
-            }
-            else
-            {
-                for (int i=0; i<mapped.length; i++)
-                {
-                    visit(mapped[i], parent);
-                }
-            }
-            return parent;
         }
 
         // assign
         @Override
-        public void visit(IdxElement element, Object parent)
+        public Object accept(Node<? extends AbstractAlkemyElement<?>> node, Object parent, Object... args)
         {
-            element.set(source[element.idx], parent);
+            if (mapped == null)
+            {
+                mapped = map(node);
+            }
+
+            for (int i = 0; i < mapped.length; i++)
+            {
+                mapped[i].set(source[mapped[i].idx], parent);
+            }
+            return parent;
         }
         
-        @Override
-        public boolean accepts(Class<?> type)
+        private IdxElement[] map(Node<? extends AbstractAlkemyElement<?>> node)
         {
-            return Idx.class == type;
-        }
-        
-        @Override
-        public IdxElement map(AlkemyElement e)
-        {
-            return (mapped[map++] = new IdxElement(e));
+            final IdxElement[] mapped = new IdxElement[node.children().size()];
+            for (int i = 0; i < mapped.length; i++)
+            {
+                mapped[i] = new IdxElement(node.children().get(i).data());
+            }
+            return mapped;
         }
     }
-    
+
     static class IdxElement extends AbstractAlkemyElement<IdxElement>
     {
         int idx;
-        
+
         protected IdxElement(AbstractAlkemyElement<?> other)
         {
             super(other);
             idx = other.desc().getAnnotation(Idx.class).value();
         }
-        
+
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
     @AlkemyLeaf(Idx.class)

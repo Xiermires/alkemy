@@ -20,7 +20,6 @@ import java.util.function.Supplier;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.exception.InvalidArgument;
 
 public class StaticMethodLambdaBasedConstructor implements NodeConstructor
 {

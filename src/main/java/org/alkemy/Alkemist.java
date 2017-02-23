@@ -26,10 +26,10 @@ import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
 
 /**
- * The Alkemist class allows applying user specific {@link AlkemyNodeVisitor} and {@link AlkemyElementVisitor} strategies to a set
+ * The Alkemist class allows applying user specific {@link AlkemyNodeReader} and {@link AlkemyElementVisitor} strategies to a set
  * of alkemy elements.
  * <p>
  * Alkemy elements are the result of parsing an "alkemized" type with an {@link AlkemyParser}, being "alkemized" user defined.
@@ -44,9 +44,9 @@ import org.alkemy.visitor.AlkemyNodeVisitor;
 public class Alkemist
 {
     private AlkemyLoadingCache cache;
-    private AlkemyNodeVisitor anv;
+    private AlkemyNodeReader anv;
 
-    Alkemist(AlkemyLoadingCache cache, AlkemyNodeVisitor anv)
+    Alkemist(AlkemyLoadingCache cache, AlkemyNodeReader anv)
     {
         Assertions.noneNull(cache, anv);
 
@@ -60,7 +60,7 @@ public class Alkemist
     public <T> T process(T t)
     {
         Assertions.nonNull(t);
-        anv.visit(cache.get(t.getClass()), t);
+        anv.accept(cache.get(t.getClass()), t);
         return t;
     }
     
@@ -70,7 +70,7 @@ public class Alkemist
     public <T> T process(T t, Object... args)
     {
         Assertions.nonNull(t);
-        anv.visit(cache.get(t.getClass()), t, args);
+        anv.accept(cache.get(t.getClass()), t, args);
         return t;
     }
 
@@ -82,7 +82,7 @@ public class Alkemist
     {
         Assertions.noneNull(clazz, anv);
         final Node<? extends AbstractAlkemyElement<?>> node = cache.get(clazz);
-        return clazz.cast(anv.visit(node, node.data().newInstance()));
+        return clazz.cast(anv.accept(node, node.data().newInstance()));
     }
 
     /**
@@ -92,16 +92,16 @@ public class Alkemist
     {
         Assertions.noneNull(clazz, args);
         final Node<? extends AbstractAlkemyElement<?>> node = cache.get(clazz);
-        return clazz.cast(anv.visit(node, node.data().newInstance(), args));
+        return clazz.cast(anv.accept(node, node.data().newInstance(), args));
     }
 
     /**
-     * Delegates any decision regarding the class to this Alkemist {@link AlkemyNodeVisitor}.
+     * Delegates any decision regarding the class to this Alkemist {@link AlkemyNodeReader}.
      */
     public <T> T delegateToNodeVisitor(Class<T> clazz)
     {
         Assertions.noneNull(clazz, anv);
-        return clazz.cast(anv.visit(cache.get(clazz)));
+        return clazz.cast(anv.accept(cache.get(clazz)));
     }
 
     /**
@@ -110,7 +110,7 @@ public class Alkemist
     public <T> T delegateToNodeVisitor(Class<T> clazz, Object... args)
     {
         Assertions.noneNull(clazz, args);
-        return clazz.cast(anv.visit(cache.get(clazz), args));
+        return clazz.cast(anv.accept(cache.get(clazz), args));
     }
     
     /**
@@ -168,10 +168,10 @@ public class Alkemist
      * <p>
      * See {@link #process(Object)}
      */
-    public static <T> T create(Class<T> clazz, AlkemyNodeVisitor anv, AlkemyParser parser)
+    public static <T> T create(Class<T> clazz, AlkemyNodeReader anv, AlkemyParser parser)
     {
         Assertions.noneNull(clazz, anv);
-        return clazz.cast(anv.visit(parser.parse(clazz)));
+        return clazz.cast(anv.accept(parser.parse(clazz)));
     }
 
     /**
@@ -181,10 +181,10 @@ public class Alkemist
      * <p>
      * See {@link #process(Class)}
      */
-    public static <T> T process(T t, AlkemyNodeVisitor anv, AlkemyParser parser)
+    public static <T> T process(T t, AlkemyNodeReader anv, AlkemyParser parser)
     {
         Assertions.noneNull(t, anv);
-        anv.visit(parser.parse(t.getClass()), t);
+        anv.accept(parser.parse(t.getClass()), t);
         return t;
     }
 

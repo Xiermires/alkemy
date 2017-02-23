@@ -45,7 +45,7 @@ public class AlkemyVisitorTests
     public void testReadAnObject()
     {
         final ObjectReader or = new ObjectReader(new Stack<Integer>());
-        Alkemist.process(new TestReader(), AlkemyPreorderVisitor.create(or, false, false, true), AlkemyParsers.fieldParser());
+        Alkemist.process(new TestReader(), AlkemyPreorderReader.create(or, false, false, true), AlkemyParsers.fieldParser());
 
         assertThat(or.stack.size(), is(8));
     }
@@ -53,7 +53,7 @@ public class AlkemyVisitorTests
     @Test
     public void testWriteAnObjUsingPreorderVisitor()
     {
-        final TestWriter tc = Alkemist.create(TestWriter.class, new AlkemyPreorderVisitor(new ObjectWriter(
+        final TestWriter tc = Alkemist.create(TestWriter.class, new AlkemyPreorderReader(new ObjectWriter(
                 new Constant<AlkemyElement>(55)), true, true, false), AlkemyParsers.fieldParser());
 
         assertThat(tc.a, is(55));
@@ -82,7 +82,7 @@ public class AlkemyVisitorTests
     @Test
     public void performanceWriteAnObjUsingPreorderVisitor() throws Throwable
     {
-        final Alkemist alkemist = new AlkemistBuilder().build(new AlkemyPreorderVisitor(new ObjectWriter(
+        final Alkemist alkemist = new AlkemistBuilder().build(new AlkemyPreorderReader(new ObjectWriter(
                 new Constant<AlkemyElement>(55)), true, true, false));
         System.out.println("Create 1e6 objects (preorder): " + Measure.measure(() ->
         {
@@ -102,7 +102,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, false, false, true), AlkemyParsers.fieldParser());
+        Alkemist.process(tr, AlkemyPreorderReader.create(ns, false, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -123,7 +123,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(tr, AlkemyPostorderVisitor.create(ns, false, false, true), AlkemyParsers.fieldParser());
+        Alkemist.process(tr, AlkemyPostorderReader.create(ns, false, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -144,7 +144,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(tr, AlkemyPreorderVisitor.create(ns, true, false, true), AlkemyParsers.fieldParser());
+        Alkemist.process(tr, AlkemyPreorderReader.create(ns, true, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -171,7 +171,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        Alkemist.process(new TestReader(), AlkemyPostorderVisitor.create(ns, true, false, true), AlkemyParsers.fieldParser());
+        Alkemist.process(new TestReader(), AlkemyPostorderReader.create(ns, true, false, true), AlkemyParsers.fieldParser());
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -200,7 +200,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public void visitArgs(AlkemyElement e, Object parent, Object... args)
+        public void visit(AlkemyElement e, Object parent, Object... args)
         {
             if (!e.isNode()) stack.push(Integer.valueOf((int) e.get(parent)));
         }
@@ -241,15 +241,9 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public void visitArgs(AlkemyElement e, Object parent, Object... args)
+        public void visit(AlkemyElement e, Object parent, Object... args)
         {
             e.set(avp.getValue(e), parent);
-        }
-
-        @Override
-        public Object visitArgs(AlkemyElement e, Object... args)
-        {
-            return e.newInstance(args);
         }
 
         @Override
@@ -294,7 +288,7 @@ public class AlkemyVisitorTests
         final Stack<String> names = new Stack<String>();
 
         @Override
-        public void visitArgs(AlkemyElement e, Object parent, Object... args)
+        public void visit(AlkemyElement e, Object parent, Object... args)
         {
             names.add(e.targetName());
         }

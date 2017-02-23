@@ -24,10 +24,10 @@ import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
 import org.alkemy.visitor.impl.AlkemyControllerVisitor;
-import org.alkemy.visitor.impl.AlkemyPostorderVisitor;
-import org.alkemy.visitor.impl.AlkemyPreorderVisitor;
+import org.alkemy.visitor.impl.AlkemyPostorderReader;
+import org.alkemy.visitor.impl.AlkemyPreorderReader;
 
 public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
 {
@@ -124,13 +124,13 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      * <p>
      * If the visitor doesn't {@link AlkemyElementVisitor#accepts(Class)} this element, element is not processed and returns null.
      * <p>
-     * The accept methods are used to bridge between {@link AlkemyNodeVisitor}, which traverses a tree of unknown
+     * The accept methods are used to bridge between {@link AlkemyNodeReader}, which traverses a tree of unknown
      * {@link AbstractAlkemyElement} implementations, and an {@link AlkemyElementVisitor} which requires an explicit
-     * {@link AbstractAlkemyElement} type. Multi-purpose node visitors, such as the {@link AlkemyPreorderVisitor}, the
-     * {@link AlkemyPostorderVisitor} and the {@link AlkemyControllerVisitor}, use this method to avoid any casting between
+     * {@link AbstractAlkemyElement} type. Multi-purpose node visitors, such as the {@link AlkemyPreorderReader}, the
+     * {@link AlkemyPostorderReader} and the {@link AlkemyControllerVisitor}, use this method to avoid any casting between
      * {@link AbstractAlkemyElement} types.
      * <p>
-     * Whenever a {@link AlkemyNodeVisitor} handles known {@link AbstractAlkemyElement} implementations, these methods are not
+     * Whenever a {@link AlkemyNodeReader} handles known {@link AbstractAlkemyElement} implementations, these methods are not
      * required and the node visitor can directly
      * <code>alkemyElementVisitor.visit(new ConcreteAlkemyElement(node<impl>.data())</code>.
      */
@@ -145,54 +145,21 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     /**
-     * As {@link #accept(AlkemyElementVisitor)} but working on an element bound to a parent object.
-     * <p>
-     * Returns true if the visitor could accept this element.
-     */
-    public <T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<T> v, Object parent)
-    {
-        if (cacheAcceptedRef())
-        {
-            final T t = map(v);
-            if (t != null)
-            {
-                v.visit(t, parent);
-            }
-        }
-        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent);
-        else return false;
-        return true;
-    }
-
-    /**
-     * As {@link #accept(AlkemyElementVisitor)} but accepting extra parameters.
-     */
-    public <T extends AbstractAlkemyElement<T>> Object acceptArgs(AlkemyElementVisitor<T> v, Object... args)
-    {
-        if (cacheAcceptedRef())
-        {
-            final T t = map(v);
-            return t != null ? v.visitArgs(t, args) : null;
-        }
-        else return v.visitArgs(v.map(view()), args);
-    }
-
-    /**
      * As {@link #accept(AlkemyElementVisitor, Object)} but accepting extra parameters.
      * <p>
      * Returns true if the visitor could accept this element.
      */
-    public <T extends AbstractAlkemyElement<T>> boolean acceptArgs(AlkemyElementVisitor<T> v, Object parent, Object... args)
+    public <T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<T> v, Object parent, Object... args)
     {
         if (cacheAcceptedRef())
         {
             final T t = map(v);
             if (t != null)
             {
-                v.visitArgs(t, parent, args);
+                v.visit(t, parent, args);
             }
         }
-        else if (v.accepts(alkemyType)) v.visitArgs(v.map(view()), parent, args);
+        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent, args);
         else return false;
         return true;
     }

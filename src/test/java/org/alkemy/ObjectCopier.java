@@ -17,16 +17,16 @@ package org.alkemy;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements AlkemyNodeVisitor
+public class ObjectCopier<T> implements AlkemyNodeReader
 {
     private Objenesis objenesis = new ObjenesisStd();
     
     @Override
-    public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object orig, Object... args)
+    public Object accept(Node<? extends AbstractAlkemyElement<?>> root, Object orig, Object... args)
     {
         final Object dest = objenesis.newInstance(orig.getClass());
         visit(root, orig, dest);

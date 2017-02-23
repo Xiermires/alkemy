@@ -24,24 +24,14 @@ public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>>
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
-    
-    default void visit(E e, Object parent)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default Object visitArgs(E e, Object... args)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visitArgs(E e, Object parent, Object... args)
+
+    default void visit(E e, Object parent, Object... args)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
     E map(AlkemyElement e);
-    
+
     default boolean accepts(Class<?> type)
     {
         return true;

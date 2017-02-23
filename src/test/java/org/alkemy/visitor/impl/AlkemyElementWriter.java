@@ -15,15 +15,14 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
 
-public class AlkemyElementWriter implements AlkemyNodeVisitor
+public class AlkemyElementWriter implements AlkemyNodeReader
 {
     private AlkemyElementVisitor<?> aev;
 
@@ -33,31 +32,28 @@ public class AlkemyElementWriter implements AlkemyNodeVisitor
     }
 
     @Override
-    public Object visit(Node<? extends AbstractAlkemyElement<?>> root)
+    public Object accept(Node<? extends AbstractAlkemyElement<?>> root)
     {
         final Parameters params = new Parameters(aev, root.children().size());
-        root.children().forEach(processNode(params));
-        return root.data().acceptArgs(aev, params.get());
+        root.children().forEach(c -> processNode(c, params));
+        return root.data().newInstance(params.get());
     }
 
-    private Consumer<? super Node<? extends AbstractAlkemyElement<?>>> processNode(Parameters params)
+    private void processNode(Node<? extends AbstractAlkemyElement<?>> e, Parameters params)
     {
-        return e ->
+        if (e.hasChildren())
         {
-            if (e.hasChildren())
+            final Parameters childParams = new Parameters(aev, e.children().size());
+            e.children().forEach(c -> processNode(c, childParams));
+            if (!childParams.unsupported)
             {
-                final Parameters childParams = new Parameters(aev, e.children().size());
-                e.children().forEach(processNode(childParams));
-                if (!childParams.unsupported)
-                {
-                    params.add(e.data().newInstance(childParams.get()));
-                }
+                params.add(e.data().newInstance(childParams.get()));
             }
-            else
-            {
-                params.tryAdd(e);
-            }
-        };
+        }
+        else
+        {
+            params.tryAdd(e);
+        }
     }
 
     static class Parameters implements Supplier<Object[]>

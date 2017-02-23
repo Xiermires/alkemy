@@ -20,19 +20,19 @@ import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
 
 /**
  * Traverses the directed rooted tree in post-order, branch children first, branch node later.
  */
-public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
+public class AlkemyPostorderReader implements AlkemyNodeReader
 {
     private AlkemyElementVisitor<?> aev;
     private boolean includeNullNodes;
     private boolean instantiateNodes;
     private boolean visitNodes;
 
-    AlkemyPostorderVisitor(AlkemyElementVisitor<?> aev, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+    AlkemyPostorderReader(AlkemyElementVisitor<?> aev, boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
     {
         this.aev = aev;
         this.includeNullNodes = includeNullNodes;
@@ -40,14 +40,14 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
         this.visitNodes = visitNodes;
     }
 
-    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeVisitor create(AlkemyElementVisitor<E> aev,
+    public static <E extends AbstractAlkemyElement<E>> AlkemyNodeReader create(AlkemyElementVisitor<E> aev,
             boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
     {
-        return new AlkemyPostorderVisitor(aev, includeNullNodes, instantiateNodes, visitNodes);
+        return new AlkemyPostorderReader(aev, includeNullNodes, instantiateNodes, visitNodes);
     }
 
     @Override
-    public Object visit(Node<? extends AbstractAlkemyElement<?>> root)
+    public Object accept(Node<? extends AbstractAlkemyElement<?>> root)
     {
         Assertions.nonNull(root);
 
@@ -57,7 +57,7 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
     }
 
     @Override
-    public Object visit(Node<? extends AbstractAlkemyElement<?>> root, Object parent, Object... args)
+    public Object accept(Node<? extends AbstractAlkemyElement<?>> root, Object parent, Object... args)
     {
         Assertions.nonNull(root);
 
@@ -76,12 +76,12 @@ public class AlkemyPostorderVisitor implements AlkemyNodeVisitor
                 {
                     processBranch(c, c.data().get(node));
                 });
-                if (visitNodes) e.data().acceptArgs(aev, e.data().get(parent), args);
+                if (visitNodes) e.data().accept(aev, e.data().get(parent), args);
             }
         }
         else
         {
-            e.data().acceptArgs(aev, parent, args);
+            e.data().accept(aev, parent, args);
         }
     }
 }
