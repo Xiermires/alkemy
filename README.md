@@ -91,22 +91,22 @@ public class RandomGenerator
     @Test
     public void generateRandoms()
     {
-		// Build an Alkemist with a single visitor (XorRandomGenerator)
-        final Alkemist alkemist = new AlkemistBuilder().visitor(new XorRandomGenerator()).build();
-        
 		// Create a raw class we want to alkemize
 		final TestClass tc = new TestClass();
 
-		// Visit TestClass.class alkemization and imbue XorRandomGenerator properties into tc.
-        alkemist.process(tc);
+        // Generate the tree of alkemy elements
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        // Traverse the tree in preorder, apply XorRandomGenerator to any AlkemyElement found of type 'Random'
+        new FluentAlkemyPreorderReader<TestClass>(false, false, false) // don't include null branches / don't instantiate / don't visit node elements
+                .acceptFluent(new XorRandomGenerator<TestClass>(), node, tc);
         
 		// No between matcher / gt, lt are left / right open.
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10)))); 
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));
     }
     
-    // The visitor that works on the AlkemyElements. 
-    static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement>
+    // The visitor that works on the AlkemyElements.
+    static class XorRandomGenerator<P> implements AlkemyElementVisitor<P, RandomElement>
     {
         @Override
         public void visit(RandomElement e, Object parent)
@@ -120,13 +120,19 @@ public class RandomGenerator
             return new RandomElement(e);
         }
 
+        @Override
+        public boolean accepts(Class<?> type)
+        {
+            return Random.class == type; // Accept @Random only.
+        }
+
         protected double nextDouble(double min, double max)
         {
             return min + (nextDouble() * ((max - min)));
         }
-        
+
         private long seed = System.nanoTime();
-        
+
         /**
          * Return an uniformly distributed double number between (0-1).
          * <p>
