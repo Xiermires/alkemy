@@ -24,10 +24,10 @@ import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class PassThrough implements AlkemyElementVisitor<AlkemyElement>
+public class PassThrough<P> implements AlkemyElementVisitor<P, AlkemyElement>
 {
     @Override
-    public void visit(AlkemyElement e, Object parent, Object... args)
+    public void visit(AlkemyElement e, Object parent)
     {
     }
 

@@ -26,7 +26,7 @@ public class ObjectCopier<T> implements FluentAlkemyNodeVisitor<T>
     private Objenesis objenesis = new ObjenesisStd();
     
     @Override
-    public T visit(Node<? extends AbstractAlkemyElement<?>> root, T orig)
+    public T visitFluent(Node<? extends AbstractAlkemyElement<?>> root, T orig)
     {
         @SuppressWarnings("unchecked")
         final T dest = (T) objenesis.newInstance(orig.getClass());

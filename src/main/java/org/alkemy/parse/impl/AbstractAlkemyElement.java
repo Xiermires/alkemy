@@ -147,7 +147,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      * required and the node visitor can directly
      * <code>alkemyElementVisitor.visit(new ConcreteAlkemyElement(node<impl>.data())</code>.
      */
-    public <T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<T> v)
+    public <P, T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<P, T> v)
     {
         if (cacheAcceptedRef())
         {
@@ -156,29 +156,49 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
         else return v.visit(v.map(view()));
     }
-
+    
     /**
      * As {@link #accept(AlkemyElementVisitor, Object)} but accepting extra parameters.
      * <p>
      * Returns true if the visitor could accept this element.
      */
-    public <T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<T> v, Object parent, Object... args)
+    public <P, T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<P, T> v, Object parent)
     {
         if (cacheAcceptedRef())
         {
             final T t = map(v);
             if (t != null)
             {
-                v.visit(t, parent, args);
+                v.visit(t, parent);
             }
         }
-        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent, args);
+        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent);
+        else return false;
+        return true;
+    }
+    
+    /**
+     * As {@link #accept(AlkemyElementVisitor, Object)} but accepting extra parameters.
+     * <p>
+     * Returns true if the visitor could accept this element.
+     */
+    public <P, T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<P, T> v, Object parent, P parameter)
+    {
+        if (cacheAcceptedRef())
+        {
+            final T t = map(v);
+            if (t != null)
+            {
+                v.visit(t, parent, parameter);
+            }
+        }
+        else if (v.accepts(alkemyType)) v.visit(v.map(view()), parent, parameter);
         else return false;
         return true;
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends AbstractAlkemyElement<T>> T map(AlkemyElementVisitor<T> v)
+    protected <P, T extends AbstractAlkemyElement<T>> T map(AlkemyElementVisitor<P, T> v)
     {
         if (cacheRef != null)
         {

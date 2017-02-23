@@ -37,22 +37,22 @@ import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
  */
 public interface AlkemyNodeReader<R, P>
 {
-    default R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+    default R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
-    default R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node, P parameter, Class<R> retType)
+    default R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, P parameter, Class<R> retType)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
-
+    
     /**
      * Fluent version of the {@link AlkemyNodeReader}.
      */
     public interface FluentAlkemyNodeReader<R> extends AlkemyNodeReader<R, R>
     {
-        default R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node, R parameter)
+        default R acceptFluent(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, R parameter)
         {
             throw new UnsupportedOperationException("Not implemented.");
         }
@@ -60,7 +60,7 @@ public interface AlkemyNodeReader<R, P>
         /**
          * See {@link FluentAlkemyNodeVisitor#iterable(Node, Iterable)}
          */
-        default Iterable<R> iterable(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
+        default Iterable<R> iterable(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
         {
             return new FluentNodeReaderToVisitorAdapter<R>(this, aev).iterable(node, items);
         }
@@ -68,7 +68,7 @@ public interface AlkemyNodeReader<R, P>
         /**
          * See {@link FluentAlkemyNodeVisitor#iterable(Node, Iterator)}
          */
-        default Iterable<R> iterable(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
+        default Iterable<R> iterable(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
         {
             return new FluentNodeReaderToVisitorAdapter<R>(this, aev).iterable(node, items);
         }
@@ -77,7 +77,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * See {@link AlkemyNodeVisitor#iterable(Node, Iterable, Class)}
      */
-    default Iterable<Entry<R, P>> iterable(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node,
+    default Iterable<Entry<R, P>> iterable(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node,
             Iterable<P> items, Class<R> retType)
     {
         return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items, retType);
@@ -86,7 +86,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * See {@link AlkemyNodeVisitor#iterable(Node, Iterator, Class)}
      */
-    default Iterable<Entry<R, P>> iterable(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node,
+    default Iterable<Entry<R, P>> iterable(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node,
             Iterator<P> items, Class<R> retType)
     {
         return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items, retType);
@@ -95,7 +95,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * See {@link AlkemyNodeVisitor#iterable(Node, Supplier, Class)}
      */
-    default Iterable<R> iterable(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> node,
+    default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node,
             Supplier<Boolean> hasNext, Class<R> retType)
     {
         return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, hasNext, retType);

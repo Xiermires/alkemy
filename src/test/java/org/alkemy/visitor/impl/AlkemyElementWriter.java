@@ -25,19 +25,19 @@ import org.alkemy.visitor.AlkemyNodeReader.FluentAlkemyNodeReader;
 public class AlkemyElementWriter<R> implements FluentAlkemyNodeReader<R>
 {
     @Override
-    public R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> root, Class<R> retType)
+    public R accept(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, Class<R> retType)
     {
-        final Parameters params = new Parameters(aev, root.children().size());
-        root.children().forEach(c -> processNode(aev, c, params));
+        final Parameters<R> params = new Parameters<>(aev, root.children().size(), retType);
+        root.children().forEach(c -> processNode(aev, c, params, retType));
         return root.data().safeNewInstance(retType, params.get());
     }
 
-    private void processNode(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters params)
+    private void processNode(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters<R> params, Class<R> retType)
     {
         if (e.hasChildren())
         {
-            final Parameters childParams = new Parameters(aev, e.children().size());
-            e.children().forEach(c -> processNode(aev, c, childParams));
+            final Parameters<R> childParams = new Parameters<>(aev, e.children().size(), retType);
+            e.children().forEach(c -> processNode(aev, c, childParams, retType));
             if (!childParams.unsupported)
             {
                 params.add(e.data().newInstance(childParams.get()));
@@ -49,14 +49,15 @@ public class AlkemyElementWriter<R> implements FluentAlkemyNodeReader<R>
         }
     }
 
-    static class Parameters implements Supplier<Object[]>
+    static class Parameters<R> implements Supplier<Object[]>
     {
         int c = 0;
         Object[] params;
         boolean unsupported = false;
-        AlkemyElementVisitor<?> aev;
+        AlkemyElementVisitor<R, ?> aev;
+        Class<R> returnType;
 
-        Parameters(AlkemyElementVisitor<?> aev, int size)
+        Parameters(AlkemyElementVisitor<R, ?> aev, int size, Class<R> returnType)
         {
             this.aev = aev;
             params = new Object[size];

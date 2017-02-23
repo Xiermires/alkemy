@@ -43,17 +43,17 @@ public class RandomGenerator
     public void generateRandoms()
     {
         final TestClass tc = new TestClass();
-        new FluentAlkemyPreorderReader<TestClass>(false, false, false).accept(new XorRandomGenerator(), Alkemy.nodes().get(TestClass.class), tc);
+        new FluentAlkemyPreorderReader<TestClass>(false, false, false).acceptFluent(new XorRandomGenerator<TestClass>(), Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));
     }
 
     // The visitor that works on the AlkemyElements.
-    static class XorRandomGenerator implements AlkemyElementVisitor<RandomElement>
+    static class XorRandomGenerator<P> implements AlkemyElementVisitor<P, RandomElement>
     {
         @Override
-        public void visit(RandomElement e, Object parent, Object... args)
+        public void visit(RandomElement e, Object parent)
         {
             e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
         }

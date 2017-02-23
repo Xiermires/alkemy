@@ -38,20 +38,38 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
     }
     
     @Override
-    protected void processBranch(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parameter, Object... args)
+    protected void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent, P parameter)
     {
         if (e.hasChildren())
         {
-            final Object node = AlkemyUtils.getNodeInstance(e, parameter, instantiateNodes);
+            final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes);
             if (includeNullNodes || node != null)
             {
-                if (visitNodes) e.data().accept(aev, parameter, args);
-                e.children().forEach(c -> processBranch(aev, c, e.data().get(parameter)));
+                if (visitNodes) e.data().accept(aev, parent, parameter);
+                e.children().forEach(c -> processBranch(aev, c, e.data().get(parent), parameter));
             }
         }
         else
         {
-            e.data().accept(aev, parameter, args);
+            e.data().accept(aev, parent, parameter);
+        }
+    }
+    
+    @Override
+    protected void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    {
+        if (e.hasChildren())
+        {
+            final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes);
+            if (includeNullNodes || node != null)
+            {
+                if (visitNodes) e.data().accept(aev, parent);
+                e.children().forEach(c -> processBranch(aev, c, e.data().get(parent)));
+            }
+        }
+        else
+        {
+            e.data().accept(aev, parent);
         }
     }
     
@@ -64,9 +82,9 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
         {
             super(includeNullNodes, instantiateNodes, visitNodes);
         }
-
+        
         @Override
-        public R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> root, R parameter)
+        public R acceptFluent(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, R parameter)
         {
             Assertions.nonNull(root);
 

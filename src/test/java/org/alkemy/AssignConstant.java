@@ -24,7 +24,7 @@ import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
+public class AssignConstant<P, T> implements AlkemyElementVisitor<P, AlkemyElement>
 {
     private final T t;
 
@@ -34,7 +34,7 @@ public class AssignConstant<T> implements AlkemyElementVisitor<AlkemyElement>
     }
 
     @Override
-    public void visit(AlkemyElement e, Object parent, Object... args)
+    public void visit(AlkemyElement e, Object parent)
     {
         e.set(t, parent);
     }

@@ -38,7 +38,8 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
     }
 
     @Override
-    protected void processBranch(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent, Object... parameter)
+    protected void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent,
+            P parameter)
     {
         if (e.hasChildren())
         {
@@ -49,6 +50,27 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
                 {
                     processBranch(aev, c, c.data().get(node), parameter);
                 });
+                if (visitNodes) e.data().accept(aev, e.data().get(parent), parameter);
+            }
+        }
+        else
+        {
+            e.data().accept(aev, parent, parameter);
+        }
+    }
+    
+    @Override
+    protected void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    {
+        if (e.hasChildren())
+        {
+            final Object node = AlkemyUtils.getNodeInstance(e, parent, instantiateNodes);
+            if (includeNullNodes || node != null)
+            {
+                e.children().forEach(c ->
+                {
+                    processBranch(aev, c, c.data().get(node));
+                });
                 if (visitNodes) e.data().accept(aev, e.data().get(parent));
             }
         }
@@ -57,7 +79,7 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
             e.data().accept(aev, parent);
         }
     }
-    
+
     /**
      * Fluent version.
      */
@@ -68,8 +90,7 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
             super(includeNullNodes, instantiateNodes, visitNodes);
         }
 
-        @Override
-        public R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> root, R parent)
+        public R acceptFluent(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, R parent)
         {
             Assertions.nonNull(root);
 

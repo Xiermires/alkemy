@@ -27,7 +27,7 @@ import org.alkemy.visitor.AlkemyNodeReader;
 public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
 {
     @Override
-    public R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> root, Class<R> retType)
+    public R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, Class<R> retType)
     {
         Assertions.nonNull(root);
         final R instance = root.data().safeNewInstance(retType);
@@ -39,7 +39,7 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     }
 
     @Override
-    public R accept(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> root, P parameter, Class<R> type)
+    public R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, P parameter, Class<R> type)
     {
         Assertions.nonNull(root);
 
@@ -51,6 +51,9 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
         return instance;
     }
 
-    protected abstract void processBranch(AlkemyElementVisitor<?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent,
-            Object... parameter);
+    protected abstract void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e,
+            Object parent, P parameter);
+    
+    protected abstract void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e,
+            Object parent);
 }

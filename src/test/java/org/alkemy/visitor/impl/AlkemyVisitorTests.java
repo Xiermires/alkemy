@@ -45,9 +45,9 @@ public class AlkemyVisitorTests
     @Test
     public void testReadAnObject()
     {
-        final ObjectReader or = new ObjectReader(new Stack<Integer>());
+        final ObjectReader<TestReader> or = new ObjectReader<>(new Stack<Integer>());
         final FluentAlkemyPreorderReader<TestReader> aew = new FluentAlkemyPreorderReader<>(false, false, false);
-        aew.accept(or, Alkemy.nodes().get(TestReader.class), new TestReader());
+        aew.acceptFluent(or, Alkemy.nodes().get(TestReader.class), new TestReader());
 
         assertThat(or.stack.size(), is(8));
     }
@@ -55,9 +55,10 @@ public class AlkemyVisitorTests
     @Test
     public void testWriteAnObjUsingPreorderVisitor()
     {
-        final FluentAlkemyPreorderReader<TestWriter> aew = new FluentAlkemyPreorderReader<>(true, true, false);
+        final FluentAlkemyPreorderReader<Object> aew = new FluentAlkemyPreorderReader<>(true, true, false);
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestWriter.class);
-        final TestWriter tw = aew.accept(new ObjectWriter(new Constant<AlkemyElement>(55)), node, TestWriter.class);
+        final TestWriter tw = TestWriter.class.cast(aew.acceptFluent(new ObjectWriter<Object>(new Constant<AlkemyElement>(55)), node,
+                new TestWriter())); // TODO special case (how-to)
 
         assertThat(tw.a, is(55));
         assertThat(tw.b, is(55));
@@ -72,15 +73,15 @@ public class AlkemyVisitorTests
     @Test
     public void performanceWriteAnObjectUsingCustomWriter() throws Throwable
     {
-        final AlkemyElementWriter<TestClass> aew = new AlkemyElementWriter<>();
-        final ObjectWriter ow = new ObjectWriter(new Constant<AlkemyElement>(55));
+        final AlkemyElementWriter<Object> aew = new AlkemyElementWriter<>();
+        final ObjectWriter<Object> ow = new ObjectWriter<>(new Constant<AlkemyElement>(55));
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
 
         System.out.println("Create 1e6 objects (custom): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                aew.accept(ow, node, TestClass.class);
+                aew.accept(ow, node, Object.class);
             }
         }) / 1000000 + " ms");
     }
@@ -89,14 +90,14 @@ public class AlkemyVisitorTests
     public void performanceWriteAnObjUsingPreorderVisitor() throws Throwable
     {
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        final ObjectWriter ow = new ObjectWriter(new Constant<AlkemyElement>(55));
-        final FluentAlkemyPreorderReader<TestClass> apr = new FluentAlkemyPreorderReader<>(true, true, false);
+        final ObjectWriter<Object> ow = new ObjectWriter<>(new Constant<AlkemyElement>(55));
+        final FluentAlkemyPreorderReader<Object> apr = new FluentAlkemyPreorderReader<Object>(true, true, false);
 
         System.out.println("Create 1e6 objects (preorder): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                apr.accept(ow, node, TestClass.class);
+                apr.acceptFluent(ow, node, new TestClass());
             }
         }) / 1000000 + " ms");
     }
@@ -104,13 +105,13 @@ public class AlkemyVisitorTests
     @Test
     public void testPreorder()
     {
-        final NameStack ns = new NameStack();
+        final NameStack<TestReader> ns = new NameStack<>();
         final TestReader tr = new TestReader();
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPreorderReader<>(false, false, false).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPreorderReader<TestReader>(false, false, false).acceptFluent(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -125,13 +126,13 @@ public class AlkemyVisitorTests
     @Test
     public void testPostorder()
     {
-        final NameStack ns = new NameStack();
+        final NameStack<TestReader> ns = new NameStack<>();
         final TestReader tr = new TestReader();
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPostorderReader<>(false, false, true).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPostorderReader<TestReader>(false, false, true).acceptFluent(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -146,13 +147,13 @@ public class AlkemyVisitorTests
     @Test
     public void testPreorderIncludeNulls()
     {
-        final NameStack ns = new NameStack();
+        final NameStack<TestReader> ns = new NameStack<>();
         final TestReader tr = new TestReader();
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPreorderReader<>(true, false, true).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPreorderReader<TestReader>(true, false, true).acceptFluent(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -173,13 +174,13 @@ public class AlkemyVisitorTests
     @Test
     public void testPostorderIncludeNulls()
     {
-        final NameStack ns = new NameStack();
+        final NameStack<TestReader> ns = new NameStack<>();
         final TestReader tr = new TestReader();
         tr.na = new NestedA();
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPostorderReader<TestReader>(true, false, true).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPostorderReader<TestReader>(true, false, true).acceptFluent(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -198,7 +199,7 @@ public class AlkemyVisitorTests
     }
 
     // Implements both supplier & consumer
-    static class ObjectReader implements AlkemyElementVisitor<AlkemyElement>
+    static class ObjectReader<P> implements AlkemyElementVisitor<P, AlkemyElement>
     {
         private Stack<Integer> stack;
 
@@ -208,7 +209,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public void visit(AlkemyElement e, Object parent, Object... args)
+        public void visit(AlkemyElement e, Object parent)
         {
             stack.push(e.safeGet(parent, Integer.class));
         }
@@ -233,7 +234,7 @@ public class AlkemyVisitorTests
         }
     }
 
-    static class ObjectWriter implements AlkemyElementVisitor<AlkemyElement>
+    static class ObjectWriter<R> implements AlkemyElementVisitor<Object, AlkemyElement>
     {
         private AlkemyValueProvider<AlkemyElement> avp;
 
@@ -249,7 +250,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public void visit(AlkemyElement e, Object parent, Object... args)
+        public void visit(AlkemyElement e, Object parent)
         {
             e.set(avp.getValue(e), parent);
         }
@@ -291,12 +292,12 @@ public class AlkemyVisitorTests
         }
     }
 
-    static class NameStack implements AlkemyElementVisitor<AlkemyElement>
+    static class NameStack<P> implements AlkemyElementVisitor<P, AlkemyElement>
     {
         final Stack<String> names = new Stack<String>();
 
         @Override
-        public void visit(AlkemyElement e, Object parent, Object... args)
+        public void visit(AlkemyElement e, Object parent)
         {
             names.add(e.targetName());
         }

@@ -26,17 +26,17 @@ import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
 public class FluentNodeReaderToVisitorAdapter<R> implements FluentAlkemyNodeReader<R>, FluentAlkemyNodeVisitor<R>
 {
     private final FluentAlkemyNodeReader<R> reader;
-    private final AlkemyElementVisitor<?> aev;
+    private final AlkemyElementVisitor<R, ?> aev;
 
-    FluentNodeReaderToVisitorAdapter(FluentAlkemyNodeReader<R> reader, AlkemyElementVisitor<?> aev)
+    FluentNodeReaderToVisitorAdapter(FluentAlkemyNodeReader<R> reader, AlkemyElementVisitor<R, ?> aev)
     {
         this.reader = reader;
         this.aev = aev;
     }
-    
+
     @Override
-    public R visit(Node<? extends AbstractAlkemyElement<?>> node, R parameter)
+    public R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, R parameter)
     {
-        return reader.accept(aev, node, parameter);
+        return reader.acceptFluent(aev, node, parameter);
     }
 }

@@ -18,14 +18,19 @@ package org.alkemy.visitor;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 
-public interface AlkemyElementVisitor<E extends AbstractAlkemyElement<E>>
+public interface AlkemyElementVisitor<P, E extends AbstractAlkemyElement<E>>
 {
     default Object visit(E e)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
-    default void visit(E e, Object parent, Object... args)
+    default void visit(E e, Object parent)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    default void visit(E e, Object parent, P parameter)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }

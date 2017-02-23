@@ -48,8 +48,8 @@ public class AlkemistTest
     public void testConcat()
     {
         final TestClass tc = new TestClass();
-        final PropertyConcatenation concat = new PropertyConcatenation();
-        new FluentAlkemyPreorderReader<>(false, false, false).accept(concat, Alkemy.nodes().get(TestClass.class), tc);
+        final PropertyConcatenation<Object> concat = new PropertyConcatenation<>();
+        new FluentAlkemyPreorderReader<>(false, false, false).acceptFluent(concat, Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat("01234", is(concat.get()));
     }
@@ -58,7 +58,7 @@ public class AlkemistTest
     public void testAssign()
     {
         final TestClass tc = new TestClass();
-        new FluentAlkemyPreorderReader<>(false, false, false).accept(new AssignConstant<String>("bar"),
+        new FluentAlkemyPreorderReader<>(false, false, false).acceptFluent(new AssignConstant<>("bar"),
                 Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat(tc.s0, is("0"));
@@ -83,7 +83,7 @@ public class AlkemistTest
         tdc.testClass = tc;
 
         final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<>();
-        final TestDeepCopy copy = copier.visit(Alkemy.nodes().get(TestDeepCopy.class), tdc);
+        final TestDeepCopy copy = copier.visitFluent(Alkemy.nodes().get(TestDeepCopy.class), tdc);
 
         assertThat(copy.testClass, is(not(nullValue())));
         assertThat(copy.testClass.s0, is("0"));
@@ -127,7 +127,7 @@ public class AlkemistTest
     {
         final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        final AssignConstant<String> aev = new AssignConstant<String>("foo");
+        final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final Supplier<Boolean> upTo100 = new Supplier<Boolean>()
         {
             int i = 0;
@@ -166,14 +166,14 @@ public class AlkemistTest
     {
         final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        final AssignConstant<String> aev = new AssignConstant<String>("foo");
+        final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final TestClass tc = new TestClass();
 
         System.out.println("Assign 5e6 strings: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.accept(aev, node, tc);
+                anv.acceptFluent(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -183,14 +183,14 @@ public class AlkemistTest
     {
         final FluentAlkemyPreorderReader<TestClassNoInstr> anv = new FluentAlkemyPreorderReader<>(false, false, false);
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClassNoInstr.class);
-        final AssignConstant<String> aev = new AssignConstant<String>("foo");
+        final AssignConstant<TestClassNoInstr, String> aev = new AssignConstant<>("foo");
         final TestClassNoInstr tc = new TestClassNoInstr(); // do not include in the suite.
 
         System.out.println("Assign 5e6 strings: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.accept(aev, node, tc);
+                anv.acceptFluent(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -200,14 +200,14 @@ public class AlkemistTest
     {
         final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        final PassThrough aev = new PassThrough();
+        final PassThrough<TestClass> aev = new PassThrough<>();
         final TestClass tc = new TestClass();
 
         System.out.println("Visiting 1e6 types: " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.accept(aev, node, tc);
+                anv.acceptFluent(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -223,7 +223,7 @@ public class AlkemistTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                fsfoc.visit(node, fvc);
+                fsfoc.visitFluent(node, fvc);
             }
         }) / 1000000 + " ms");
     }
@@ -238,7 +238,7 @@ public class AlkemistTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                fsfoc.visit(node, Object.class);
+                fsfoc.visitFluent(node, Object.class);
             }
         }) / 1000000 + " ms");
     }
@@ -256,7 +256,7 @@ public class AlkemistTest
 
         // create
         @Override
-        public R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+        public R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
         {
             args = args != null ? args : new Object[node.children().size()];
             if (mapped == null) // map once
@@ -272,7 +272,7 @@ public class AlkemistTest
 
         // assign
         @Override
-        public R visit(Node<? extends AbstractAlkemyElement<?>> node, R parent)
+        public R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, R parent)
         {
             if (mapped == null)
             {
