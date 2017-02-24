@@ -22,6 +22,7 @@ import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.exception.TypeMismatch;
 import org.alkemy.util.AlkemyUtils;
+import org.alkemy.util.NumberConversion;
 
 /**
  * This implementation uses reflection to access and modify fields.
@@ -29,12 +30,14 @@ import org.alkemy.util.AlkemyUtils;
 public class AbstractReflectionBasedValueAccessor implements ValueAccessor
 {
     protected final Field f;
-    private boolean isEnum;
+    private final boolean isEnum;
+    private final int rank;
 
     public AbstractReflectionBasedValueAccessor(Field f)
     {
         this.f = f;
         this.isEnum = f.getType().isEnum();
+        this.rank = NumberConversion.getRank(f.getType());
     }
 
     @Override
@@ -76,7 +79,7 @@ public class AbstractReflectionBasedValueAccessor implements ValueAccessor
             }
             else
             {
-                f.set(parent, value);
+                f.set(parent, rank != -1 ? NumberConversion.convert(value, rank) : value);
             }
         }
         catch (final IllegalArgumentException | IllegalAccessException e)

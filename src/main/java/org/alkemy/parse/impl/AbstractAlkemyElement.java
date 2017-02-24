@@ -131,7 +131,16 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
 
     private AlkemyElement view()
     {
-        return view != null ? view : new AlkemyElement(this);
+        return view != null ? view : initializeView();
+    }
+
+    private synchronized AlkemyElement initializeView()
+    {
+        if (view == null)
+        {
+            view = new AlkemyElement(this);
+        }
+        return view;
     }
 
     /**
@@ -215,8 +224,17 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
         else
         {
-            return (T) (v.accepts(alkemyType) ? (cacheRef = v.map(view())) : null);
+            return (T) (v.accepts(alkemyType) ? initializeCacheRef(v) : null);
         }
+    }
+
+    private synchronized <P, T extends AbstractAlkemyElement<T>> Object initializeCacheRef(AlkemyElementVisitor<P, T> v)
+    {
+        if (cacheRef == null)
+        {
+            cacheRef = v.map(view());
+        }
+        return cacheRef;
     }
 
     private Object cacheRef = null;
@@ -234,7 +252,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      * {@link Node#copy(Node, org.alkemy.util.Node.Builder, java.util.function.Function)}.
      * </ul>
      * <p>
-     * Extend this method to return false otherwise. 
+     * Extend this method to return false otherwise.
      */
     protected boolean cacheAcceptedRef()
     {

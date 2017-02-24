@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.MemberFieldReflectionBasedAccessor;
 import org.alkemy.parse.impl.TestAlkemizer.Lorem;
 import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsDeclaration;
 import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsOrder;
@@ -158,6 +159,9 @@ public class AlkemizerTest
         
         short s = 1;
         accessor.set(s, new TestAlkemizer());
+        
+        final MemberFieldReflectionBasedAccessor reflectAccessor = new MemberFieldReflectionBasedAccessor(f);
+        reflectAccessor.set(s, new TestAlkemizer());
     }
     
     @Test
@@ -168,6 +172,9 @@ public class AlkemizerTest
         
         double d = 1;
         accessor.set(d, new TestAlkemizer());
+        
+        final MemberFieldReflectionBasedAccessor reflectAccessor = new MemberFieldReflectionBasedAccessor(f);
+        reflectAccessor.set(d, new TestAlkemizer());
     }
     
     @Test

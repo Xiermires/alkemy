@@ -28,9 +28,11 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
@@ -163,6 +165,47 @@ public class AlkemyTest
     }
 
     @Test
+    public void testStreamForEach()
+    {
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
+        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
+
+        final Set<TestClass> created = new HashSet<>();
+        anv.stream(aev, node, upTo100()).forEach(c -> created.add(c));
+
+        assertThat(created.size(), is(100));
+        for (TestClass tc : created)
+        {
+            assertThat(tc.s0, is("0"));
+            assertThat(tc.s1, is("1"));
+            assertThat(tc.s2, is("2"));
+            assertThat(tc.s3, is("3"));
+            assertThat(tc.s4, is("4"));
+            assertThat(tc.s5, is("foo"));
+            assertThat(tc.s6, is("foo"));
+            assertThat(tc.s7, is("foo"));
+            assertThat(tc.s8, is("foo"));
+            assertThat(tc.s9, is("foo"));
+        }
+    }
+
+    @Test
+    public void testStreamFilter()
+    {
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
+        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
+        final Set<TestClass> created = new HashSet<>();
+        // s0.equals("0") always
+        anv.stream(aev, node, upTo100()).filter(f -> !f.s0.equals("0")).forEach(c -> created.add(c));
+        assertThat(created.size(), is(0));
+
+        anv.stream(aev, node, upTo100()).filter(f -> f.s0.equals("0")).forEach(c -> created.add(c));
+        assertThat(created.size(), is(100));
+    }
+
+    @Test
     public void peformanceElementVisitor() throws Throwable
     {
         final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
@@ -183,7 +226,8 @@ public class AlkemyTest
     public void peformanceElementVisitorNoInstr() throws Throwable
     {
         final FluentAlkemyPreorderReader<TestClassNoInstr> anv = new FluentAlkemyPreorderReader<>(false, false, false);
-        final TypifiedNode<TestClassNoInstr, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClassNoInstr.class);
+        final TypifiedNode<TestClassNoInstr, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes()
+                .get(TestClassNoInstr.class);
         final AssignConstant<TestClassNoInstr, String> aev = new AssignConstant<>("foo");
         final TestClassNoInstr tc = new TestClassNoInstr(); // do not include in the suite.
 
@@ -228,20 +272,53 @@ public class AlkemyTest
             }
         }) / 1000000 + " ms");
     }
+    
+    @Test
+    public void peformanceFastVisitorAssignUsingParallelStream() throws Throwable
+    {
+        final TypifiedNode<TestFastVisitor, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
+        final FastSameFlatObjConcept<TestFastVisitor> anv = new FastSameFlatObjConcept<>();
+        final TestFastVisitor fvc = new TestFastVisitor();
+
+        final Stream<TestFastVisitor> stream = anv.parallelStream(node, new InstanceProviderIterator<TestFastVisitor>(1000000, () -> fvc));
+        
+        System.out.println("Fast visitor 1e7 assign (parallel stream): " + Measure.measure(() ->
+        {
+            stream.forEach(AlkemyTest::sink);
+        }) / 1000000 + " ms");
+    }
+    
+    static <R> void sink(R r)
+    {   
+    }
 
     @Test
     public void peformanceFastVisitorCreate() throws Throwable
     {
         final TypifiedNode<TestFastVisitor, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
-        final FastSameFlatObjConcept<TestFastVisitor> fsfoc = new FastSameFlatObjConcept<>();
+        final FastSameFlatObjConcept<TestFastVisitor> anv = new FastSameFlatObjConcept<>();
 
         System.out.println("Fast visitor 1e6 create (10 fields): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                fsfoc.visit(node);
+                anv.visit(node);
             }
         }) / 1000000 + " ms");
+    }
+
+    private Supplier<Boolean> upTo100()
+    {
+        return new Supplier<Boolean>()
+        {
+            int i = 0;
+
+            @Override
+            public Boolean get()
+            {
+                return i++ < 100;
+            }
+        };
     }
 
     // Fast impl. of a fast set / get.
@@ -316,5 +393,30 @@ public class AlkemyTest
     static @interface Idx
     {
         int value();
+    }
+    
+    static class InstanceProviderIterator<R> implements Iterator<R>
+    {
+        private int i = 0;
+        private int n;
+        private Supplier<R> s;
+        
+        InstanceProviderIterator(int n, Supplier<R> s)
+        {
+            this.n = n;
+            this.s = s;
+        }
+        
+        @Override
+        public boolean hasNext()
+        {
+            return i++ < n;
+        }
+
+        @Override
+        public R next()
+        {
+            return s.get();
+        }
     }
 }

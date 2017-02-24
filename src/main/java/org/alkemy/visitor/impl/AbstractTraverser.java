@@ -54,7 +54,7 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
 
     protected abstract void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e,
             Object parent, P parameter);
-    
+
     protected abstract void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e,
             Object parent);
 }

@@ -16,7 +16,10 @@
 package org.alkemy.visitor;
 
 import java.util.Iterator;
+import java.util.Spliterators;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
@@ -43,7 +46,7 @@ public interface AlkemyNodeVisitor<R, P>
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
-    
+
     /**
      * Generates an element of type R using a parameter P.
      */
@@ -51,7 +54,7 @@ public interface AlkemyNodeVisitor<R, P>
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
-    
+
     /**
      * Generates an element of type R, or modifies and returns the received param1 of type R, using the param2 of type P.
      */
@@ -59,7 +62,6 @@ public interface AlkemyNodeVisitor<R, P>
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
-
 
     /**
      * Syntax sugar. Fluent version of the {@link AlkemyNodeVisitor}.
@@ -70,6 +72,92 @@ public interface AlkemyNodeVisitor<R, P>
     public interface FluentAlkemyNodeVisitor<R> extends AlkemyNodeVisitor<R, R>
     {
     }
+
+    /* * STREAM SUPPORT * */
+
+    /**
+     * Stream of {@link #iterable(TypifiedNode, Iterable)}
+     */
+    default Stream<R> stream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), -1, 0), false);
+    }
+
+    /**
+     * Stream of {@link #iterable(TypifiedNode, Iterator)}
+     */
+    default Stream<R> stream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), -1, 0), false);
+    }
+
+    /**
+     * Stream of {@link #peekIterable(TypifiedNode, Iterable)}
+     */
+    default Stream<Entry<R, P>> peekStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(peekIterable(node, items).iterator(), -1, 0), false);
+    }
+
+    /**
+     * Stream of {@link #iterable(TypifiedNode, Iterator)}
+     */
+    default Stream<Entry<R, P>> peekStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(peekIterable(node, items).iterator(), -1, 0), false);
+    }
+
+    /**
+     * Stream of {@link #iterable(TypifiedNode, Supplier)}
+     */
+    default Stream<R> stream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Supplier<Boolean> hasNext)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(iterable(node, hasNext).iterator(), -1, 0), false);
+    }
+
+    /* * PARALLEL STREAM SUPPORT * */
+
+    /**
+     * Parallel stream of {@link #iterable(TypifiedNode, Iterable)} 
+     */
+    default Stream<R> parallelStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), Long.MAX_VALUE, 0), true);
+    }
+
+    /**
+     * Parallel stream of {@link #iterable(TypifiedNode, Iterator)} 
+     */
+    default Stream<R> parallelStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), Long.MAX_VALUE, 0), true);
+    }
+
+    /**
+     * Parallel stream of {@link #peekIterable(TypifiedNode, Iterable)}
+     */
+    default Stream<Entry<R, P>> parallelPeekStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(peekIterable(node, items).iterator(), Long.MAX_VALUE, 0), true);
+    }
+    
+    /**
+     * Parallel stream of {@link #peekIterable(TypifiedNode, Iterator)}
+     */
+    default Stream<Entry<R, P>> parallelPeekStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(peekIterable(node, items).iterator(), Long.MAX_VALUE, 0), true);
+    }
+
+    /**
+     * Parallel stream of {@link #iterable(TypifiedNode, Supplier)}
+     */
+    default Stream<R> parallelStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Supplier<Boolean> hasNext)
+    {
+        return StreamSupport.stream(Spliterators.spliterator(iterable(node, hasNext).iterator(), Long.MAX_VALUE, 0), true);
+    }
+
+    /* * ITERABLE SUPPORT * */
 
     /**
      * Returns an iterable of type R. Items returned might be new or modified from items.
