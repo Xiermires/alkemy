@@ -91,22 +91,15 @@ public class RandomGenerator
     @Test
     public void generateRandoms()
     {
-		// Create a raw class we want to alkemize
-		final TestClass tc = new TestClass();
+		// Reads TestClass, identifies the @Random elements and applies XorRandomGenerator on them.
+        final TestClass tc = Alkemy.mature(TestClass.class, new XorRandomGenerator());
 
-        // Generate the tree of alkemy elements
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        // Traverse the tree in preorder, apply XorRandomGenerator to any AlkemyElement found of type 'Random'
-        new FluentAlkemyPreorderReader<TestClass>(false, false, false) // don't include null branches / don't instantiate / don't visit node elements
-                .acceptFluent(new XorRandomGenerator<TestClass>(), node, tc);
-        
-		// No between matcher / gt, lt are left / right open.
-        assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10)))); 
+        assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));
     }
     
     // The visitor that works on the AlkemyElements.
-    static class XorRandomGenerator<P> implements AlkemyElementVisitor<P, RandomElement>
+    static class XorRandomGenerator implements AlkemyElementVisitor<Void, RandomElement>
     {
         @Override
         public void visit(RandomElement e, Object parent)
@@ -119,14 +112,10 @@ public class RandomGenerator
         {
             return new RandomElement(e);
         }
+		
+		/* RNG */
 
-        @Override
-        public boolean accepts(Class<?> type)
-        {
-            return Random.class == type; // Accept @Random only.
-        }
-
-        protected double nextDouble(double min, double max)
+        private double nextDouble(double min, double max)
         {
             return min + (nextDouble() * ((max - min)));
         }
@@ -143,15 +132,16 @@ public class RandomGenerator
         double nextDouble()
         {
             double d = xorshift64() / (double) (Long.MAX_VALUE + 1);
-            return d < 0 ? -d : d; // xorshift64() generates values in the whole Long.MIN_VALUE to Long.MAX_VALUE. Ensure we
+            return d < 0 ? -d : d; // xorshift64() generates values in the whole Long.MIN_VALUE to
+                                   // Long.MAX_VALUE. Ensure we
                                    // return positive numbers (0-1).
         }
 
         /**
          * Xorshift implementation 2^64 version.
          * <p>
-         * Shifting triplet values selected from G. Marsaglia '<a href="https://www.jstatsoft.org/article/view/v008i14">Xorshift
-         * RNGs</a>'.</a>'
+         * Shifting triplet values selected from G. Marsaglia '<a
+         * href="https://www.jstatsoft.org/article/view/v008i14">Xorshift RNGs</a>'.</a>'
          */
         long xorshift64()
         {

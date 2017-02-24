@@ -62,13 +62,7 @@ public class RandomGenerator
             return new RandomElement(e);
         }
 
-        @Override
-        public boolean accepts(Class<?> type)
-        {
-            return Random.class == type;
-        }
-
-        protected double nextDouble(double min, double max)
+        private double nextDouble(double min, double max)
         {
             return min + (nextDouble() * ((max - min)));
         }
