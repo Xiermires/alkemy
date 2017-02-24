@@ -47,9 +47,7 @@ public class AlkemyVisitorTests
     public void testReadAnObject()
     {
         final ObjectReader<TestReader> or = new ObjectReader<>(new Stack<Integer>());
-        final FluentAlkemyPreorderReader<TestReader> aew = new FluentAlkemyPreorderReader<>(0);
-        aew.accept(or, Alkemy.nodes().get(TestReader.class), new TestReader());
-
+        Alkemy.mature(or, TestReader.class);
         assertThat(or.stack.size(), is(8));
     }
 

@@ -22,6 +22,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -155,16 +156,29 @@ public class LambdaRefHelper
         return null;
     }
 
+    /*
+     * Maintain weak references of the failed classes to log once per class and tree generation at
+     * most.
+     * <p>
+     * Assumption is that they hold enough so that the whole reflection fallbacks are generated and
+     * we get the log message only once.
+     * <p>
+     * TODO is this issue worth solving by better means ?
+     */
+    static final WeakHashMap<Class<?>, Object> failed = new WeakHashMap<>();
+
     static MethodHandle methodHandle(Class<?> clazz, String name, Class<?>... params) throws IllegalAccessException,
             SecurityException
     {
         try
         {
-            return MethodHandles.lookup().unreflect(clazz.getDeclaredMethod(name, params));
+            return failed.containsKey(clazz) ? null : MethodHandles.lookup().unreflect(clazz.getDeclaredMethod(name, params));
         }
         catch (NoSuchMethodException e)
         {
-            log.debug(String.format("Type '%s' not instrumented, or error in the instrumentation. Fallback to reflection.", clazz.getName()));
+            log.debug(String.format("Type '%s' not instrumented, or error in the instrumentation. Fallback to reflection.",
+                    clazz.getName()));
+            failed.put(clazz, null);
         }
         return null;
     }

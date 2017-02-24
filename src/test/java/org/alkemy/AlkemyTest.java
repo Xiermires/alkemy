@@ -50,20 +50,17 @@ public class AlkemyTest
     @Test
     public void testConcat()
     {
-        final TestClass tc = new TestClass();
         final PropertyConcatenation<TestClass> concat = new PropertyConcatenation<>();
-        new FluentAlkemyPreorderReader<TestClass>(0).accept(concat, Alkemy.nodes().get(TestClass.class), tc);
-
+        Alkemy.mature(concat, new TestClass());
+        
         assertThat("01234", is(concat.get()));
     }
 
     @Test
     public void testAssign()
     {
-        final TestClass tc = new TestClass();
-        new FluentAlkemyPreorderReader<TestClass>(0).accept(new AssignConstant<>("bar"),
-                Alkemy.nodes().get(TestClass.class), tc);
-
+        final TestClass tc = Alkemy.mature(new AssignConstant<>("bar"), new TestClass());
+        
         assertThat(tc.s0, is("0"));
         assertThat(tc.s1, is("1"));
         assertThat(tc.s2, is("2"));

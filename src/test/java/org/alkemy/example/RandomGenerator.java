@@ -32,9 +32,7 @@ import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.util.Assertions;
-import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
 import org.junit.Test;
 
 // Injecting random generated values
@@ -43,19 +41,14 @@ public class RandomGenerator
     @Test
     public void generateRandoms()
     {
-        final TestClass tc = new TestClass();
-        // Generate the tree of alkemy elements
-        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        // Traverse the tree in preorder, apply XorRandomGenerator to any AlkemyElement found of
-        // type 'Random'
-        new FluentAlkemyPreorderReader<TestClass>(0).accept(new XorRandomGenerator<TestClass>(), node, tc);
+        final TestClass tc = Alkemy.mature(new XorRandomGenerator(), TestClass.class);
 
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));
     }
 
     // The visitor that works on the AlkemyElements.
-    static class XorRandomGenerator<P> implements AlkemyElementVisitor<P, RandomElement>
+    static class XorRandomGenerator implements AlkemyElementVisitor<Void, RandomElement>
     {
         @Override
         public void visit(RandomElement e, Object parent)
