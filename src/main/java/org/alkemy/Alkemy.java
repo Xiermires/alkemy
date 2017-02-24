@@ -85,7 +85,7 @@ public class Alkemy
      * <li>Returns the object R.
      * </ol>
      */
-    public static <R, P> R mature(AlkemyElementVisitor<P, ?> aev, Class<R> r)
+    public static <R, P> R mature(Class<R> r, AlkemyElementVisitor<P, ?> aev)
     {
         return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes().get(r));
     }
@@ -108,7 +108,7 @@ public class Alkemy
      */
     @SuppressWarnings("unchecked")
     // safe
-    public static <R, P> R mature(AlkemyElementVisitor<P, ?> aev, R r)
+    public static <R, P> R mature(R r, AlkemyElementVisitor<P, ?> aev)
     {
         return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes().get((Class<R>) r.getClass()));
     }
@@ -128,7 +128,7 @@ public class Alkemy
      */
     @SuppressWarnings("unchecked")
     // safe
-    public static <R, P> R mature(AlkemyElementVisitor<P, ?> aev, R r, P p)
+    public static <R, P> R mature(R r, P p, AlkemyElementVisitor<P, ?> aev)
     {
         return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes().get((Class<R>) r.getClass()), p);
     }

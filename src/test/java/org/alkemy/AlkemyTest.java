@@ -51,7 +51,7 @@ public class AlkemyTest
     public void testConcat()
     {
         final PropertyConcatenation<TestClass> concat = new PropertyConcatenation<>();
-        Alkemy.mature(concat, new TestClass());
+        Alkemy.mature(new TestClass(), concat);
         
         assertThat("01234", is(concat.get()));
     }
@@ -59,7 +59,7 @@ public class AlkemyTest
     @Test
     public void testAssign()
     {
-        final TestClass tc = Alkemy.mature(new AssignConstant<>("bar"), new TestClass());
+        final TestClass tc = Alkemy.mature(new TestClass(), new AssignConstant<>("bar"));
         
         assertThat(tc.s0, is("0"));
         assertThat(tc.s1, is("1"));

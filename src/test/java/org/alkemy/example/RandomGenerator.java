@@ -41,7 +41,7 @@ public class RandomGenerator
     @Test
     public void generateRandoms()
     {
-        final TestClass tc = Alkemy.mature(new XorRandomGenerator(), TestClass.class);
+        final TestClass tc = Alkemy.mature(TestClass.class, new XorRandomGenerator());
 
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));

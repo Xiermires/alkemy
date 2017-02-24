@@ -47,7 +47,7 @@ public class AlkemyVisitorTests
     public void testReadAnObject()
     {
         final ObjectReader<TestReader> or = new ObjectReader<>(new Stack<Integer>());
-        Alkemy.mature(or, TestReader.class);
+        Alkemy.mature(TestReader.class, or);
         assertThat(or.stack.size(), is(8));
     }
 
