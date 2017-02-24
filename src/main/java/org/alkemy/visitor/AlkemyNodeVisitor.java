@@ -35,7 +35,7 @@ import org.alkemy.util.Node;
  */
 public interface AlkemyNodeVisitor<R, P>
 {
-    default R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+    default R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
@@ -256,7 +256,7 @@ public interface AlkemyNodeVisitor<R, P>
         @Override
         public R next()
         {
-            return visitor.visitFluent(node, retType);
+            return visitor.visit(node, retType);
         }
     }
 

@@ -232,13 +232,13 @@ public class AlkemistTest
     public void peformanceFastVisitorCreate() throws Throwable
     {
         final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
-        final FastSameFlatObjConcept<Object> fsfoc = new FastSameFlatObjConcept<>();
-
+        final FastSameFlatObjConcept<TestFastVisitor> fsfoc = new FastSameFlatObjConcept<>();
+        
         System.out.println("Fast visitor 1e6 create (10 fields): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                fsfoc.visitFluent(node, Object.class);
+                fsfoc.visit(node, TestFastVisitor.class);
             }
         }) / 1000000 + " ms");
     }
@@ -256,7 +256,7 @@ public class AlkemistTest
 
         // create
         @Override
-        public R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+        public R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
         {
             args = args != null ? args : new Object[node.children().size()];
             if (mapped == null) // map once

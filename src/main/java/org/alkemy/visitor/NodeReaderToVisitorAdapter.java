@@ -33,7 +33,7 @@ class NodeReaderToVisitorAdapter<R, P> implements AlkemyNodeReader<R, P>, Alkemy
     }
 
     @Override
-    public R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+    public R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
     {
         return reader.accept(aev, node, retType);
     }

@@ -44,8 +44,10 @@ public class RandomGenerator
     public void generateRandoms()
     {
         final TestClass tc = new TestClass();
-        Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        new FluentAlkemyPreorderReader<TestClass>(false, false, false)
+        // Generate the tree of alkemy elements
+        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        // Traverse the tree in preorder, apply XorRandomGenerator to any AlkemyElement found of type 'Random'
+        new FluentAlkemyPreorderReader<TestClass>(false, false, false) // don't include null branches / don't instantiate / don't visit node elements
                 .acceptFluent(new XorRandomGenerator<TestClass>(), node, tc);
 
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
