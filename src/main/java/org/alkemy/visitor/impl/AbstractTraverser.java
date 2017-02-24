@@ -18,6 +18,7 @@ package org.alkemy.visitor.impl;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
 
@@ -27,10 +28,10 @@ import org.alkemy.visitor.AlkemyNodeReader;
 public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
 {
     @Override
-    public R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, Class<R> retType)
+    public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {
         Assertions.nonNull(root);
-        final R instance = root.data().safeNewInstance(retType);
+        final R instance = root.data().safeNewInstance(root.type());
         if (instance != null)
         {
             root.children().forEach(c -> processBranch(aev, c, instance));
@@ -39,11 +40,11 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     }
 
     @Override
-    public R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, P parameter, Class<R> type)
+    public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, P parameter)
     {
         Assertions.nonNull(root);
 
-        final R instance = root.data().safeNewInstance(type);
+        final R instance = root.data().safeNewInstance(root.type());
         if (instance != null)
         {
             root.children().forEach(c -> processBranch(aev, c, instance, parameter));

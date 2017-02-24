@@ -32,7 +32,7 @@ import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 import org.alkemy.util.Assertions;
-import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
 import org.junit.Test;
@@ -45,10 +45,10 @@ public class RandomGenerator
     {
         final TestClass tc = new TestClass();
         // Generate the tree of alkemy elements
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         // Traverse the tree in preorder, apply XorRandomGenerator to any AlkemyElement found of type 'Random'
         new FluentAlkemyPreorderReader<TestClass>(false, false, false) // don't include null branches / don't instantiate / don't visit node elements
-                .acceptFluent(new XorRandomGenerator<TestClass>(), node, tc);
+                .accept(new XorRandomGenerator<TestClass>(), node, tc);
 
         assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
         assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));

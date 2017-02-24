@@ -17,6 +17,7 @@ package org.alkemy;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
@@ -26,7 +27,7 @@ public class ObjectCopier<T> implements FluentAlkemyNodeVisitor<T>
     private Objenesis objenesis = new ObjenesisStd();
     
     @Override
-    public T visitFluent(Node<? extends AbstractAlkemyElement<?>> root, T orig)
+    public T visit(TypifiedNode<T, ? extends AbstractAlkemyElement<?>> root, T orig)
     {
         @SuppressWarnings("unchecked")
         final T dest = (T) objenesis.newInstance(orig.getClass());

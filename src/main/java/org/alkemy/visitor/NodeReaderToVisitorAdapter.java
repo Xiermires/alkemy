@@ -16,7 +16,7 @@
 package org.alkemy.visitor;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 
 /**
  * Adapter between a reader and a visitor to access the Iterable functionality.
@@ -33,14 +33,14 @@ class NodeReaderToVisitorAdapter<R, P> implements AlkemyNodeReader<R, P>, Alkemy
     }
 
     @Override
-    public R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
     {
-        return reader.accept(aev, node, retType);
+        return reader.accept(aev, node);
     }
 
     @Override
-    public R visit(Node<? extends AbstractAlkemyElement<?>> node, P parameter, Class<R> retType)
+    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
     {
-        return reader.accept(aev, node, parameter, retType);
+        return reader.accept(aev, node, parameter);
     }
 }

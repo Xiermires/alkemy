@@ -16,7 +16,7 @@
 package org.alkemy.visitor;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyNodeReader.FluentAlkemyNodeReader;
 import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
 
@@ -35,8 +35,8 @@ public class FluentNodeReaderToVisitorAdapter<R> implements FluentAlkemyNodeRead
     }
 
     @Override
-    public R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, R parameter)
+    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R parameter)
     {
-        return reader.acceptFluent(aev, node, parameter);
+        return reader.accept(aev, node, parameter);
     }
 }

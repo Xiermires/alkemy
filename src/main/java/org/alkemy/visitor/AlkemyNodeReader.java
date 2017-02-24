@@ -20,8 +20,8 @@ import java.util.function.Supplier;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyNodeVisitor.Entry;
-import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
 
 /**
  * A class implementing this interface is expected to process trees of alkemy elements and delegate its element processing to
@@ -37,67 +37,82 @@ import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
  */
 public interface AlkemyNodeReader<R, P>
 {
-    default R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+    /**
+     * Generates an element of type R.
+     */
+    default R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
-    default R accept(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, P parameter, Class<R> retType)
+    /**
+     * Generates an element of type R using a parameter P.
+     */
+    default R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
     
     /**
-     * Fluent version of the {@link AlkemyNodeReader}.
+     * Generates an element of type R, or modifies and returns the received param1 of type R, using the param2 of type P.
+     */
+    default R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R param1, P param2)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    /**
+     * Syntax sugar. Fluent version of the {@link AlkemyNodeReader}.
+     * <p>
+     * An {@link AlkemyNodeReader} where both parameter and return are from the same type. Usually represents a fluent operation
+     * where the parameter object is worked on and returned just after.
      */
     public interface FluentAlkemyNodeReader<R> extends AlkemyNodeReader<R, R>
-    {
-        default R acceptFluent(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, R parameter)
-        {
-            throw new UnsupportedOperationException("Not implemented.");
-        }
-
-        /**
-         * See {@link FluentAlkemyNodeVisitor#iterable(Node, Iterable)}
-         */
-        default Iterable<R> iterable(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
-        {
-            return new FluentNodeReaderToVisitorAdapter<R>(this, aev).iterable(node, items);
-        }
-
-        /**
-         * See {@link FluentAlkemyNodeVisitor#iterable(Node, Iterator)}
-         */
-        default Iterable<R> iterable(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
-        {
-            return new FluentNodeReaderToVisitorAdapter<R>(this, aev).iterable(node, items);
-        }
+    {   
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Iterable, Class)}
+     * See {@link AlkemyNodeVisitor#iterable(Node, Iterable)}
      */
-    default Iterable<Entry<R, P>> iterable(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node,
-            Iterable<P> items, Class<R> retType)
+    default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+            Iterable<P> items)
     {
-        return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items, retType);
+        return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items);
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Iterator, Class)}
+     * See {@link AlkemyNodeVisitor#iterable(Node, Iterator)}
      */
-    default Iterable<Entry<R, P>> iterable(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node,
-            Iterator<P> items, Class<R> retType)
+    default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+            Iterator<P> items)
     {
-        return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items, retType);
+        return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items);
+    }
+    
+    /**
+     * See {@link AlkemyNodeVisitor#peekIterable(Node, Iterable)}
+     */
+    default Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+            Iterable<P> items)
+    {
+        return new NodeReaderToVisitorAdapter<R, P>(this, aev).peekIterable(node, items);
+    }
+
+    /**
+     * See {@link AlkemyNodeVisitor#peekIterable(Node, Iterator)}
+     */
+    default Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+            Iterator<P> items)
+    {
+        return new NodeReaderToVisitorAdapter<R, P>(this, aev).peekIterable(node, items);
     }
 
     /**
      * See {@link AlkemyNodeVisitor#iterable(Node, Supplier, Class)}
      */
-    default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> node,
-            Supplier<Boolean> hasNext, Class<R> retType)
+    default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+            Supplier<Boolean> hasNext)
     {
-        return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, hasNext, retType);
+        return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, hasNext);
     }
 }

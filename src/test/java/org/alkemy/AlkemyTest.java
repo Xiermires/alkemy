@@ -36,20 +36,21 @@ import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Measure;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.util.PassThrough;
 import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
 import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
 import org.junit.Test;
 
-// Alkemist usage examples.
-public class AlkemistTest
+// Alkemy general usage examples.
+public class AlkemyTest
 {
     @Test
     public void testConcat()
     {
         final TestClass tc = new TestClass();
-        final PropertyConcatenation<Object> concat = new PropertyConcatenation<>();
-        new FluentAlkemyPreorderReader<>(false, false, false).acceptFluent(concat, Alkemy.nodes().get(TestClass.class), tc);
+        final PropertyConcatenation<TestClass> concat = new PropertyConcatenation<>();
+        new FluentAlkemyPreorderReader<TestClass>(false, false, false).accept(concat, Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat("01234", is(concat.get()));
     }
@@ -58,7 +59,7 @@ public class AlkemistTest
     public void testAssign()
     {
         final TestClass tc = new TestClass();
-        new FluentAlkemyPreorderReader<>(false, false, false).acceptFluent(new AssignConstant<>("bar"),
+        new FluentAlkemyPreorderReader<TestClass>(false, false, false).accept(new AssignConstant<>("bar"),
                 Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat(tc.s0, is("0"));
@@ -83,7 +84,7 @@ public class AlkemistTest
         tdc.testClass = tc;
 
         final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<>();
-        final TestDeepCopy copy = copier.visitFluent(Alkemy.nodes().get(TestDeepCopy.class), tdc);
+        final TestDeepCopy copy = copier.visit(Alkemy.nodes().get(TestDeepCopy.class), tdc);
 
         assertThat(copy.testClass, is(not(nullValue())));
         assertThat(copy.testClass.s0, is("0"));
@@ -105,7 +106,7 @@ public class AlkemistTest
         final TestClass tc2 = new TestClass();
         tc1.s0 = "foo";
         tc2.s1 = "bar";
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final ObjectCopier<TestClass> oc = new ObjectCopier<TestClass>();
 
         final List<String> s0s1 = new ArrayList<>();
@@ -126,7 +127,7 @@ public class AlkemistTest
     public void testCreateIterable()
     {
         final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final Supplier<Boolean> upTo100 = new Supplier<Boolean>()
         {
@@ -138,9 +139,9 @@ public class AlkemistTest
                 return i++ < 100;
             }
         };
-        
+
         final Set<TestClass> created = new HashSet<>();
-        for (TestClass tc : anv.iterable(aev, node, upTo100, TestClass.class))
+        for (TestClass tc : anv.iterable(aev, node, upTo100))
         {
             created.add(tc);
         }
@@ -165,7 +166,7 @@ public class AlkemistTest
     public void peformanceElementVisitor() throws Throwable
     {
         final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final TestClass tc = new TestClass();
 
@@ -173,7 +174,7 @@ public class AlkemistTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.acceptFluent(aev, node, tc);
+                anv.accept(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -182,7 +183,7 @@ public class AlkemistTest
     public void peformanceElementVisitorNoInstr() throws Throwable
     {
         final FluentAlkemyPreorderReader<TestClassNoInstr> anv = new FluentAlkemyPreorderReader<>(false, false, false);
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClassNoInstr.class);
+        final TypifiedNode<TestClassNoInstr, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClassNoInstr.class);
         final AssignConstant<TestClassNoInstr, String> aev = new AssignConstant<>("foo");
         final TestClassNoInstr tc = new TestClassNoInstr(); // do not include in the suite.
 
@@ -190,7 +191,7 @@ public class AlkemistTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.acceptFluent(aev, node, tc);
+                anv.accept(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -199,7 +200,7 @@ public class AlkemistTest
     public void peformanceTypeVisitor() throws Throwable
     {
         final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
+        final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final PassThrough<TestClass> aev = new PassThrough<>();
         final TestClass tc = new TestClass();
 
@@ -207,7 +208,7 @@ public class AlkemistTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.acceptFluent(aev, node, tc);
+                anv.accept(aev, node, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -215,7 +216,7 @@ public class AlkemistTest
     @Test
     public void peformanceFastVisitorAssign() throws Throwable
     {
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
+        final TypifiedNode<TestFastVisitor, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
         final FastSameFlatObjConcept<TestFastVisitor> fsfoc = new FastSameFlatObjConcept<>();
         final TestFastVisitor fvc = new TestFastVisitor();
 
@@ -223,7 +224,7 @@ public class AlkemistTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                fsfoc.visitFluent(node, fvc);
+                fsfoc.visit(node, fvc);
             }
         }) / 1000000 + " ms");
     }
@@ -231,14 +232,14 @@ public class AlkemistTest
     @Test
     public void peformanceFastVisitorCreate() throws Throwable
     {
-        final Node<? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
+        final TypifiedNode<TestFastVisitor, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestFastVisitor.class);
         final FastSameFlatObjConcept<TestFastVisitor> fsfoc = new FastSameFlatObjConcept<>();
-        
+
         System.out.println("Fast visitor 1e6 create (10 fields): " + Measure.measure(() ->
         {
             for (int i = 0; i < 1000000; i++)
             {
-                fsfoc.visit(node, TestFastVisitor.class);
+                fsfoc.visit(node);
             }
         }) / 1000000 + " ms");
     }
@@ -256,7 +257,7 @@ public class AlkemistTest
 
         // create
         @Override
-        public R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+        public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
         {
             args = args != null ? args : new Object[node.children().size()];
             if (mapped == null) // map once
@@ -267,12 +268,12 @@ public class AlkemistTest
             {
                 args[i] = source[mapped[i].idx];
             }
-            return node.data().safeNewInstance(retType, args);
+            return node.data().safeNewInstance(node.type(), args);
         }
 
         // assign
         @Override
-        public R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, R parent)
+        public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R parent)
         {
             if (mapped == null)
             {

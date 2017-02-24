@@ -19,7 +19,9 @@ import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.AlkemyNodeReader.FluentAlkemyNodeReader;
 
 /**
  * Traverses the directed rooted tree in post-order, branch children first, branch node later.
@@ -81,7 +83,7 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
     }
 
     /**
-     * Fluent version.
+     * Fluent version. See {@link FluentAlkemyNodeReader}.
      */
     public static class FluentAlkemyPostorderReader<R> extends AlkemyPostorderReader<R, R> implements FluentAlkemyNodeReader<R>
     {
@@ -90,7 +92,8 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
             super(includeNullNodes, instantiateNodes, visitNodes);
         }
 
-        public R acceptFluent(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, R parent)
+        @Override
+        public R accept(AlkemyElementVisitor<R, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, R parent)
         {
             Assertions.nonNull(root);
 

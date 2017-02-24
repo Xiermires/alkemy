@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(InstrumentClassWithLambdas.class)
 @InstrumentableLambdaClasses(//
-testClassNames = { "org.alkemy.AlkemistTest", //
+testClassNames = { "org.alkemy.AlkemyTest", //
         "org.alkemy.parse.impl.AlkemizerTest", //
         "org.alkemy.parse.impl.TypeFieldParserTest",
         "org.alkemy.visitor.impl.AlkemyVisitorTests", //

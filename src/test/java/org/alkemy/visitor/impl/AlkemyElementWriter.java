@@ -19,25 +19,26 @@ import java.util.function.Supplier;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeReader.FluentAlkemyNodeReader;
+import org.alkemy.visitor.AlkemyNodeReader;
 
-public class AlkemyElementWriter<R> implements FluentAlkemyNodeReader<R>
+public class AlkemyElementWriter<R, P> implements AlkemyNodeReader<R, P>
 {
     @Override
-    public R accept(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> root, Class<R> retType)
+    public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {
-        final Parameters<R> params = new Parameters<>(aev, root.children().size(), retType);
-        root.children().forEach(c -> processNode(aev, c, params, retType));
-        return root.data().safeNewInstance(retType, params.get());
+        final Parameters<P> params = new Parameters<>(aev, root.children().size());
+        root.children().forEach(c -> processNode(aev, c, params));
+        return root.data().safeNewInstance(root.type(), params.get());
     }
 
-    private void processNode(AlkemyElementVisitor<R, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters<R> params, Class<R> retType)
+    private void processNode(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters<P> params)
     {
         if (e.hasChildren())
         {
-            final Parameters<R> childParams = new Parameters<>(aev, e.children().size(), retType);
-            e.children().forEach(c -> processNode(aev, c, childParams, retType));
+            final Parameters<P> childParams = new Parameters<>(aev, e.children().size());
+            e.children().forEach(c -> processNode(aev, c, childParams));
             if (!childParams.unsupported)
             {
                 params.add(e.data().newInstance(childParams.get()));
@@ -49,15 +50,14 @@ public class AlkemyElementWriter<R> implements FluentAlkemyNodeReader<R>
         }
     }
 
-    static class Parameters<R> implements Supplier<Object[]>
+    static class Parameters<P> implements Supplier<Object[]>
     {
         int c = 0;
         Object[] params;
         boolean unsupported = false;
-        AlkemyElementVisitor<R, ?> aev;
-        Class<R> returnType;
+        AlkemyElementVisitor<P, ?> aev;
 
-        Parameters(AlkemyElementVisitor<R, ?> aev, int size, Class<R> returnType)
+        Parameters(AlkemyElementVisitor<P, ?> aev, int size)
         {
             this.aev = aev;
             params = new Object[size];

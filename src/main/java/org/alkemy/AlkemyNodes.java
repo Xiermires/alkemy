@@ -24,6 +24,7 @@ import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -63,11 +64,11 @@ class AlkemyNodes implements NodeFactory
     }
 
     @Override
-    public Node<? extends AbstractAlkemyElement<?>> get(Class<?> type)
+    public <R> TypifiedNode<R, ? extends AbstractAlkemyElement<?>> get(Class<R> type)
     {
         try
         {
-            return cache.get(type);
+            return new TypifiedNode<>(cache.get(type), type);
         }
         catch (ExecutionException e) // TODO
         {

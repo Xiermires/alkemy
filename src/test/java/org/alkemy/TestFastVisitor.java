@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.AlkemistTest.Idx;
+import org.alkemy.AlkemyTest.Idx;
 
 public class TestFastVisitor
 {

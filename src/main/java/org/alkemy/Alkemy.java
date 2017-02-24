@@ -21,7 +21,7 @@ import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AlkemizerCTF;
 import org.alkemy.parse.impl.AlkemyParsers;
-import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
 import org.alkemy.visitor.AlkemyNodeVisitor;
@@ -74,9 +74,9 @@ public class Alkemy
     {
         return new AlkemyNodes(parser);
     }
-
+    
     public static interface NodeFactory
     {
-        Node<? extends AbstractAlkemyElement<?>> get(Class<?> type);
+        <R> TypifiedNode<R, ? extends AbstractAlkemyElement<?>> get(Class<R> type);
     }
 }

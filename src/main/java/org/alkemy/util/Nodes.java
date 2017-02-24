@@ -261,4 +261,82 @@ public class Nodes
             traverse(e -> c.add(e.data()), p, keepProcessingOnFailure);
         }
     }
+
+    public static class TypifiedNode<R, E> implements Node<E>
+    {
+        private Node<E> root;
+        private Class<R> type;
+
+        public TypifiedNode(Node<E> root, Class<R> type)
+        {
+            this.root = root;
+            this.type = type;
+        }
+
+        public Class<R> type()
+        {
+            return type;
+        }
+
+        @Override
+        public Node<E> parent()
+        {
+            return root.parent();
+        }
+
+        @Override
+        public E data()
+        {
+            return root.data();
+        }
+
+        @Override
+        public List<Node<E>> children()
+        {
+            return root.children();
+        }
+
+        @Override
+        public boolean hasChildren()
+        {
+            return root.hasChildren();
+        }
+
+        @Override
+        public int branchDepth()
+        {
+            return root.branchDepth();
+        }
+
+        @Override
+        public void traverse(Consumer<Node<? extends E>> c)
+        {
+            root.traverse(c);
+        }
+
+        @Override
+        public void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
+        {
+            root.traverse(c, p, keepProcessingOnFailure); 
+        }
+
+        @Override
+        public void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p,
+                boolean keepProcessingOnFailure)
+        {
+            root.traverse(onNode, onLeaf, p, keepProcessingOnFailure);
+        }
+
+        @Override
+        public void drainTo(Collection<? super E> c)
+        {
+            root.drainTo(c);
+        }
+
+        @Override
+        public void drainTo(Collection<? super E> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
+        {
+            root.drainTo(c, p, keepProcessingOnFailure);
+        }
+    }
 }

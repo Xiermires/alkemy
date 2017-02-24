@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
+import org.alkemy.util.Nodes.TypifiedNode;
 
 /**
  * A class implementing this interface is expected to process trees of alkemy elements w/o delegating element processing to any
@@ -35,111 +36,98 @@ import org.alkemy.util.Node;
  */
 public interface AlkemyNodeVisitor<R, P>
 {
-    default R visit(Node<? extends AbstractAlkemyElement<?>> node, Class<R> retType)
+    /**
+     * Generates an element of type R.
+     */
+    default R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    /**
+     * Generates an element of type R using a parameter P.
+     */
+    default R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    /**
+     * Generates an element of type R, or modifies and returns the received param1 of type R, using the param2 of type P.
+     */
+    default R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R param1, P param2)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
-    default R visit(Node<? extends AbstractAlkemyElement<?>> node, P parameter, Class<R> retType)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
 
     /**
-     * Fluent version of the {@link AlkemyNodeVisitor}.
+     * Syntax sugar. Fluent version of the {@link AlkemyNodeVisitor}.
+     * <p>
+     * An {@link AlkemyNodeVisitor} where both parameter and return are from the same type. Usually represents a fluent operation
+     * where the parameter object is worked on and returned just after.
      */
     public interface FluentAlkemyNodeVisitor<R> extends AlkemyNodeVisitor<R, R>
     {
-        default R visitFluent(Node<? extends AbstractAlkemyElement<?>> node, R parameter)
-        {
-            throw new UnsupportedOperationException("Not implemented.");
-        }
-
-        /**
-         * Returns an iterable of type T. Items returned might be new or modified.
-         * <p>
-         * There is a 1:1 relation between input and output iterables.
-         * <p>
-         * Items are lazily fetched.
-         */
-        default Iterable<R> iterable(Node<? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
-        {
-            return new FluentIterable<R>(this, node, items.iterator());
-        }
-
-        /**
-         * Syntax sugar. See {@link #iterable(Node, Iterable)}
-         */
-        default Iterable<R> iterable(Node<? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
-        {
-            return new FluentIterable<R>(this, node, items);
-        }
-
-        static class FluentIterable<R> implements Iterable<R>
-        {
-            private final FluentAlkemyNodeVisitor<R> visitor;
-            private final Node<? extends AbstractAlkemyElement<?>> node;
-            private final Iterator<R> items;
-
-            FluentIterable(FluentAlkemyNodeVisitor<R> visitor, Node<? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
-            {
-                this.visitor = visitor;
-                this.node = node;
-                this.items = items;
-            }
-
-            @Override
-            public Iterator<R> iterator()
-            {
-                return new FluentIterator<R>(visitor, node, items);
-            }
-        }
-
-        static class FluentIterator<R> implements Iterator<R>
-        {
-            private final FluentAlkemyNodeVisitor<R> visitor;
-            private final Node<? extends AbstractAlkemyElement<?>> node;
-            private final Iterator<R> items;
-
-            FluentIterator(FluentAlkemyNodeVisitor<R> visitor, Node<? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
-            {
-                this.visitor = visitor;
-                this.node = node;
-                this.items = items;
-            }
-
-            @Override
-            public boolean hasNext()
-            {
-                return items.hasNext();
-            }
-
-            @Override
-            public R next()
-            {
-                return visitor.visitFluent(node, items.next());
-            }
-        }
     }
 
     /**
-     * Returns an iterable of type T mapped from an iterable of type P.
+     * Returns an iterable of type R. Items returned might be new or modified from items.
+     * <p>
+     * There is a 1:1 relation between input and output iterables.
+     * <p>
+     * Items are lazily fetched.
+     */
+    default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    {
+        return new FluentIterable<R, P>(this, node, items.iterator());
+    }
+
+    /**
+     * Syntax sugar. See {@link #iterable(Node, Iterable)}
+     */
+    default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    {
+        return new FluentIterable<R, P>(this, node, items);
+    }
+
+    /**
+     * Returns an iterable of {@link Entry}. An entry contains the result of applying the {@link AlkemyNodeVisitor} to the node
+     * with the current P item and a peek into the future P to be used on the next iteration.
+     * <p>
+     * The first iteration contains always no result (null) and the first P item in items.
      * <p>
      * There is a 1:1 relation between P and T items.
      * <p>
      * Items are lazily fetched.
+     * <p>
+     * Example:
+     * <p>
+     * If we have an Iterable &lt;P&gt; containing {1, 2, 3, 4} and applying {@link AlkemyNodeVisitor} to each P would result in
+     * the following iterator {2, 3, 4, 5} (P + 1). <br>
+     * The {@link #peekIterable(TypifiedNode, Iterable)} function will return the following Entries:
+     * <ol>
+     * <li>Entry 1 : {null, 1}
+     * <li>Entry 2 : {1, 2}
+     * <li>Entry 3 : {2, 3}
+     * <li>Entry 4 : {3, 4}
+     * <li>Entry 5 : {4, 5}
+     * <li>Entry 6 : {5, null}
+     * </ol>
+     * The iterator finishes ({@link Iterator#hasNext()} equals false) when the {@link AlkemyNodeVisitor} has been applied to the
+     * all P, hence after Entry 6.
      */
-    default Iterable<Entry<R, P>> iterable(Node<? extends AbstractAlkemyElement<?>> node, Iterable<P> items, Class<R> retType)
+    default Iterable<Entry<R, P>> peekIterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
     {
-        return new ProcessIterable<R, P>(this, node, items.iterator(), retType);
+        return new PeekIterable<R, P>(this, node, items.iterator());
     }
 
     /**
-     * Syntax sugar. See {@link #iterable(Node, Iterable, Class)}
+     * Syntax sugar. See {@link #iterable(Node, Iterable)}
      */
-    default Iterable<Entry<R, P>> iterable(Node<? extends AbstractAlkemyElement<?>> node, Iterator<P> items, Class<R> retType)
+    default Iterable<Entry<R, P>> peekIterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
     {
-        return new ProcessIterable<R, P>(this, node, items, retType);
+        return new PeekIterable<R, P>(this, node, items);
     }
 
     /**
@@ -147,75 +135,86 @@ public interface AlkemyNodeVisitor<R, P>
      * <p>
      * The items are lazily generated on each {@link Iterator#next()} call until the hasNext function returns false.
      */
-    default Iterable<R> iterable(Node<? extends AbstractAlkemyElement<?>> node, Supplier<Boolean> hasNext, Class<R> retType)
+    default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Supplier<Boolean> hasNext)
     {
-        return new CreateIterable<R, P>(this, node, hasNext, retType);
+        return new CreateIterable<R, P>(this, node, hasNext);
     }
 
     static abstract class AbstractIter<R, P>
     {
         protected final AlkemyNodeVisitor<R, P> visitor;
-        protected final Node<? extends AbstractAlkemyElement<?>> node;
+        protected final TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node;
 
-        protected AbstractIter(AlkemyNodeVisitor<R, P> visitor, Node<? extends AbstractAlkemyElement<?>> node)
+        protected AbstractIter(AlkemyNodeVisitor<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
         {
             this.visitor = visitor;
             this.node = node;
         }
     }
 
-    static class ProcessIterable<R, P> extends AbstractIter<R, P> implements Iterable<Entry<R, P>>
+    static class PeekIterable<R, P> extends AbstractIter<R, P> implements Iterable<Entry<R, P>>
     {
         private final Iterator<P> items;
-        private final Class<R> retType;
 
-        ProcessIterable(AlkemyNodeVisitor<R, P> visitor, Node<? extends AbstractAlkemyElement<?>> node, Iterator<P> items,
-                Class<R> retType)
+        PeekIterable(AlkemyNodeVisitor<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
         {
             super(visitor, node);
             this.items = items;
-            this.retType = retType;
         }
 
         @Override
         public Iterator<Entry<R, P>> iterator()
         {
-            return new ProcessIterator<R, P>(visitor, node, items, retType);
+            return new PeekIterator<R, P>(visitor, node, items);
         }
     }
 
     static class CreateIterable<R, P> extends AbstractIter<R, P> implements Iterable<R>
     {
         private final Supplier<Boolean> hasNext;
-        private final Class<R> retType;
 
-        CreateIterable(AlkemyNodeVisitor<R, P> visitor, Node<? extends AbstractAlkemyElement<?>> node, Supplier<Boolean> hasNext,
-                Class<R> retType)
+        CreateIterable(AlkemyNodeVisitor<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+                Supplier<Boolean> hasNext)
         {
             super(visitor, node);
             this.hasNext = hasNext;
-            this.retType = retType;
         }
 
         @Override
         public Iterator<R> iterator()
         {
-            return new CreateIterator<R, P>(visitor, node, hasNext, retType);
+            return new CreateIterator<R, P>(visitor, node, hasNext);
         }
     }
 
-    static class ProcessIterator<R, P> extends AbstractIter<R, P> implements Iterator<Entry<R, P>>
+    static class FluentIterable<R, P> extends AbstractIter<R, P> implements Iterable<R>
     {
-        private P next;
         private final Iterator<P> items;
-        private final Class<R> retType;
 
-        ProcessIterator(AlkemyNodeVisitor<R, P> visitor, Node<? extends AbstractAlkemyElement<?>> node, Iterator<P> items,
-                Class<R> retType)
+        FluentIterable(AlkemyNodeVisitor<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+                Iterator<P> items)
         {
             super(visitor, node);
             this.items = items;
-            this.retType = retType;
+        }
+
+        @Override
+        public Iterator<R> iterator()
+        {
+            return new FluentIterator<R, P>(visitor, node, items);
+        }
+    }
+
+    static class PeekIterator<R, P> extends AbstractIter<R, P> implements Iterator<Entry<R, P>>
+    {
+        private boolean first = true;
+        private P next;
+        private final Iterator<P> items;
+
+        PeekIterator(AlkemyNodeVisitor<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+        {
+            super(visitor, node);
+            this.items = items;
             this.next = items.hasNext() ? items.next() : null;
         }
 
@@ -228,23 +227,29 @@ public interface AlkemyNodeVisitor<R, P>
         @Override
         public Entry<R, P> next()
         {
-            final R result = visitor.visit(node, next, retType);
-            next = items.hasNext() ? items.next() : null;
-            return new Entry<R, P>(result, next);
+            if (first)
+            {
+                first = false;
+                return new Entry<R, P>(null, next);
+            }
+            else
+            {
+                final R result = visitor.visit(node, next);
+                next = items.hasNext() ? items.next() : null;
+                return new Entry<R, P>(result, next);
+            }
         }
     }
 
     static class CreateIterator<R, P> extends AbstractIter<R, P> implements Iterator<R>
     {
         private final Supplier<Boolean> hasNext;
-        private final Class<R> retType;
 
-        CreateIterator(AlkemyNodeVisitor<R, P> visitor, Node<? extends AbstractAlkemyElement<?>> node, Supplier<Boolean> hasNext,
-                Class<R> retType)
+        CreateIterator(AlkemyNodeVisitor<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+                Supplier<Boolean> hasNext)
         {
             super(visitor, node);
             this.hasNext = hasNext;
-            this.retType = retType;
         }
 
         @Override
@@ -256,7 +261,31 @@ public interface AlkemyNodeVisitor<R, P>
         @Override
         public R next()
         {
-            return visitor.visit(node, retType);
+            return visitor.visit(node);
+        }
+    }
+
+    static class FluentIterator<R, P> extends AbstractIter<R, P> implements Iterator<R>
+    {
+        private final Iterator<P> items;
+
+        FluentIterator(AlkemyNodeVisitor<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+                Iterator<P> items)
+        {
+            super(visitor, node);
+            this.items = items;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return items.hasNext();
+        }
+
+        @Override
+        public R next()
+        {
+            return visitor.visit(node, items.next());
         }
     }
 
