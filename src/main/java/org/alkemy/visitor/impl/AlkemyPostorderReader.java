@@ -32,11 +32,15 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
     private boolean instantiateNodes;
     private boolean visitNodes;
 
-    public AlkemyPostorderReader(boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+    /**
+     * Configure using {@code INCLUDE_NULL_BRANCHES} |
+     * {@code INSTANTIATE_NODES} | {@code VISIT_NODES}
+     */
+    public AlkemyPostorderReader(int conf)
     {
-        this.includeNullNodes = includeNullNodes;
-        this.instantiateNodes = instantiateNodes;
-        this.visitNodes = visitNodes;
+        this.includeNullNodes = (conf & INCLUDE_NULL_BRANCHES) != 0;
+        this.instantiateNodes = (conf & INSTANTIATE_NODES) != 0;
+        this.visitNodes = (conf & VISIT_NODES) != 0;
     }
 
     @Override
@@ -60,7 +64,7 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
             e.data().accept(aev, parent, parameter);
         }
     }
-    
+
     @Override
     protected void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent)
     {
@@ -87,9 +91,9 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
      */
     public static class FluentAlkemyPostorderReader<R> extends AlkemyPostorderReader<R, R> implements FluentAlkemyNodeReader<R>
     {
-        public FluentAlkemyPostorderReader(boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+        public FluentAlkemyPostorderReader(int conf)
         {
-            super(includeNullNodes, instantiateNodes, visitNodes);
+            super(conf);
         }
 
         @Override

@@ -31,11 +31,11 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
     private boolean instantiateNodes;
     private boolean visitNodes;
 
-    public AlkemyPreorderReader(boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+    public AlkemyPreorderReader(int conf)
     {
-        this.includeNullNodes = includeNullNodes;
-        this.instantiateNodes = instantiateNodes;
-        this.visitNodes = visitNodes;
+        this.includeNullNodes = (conf & INCLUDE_NULL_BRANCHES) != 0;
+        this.instantiateNodes = (conf & INSTANTIATE_NODES) != 0;
+        this.visitNodes = (conf & VISIT_NODES) != 0;
     }
 
     @Override
@@ -80,9 +80,9 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
      */
     public static class FluentAlkemyPreorderReader<R> extends AlkemyPreorderReader<R, R> implements FluentAlkemyNodeReader<R>
     {
-        public FluentAlkemyPreorderReader(boolean includeNullNodes, boolean instantiateNodes, boolean visitNodes)
+        public FluentAlkemyPreorderReader(int conf)
         {
-            super(includeNullNodes, instantiateNodes, visitNodes);
+            super(conf);
         }
 
         @Override

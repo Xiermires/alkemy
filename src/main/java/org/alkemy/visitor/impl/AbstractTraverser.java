@@ -27,6 +27,21 @@ import org.alkemy.visitor.AlkemyNodeReader;
  */
 public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
 {
+    /**
+     * Branches descending from a null node are also evaluated.
+     */
+    public static final int INCLUDE_NULL_BRANCHES = 0x1;
+    
+    /**
+     * Instantiate nodes which are null.
+     */
+    public static final int INSTANTIATE_NODES = 0x2;
+    
+    /**
+     * Nodes are also evaluated by the {@link AlkemyElementVisitor}
+     */
+    public static final int VISIT_NODES = 0x4;
+    
     @Override
     public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {

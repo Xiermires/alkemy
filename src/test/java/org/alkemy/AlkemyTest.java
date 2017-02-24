@@ -52,7 +52,7 @@ public class AlkemyTest
     {
         final TestClass tc = new TestClass();
         final PropertyConcatenation<TestClass> concat = new PropertyConcatenation<>();
-        new FluentAlkemyPreorderReader<TestClass>(false, false, false).accept(concat, Alkemy.nodes().get(TestClass.class), tc);
+        new FluentAlkemyPreorderReader<TestClass>(0).accept(concat, Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat("01234", is(concat.get()));
     }
@@ -61,7 +61,7 @@ public class AlkemyTest
     public void testAssign()
     {
         final TestClass tc = new TestClass();
-        new FluentAlkemyPreorderReader<TestClass>(false, false, false).accept(new AssignConstant<>("bar"),
+        new FluentAlkemyPreorderReader<TestClass>(0).accept(new AssignConstant<>("bar"),
                 Alkemy.nodes().get(TestClass.class), tc);
 
         assertThat(tc.s0, is("0"));
@@ -128,7 +128,7 @@ public class AlkemyTest
     @Test
     public void testCreateIterable()
     {
-        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(0);
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final Supplier<Boolean> upTo100 = new Supplier<Boolean>()
@@ -167,7 +167,7 @@ public class AlkemyTest
     @Test
     public void testStreamForEach()
     {
-        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(0);
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
 
@@ -193,7 +193,7 @@ public class AlkemyTest
     @Test
     public void testStreamFilter()
     {
-        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(false, false, false);
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<TestClass>(0);
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final Set<TestClass> created = new HashSet<>();
@@ -208,7 +208,7 @@ public class AlkemyTest
     @Test
     public void peformanceElementVisitor() throws Throwable
     {
-        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(0);
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final TestClass tc = new TestClass();
@@ -225,7 +225,7 @@ public class AlkemyTest
     @Test
     public void peformanceElementVisitorNoInstr() throws Throwable
     {
-        final FluentAlkemyPreorderReader<TestClassNoInstr> anv = new FluentAlkemyPreorderReader<>(false, false, false);
+        final FluentAlkemyPreorderReader<TestClassNoInstr> anv = new FluentAlkemyPreorderReader<>(0);
         final TypifiedNode<TestClassNoInstr, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes()
                 .get(TestClassNoInstr.class);
         final AssignConstant<TestClassNoInstr, String> aev = new AssignConstant<>("foo");
@@ -243,7 +243,7 @@ public class AlkemyTest
     @Test
     public void peformanceTypeVisitor() throws Throwable
     {
-        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(false, false, false);
+        final FluentAlkemyPreorderReader<TestClass> anv = new FluentAlkemyPreorderReader<>(0);
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
         final PassThrough<TestClass> aev = new PassThrough<>();
         final TestClass tc = new TestClass();
