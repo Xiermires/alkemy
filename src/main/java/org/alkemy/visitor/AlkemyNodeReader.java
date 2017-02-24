@@ -124,7 +124,7 @@ public interface AlkemyNodeReader<R, P>
      */
     default Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
     {
-        return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), -1, 0), false);
+        return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), Long.MAX_VALUE, 0), false);
     }
 
     /**
@@ -132,7 +132,7 @@ public interface AlkemyNodeReader<R, P>
      */
     default Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
     {
-        return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), -1, 0), false);
+        return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), Long.MAX_VALUE, 0), false);
     }
 
     /**
@@ -140,7 +140,7 @@ public interface AlkemyNodeReader<R, P>
      */
     default Stream<Entry<R, P>> parallelPeekStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
     {
-        return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, node, items).iterator(), -1, 0), false);
+        return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, node, items).iterator(), Long.MAX_VALUE, 0), false);
     }
     
     /**
@@ -148,7 +148,7 @@ public interface AlkemyNodeReader<R, P>
      */
     default Stream<Entry<R, P>> parallelPeekStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
     {
-        return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, node, items).iterator(), -1, 0), false);
+        return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, node, items).iterator(), Long.MAX_VALUE, 0), false);
     }
 
     /**
@@ -156,7 +156,7 @@ public interface AlkemyNodeReader<R, P>
      */
     default Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Supplier<Boolean> hasNext)
     {
-        return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, hasNext).iterator(), -1, 0), false);
+        return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, hasNext).iterator(), Long.MAX_VALUE, 0), false);
     }
     
     
