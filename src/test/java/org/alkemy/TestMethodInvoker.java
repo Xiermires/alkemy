@@ -24,4 +24,10 @@ public class TestMethodInvoker
     {
         return "foo";
     }
+    
+    @Foo
+    public String bar(String bar)
+    {
+        return bar;
+    }
 }

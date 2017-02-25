@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy;
 
+import static org.alkemy.visitor.impl.AbstractTraverser.VISIT_NODES;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
@@ -44,7 +45,6 @@ import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.util.PassThrough;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
-import static org.alkemy.visitor.impl.AbstractTraverser.*;
 import org.alkemy.visitor.impl.SingleTypeReader;
 import org.junit.Test;
 
@@ -192,9 +192,14 @@ public class AlkemyTest
     public void testMethodInvoker()
     {
         final FooInvoker<TestMethodInvoker> aev = new FooInvoker<TestMethodInvoker>();
-        Alkemy.reader(TestMethodInvoker.class).preorder(IGNORE_LEAFS | VISIT_NODES).accept(aev);
+        Alkemy.reader(TestMethodInvoker.class).preorder(VISIT_NODES).accept(aev);
         
         assertThat(aev.foo, is("foo"));
+        
+        final BarInvoker aev2 = new BarInvoker();
+        Alkemy.reader(TestMethodInvoker.class, String.class).preorder(VISIT_NODES).accept(aev2, "bar");
+        
+        assertThat(aev2.bar, is("bar"));
     }
 
     @Test
@@ -400,6 +405,24 @@ public class AlkemyTest
         {
             final MethodInvoker mi = e.getMethodInvoker("foo");
             foo = mi.safeInvoke(parent, String.class);
+        }
+        
+        @Override
+        public AlkemyElement map(AlkemyElement e)
+        {
+            return e;
+        }
+    }
+    
+    static class BarInvoker implements AlkemyElementVisitor<String, AlkemyElement>
+    {
+        String bar; 
+        
+        @Override
+        public void visit(AlkemyElement e, Object parent, String param)
+        {
+            final MethodInvoker mi = e.getMethodInvoker("bar");
+            bar = mi.safeInvoke(parent, String.class, param);
         }
         
         @Override

@@ -65,7 +65,10 @@ public class MethodHandleBasedInvoker implements MethodInvoker
         {
             if (hasArgs)
             {
-                return Optional.ofNullable(mh.invokeWithArguments(parent, args));
+                final Object[] os = new Object[args.length + 1];
+                os[0] = parent;
+                System.arraycopy(args, 0, os, 1, args.length);
+                return Optional.ofNullable(mh.invokeWithArguments(os));
             }
             else
             {
