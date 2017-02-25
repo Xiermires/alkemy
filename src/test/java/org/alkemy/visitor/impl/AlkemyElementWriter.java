@@ -70,13 +70,19 @@ public class AlkemyElementWriter<R, P> implements AlkemyNodeReader<R, P>
 
         void tryAdd(Node<? extends AbstractAlkemyElement<?>> e)
         {
-            if (aev.accepts(e.data().alkemyType()))
+            final Object v = e.data().accept(aev);
+            if (unsupported)
             {
-                params[c++] = e.data().accept(aev);
+                return; // no need to visit further elements.
+            }
+            else if (v != null)
+            {
+                params[c++] = v;
             }
             else
             {
-                unsupported = true;
+                params[c++] = null;
+                unsupported = aev.accepts(e.data().alkemyType());
             }
         }
 

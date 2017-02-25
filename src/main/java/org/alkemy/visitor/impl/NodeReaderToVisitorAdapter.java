@@ -13,29 +13,36 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.visitor;
+package org.alkemy.visitor.impl;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Nodes.TypifiedNode;
-import org.alkemy.visitor.AlkemyNodeReader.FluentAlkemyNodeReader;
-import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyElementVisitor;
+import org.alkemy.visitor.AlkemyNodeReader;
+import org.alkemy.visitor.AlkemyNodeVisitor;
 
 /**
- * Adapter between a fluent reader and a fluent visitor to access the Iterable functionality.
+ * Adapter between a reader and a visitor to access the Iterable functionality.
  */
-public class FluentNodeReaderToVisitorAdapter<R> implements FluentAlkemyNodeReader<R>, FluentAlkemyNodeVisitor<R>
+public class NodeReaderToVisitorAdapter<R, P> implements AlkemyNodeReader<R, P>, AlkemyNodeVisitor<R, P>
 {
-    private final FluentAlkemyNodeReader<R> reader;
-    private final AlkemyElementVisitor<R, ?> aev;
+    private final AlkemyNodeReader<R, P> reader;
+    private final AlkemyElementVisitor<P, ?> aev;
 
-    FluentNodeReaderToVisitorAdapter(FluentAlkemyNodeReader<R> reader, AlkemyElementVisitor<R, ?> aev)
+    public NodeReaderToVisitorAdapter(AlkemyNodeReader<R, P> reader, AlkemyElementVisitor<P, ?> aev)
     {
         this.reader = reader;
         this.aev = aev;
     }
 
     @Override
-    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R parameter)
+    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
+    {
+        return reader.accept(aev, node);
+    }
+
+    @Override
+    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
     {
         return reader.accept(aev, node, parameter);
     }

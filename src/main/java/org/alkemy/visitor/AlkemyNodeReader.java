@@ -25,6 +25,7 @@ import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyNodeVisitor.Entry;
+import org.alkemy.visitor.impl.NodeReaderToVisitorAdapter;
 
 /**
  * A class implementing this interface is expected to process trees of alkemy elements and delegate its element processing to

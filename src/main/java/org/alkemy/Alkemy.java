@@ -27,7 +27,11 @@ import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
 import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.impl.AlkemyPostorderReader;
 import org.alkemy.visitor.impl.AlkemyPreorderReader;
+import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
+import org.alkemy.visitor.impl.SingleTypeReader;
+import org.alkemy.visitor.impl.SingleTypeReader.FluentSingleTypeReader;
 
 /**
  * The Alkemy library allows applying user specific {@link AlkemyNodeReader},
@@ -46,6 +50,8 @@ import org.alkemy.visitor.impl.AlkemyPreorderReader;
  */
 public class Alkemy
 {
+    private static boolean instrumenting = false;
+
     /**
      * This method set-up the instrumentation of classes.
      * <p>
@@ -57,7 +63,11 @@ public class Alkemy
      */
     public static void startAlkemizer()
     {
-        AgentTools.add(new AlkemizerCTF());
+        if (!instrumenting)
+        {
+            AgentTools.add(new AlkemizerCTF());
+            instrumenting = true;
+        }
     }
 
     /**
@@ -133,6 +143,16 @@ public class Alkemy
         return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes().get((Class<R>) r.getClass()), p);
     }
 
+    public static <R> FluentReaderFactory<R> reader(Class<R> retType)
+    {
+        return new FluentReaderFactory<R>(nodes().get(retType));
+    }
+
+    public static <R, P> ReaderFactory<R, P> reader(Class<R> retType, Class<P> paramType)
+    {
+        return new ReaderFactory<R, P>(nodes().get(retType));
+    }
+
     /**
      * The node factory is the starting point of any alkemizing process.
      * <p>
@@ -150,5 +170,45 @@ public class Alkemy
     public static interface NodeFactory
     {
         <R> TypifiedNode<R, ? extends AbstractAlkemyElement<?>> get(Class<R> type);
+    }
+
+    public static class FluentReaderFactory<R>
+    {
+        private final TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root;
+
+        private FluentReaderFactory(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
+        {
+            this.root = root;
+        }
+
+        public FluentSingleTypeReader<R> preorder(int conf)
+        {
+            return new FluentSingleTypeReader<R>(root, new FluentAlkemyPreorderReader<R>(conf));
+        }
+
+        public FluentSingleTypeReader<R> postorder(int conf)
+        {
+            return new FluentSingleTypeReader<R>(root, new FluentAlkemyPreorderReader<R>(conf));
+        }
+    }
+
+    public static class ReaderFactory<R, P>
+    {
+        private final TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root;
+
+        private ReaderFactory(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
+        {
+            this.root = root;
+        }
+
+        public SingleTypeReader<R, P> preorder(int conf)
+        {
+            return new SingleTypeReader<R, P>(root, new AlkemyPostorderReader<R, P>(conf));
+        }
+
+        public SingleTypeReader<R, P> postorder(int conf)
+        {
+            return new SingleTypeReader<R, P>(root, new AlkemyPostorderReader<R, P>(conf));
+        }
     }
 }

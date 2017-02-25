@@ -15,9 +15,18 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
-import org.alkemy.visitor.AlkemyNodeReader;
+import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.visitor.AlkemyElementVisitor;
 
-public class AlkemyControllerVisitor implements AlkemyNodeReader<Object, Object>
+public class AlkemyControllerVisitor<P, E extends AbstractAlkemyElement<E>> implements AlkemyElementVisitor<P, E>
 {
+
+    @Override
+    public E map(AlkemyElement e)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
     // TODO AlkemyControllerVisitor.
 }

@@ -243,7 +243,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public Object visit(AlkemyElement e)
+        public Object generate(AlkemyElement e)
         {
             return avp.getValue(e);
         }

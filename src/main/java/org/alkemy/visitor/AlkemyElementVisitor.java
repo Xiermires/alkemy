@@ -20,11 +20,16 @@ import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 
 public interface AlkemyElementVisitor<P, E extends AbstractAlkemyElement<E>>
 {
-    default Object visit(E e)
+    default Object generate(E e)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
-
+    
+    default Object generate(E e, P parameter)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
     default void visit(E e, Object parent)
     {
         throw new UnsupportedOperationException("Not implemented.");

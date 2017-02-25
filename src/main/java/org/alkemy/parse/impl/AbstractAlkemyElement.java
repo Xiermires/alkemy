@@ -144,28 +144,37 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     /**
-     * Use this accept method to work on an element which is not linked to any concrete instance of a class.
+     * Use this accept method to work on an element which is not linked to any concrete instance of
+     * a class and return a value associated to it.
      * <p>
-     * If the visitor doesn't {@link AlkemyElementVisitor#accepts(Class)} this element, element is not processed and returns null.
+     * If the visitor doesn't {@link AlkemyElementVisitor#accepts(Class)} this element, element is
+     * not processed and returns null.
      * <p>
-     * The accept methods are used to bridge between {@link AlkemyNodeReader}, which traverses a tree of unknown
-     * {@link AbstractAlkemyElement} implementations, and an {@link AlkemyElementVisitor} which requires an explicit
-     * {@link AbstractAlkemyElement} type. Multi-purpose node visitors, such as the {@link AlkemyPreorderReader}, the
-     * {@link AlkemyPostorderReader} and the {@link AlkemyControllerVisitor}, use this method to avoid any casting between
-     * {@link AbstractAlkemyElement} types.
+     * From the returned value, it is impossible to know whenever a null value is due to the
+     * {@link AlkemyElementVisitor#accepts(Class)} returning false, or the visitor itself returning
+     * null. If that information is required, the caller itself should invoke the
+     * {@link AlkemyElementVisitor#accepts(Class)}.
      * <p>
-     * Whenever a {@link AlkemyNodeReader} handles known {@link AbstractAlkemyElement} implementations, these methods are not
-     * required and the node visitor can directly
+     * The accept methods are used to bridge between {@link AlkemyNodeReader}, which traverses a
+     * tree of unknown {@link AbstractAlkemyElement} implementations, and an
+     * {@link AlkemyElementVisitor} which requires an explicit {@link AbstractAlkemyElement} type.
+     * Multi-purpose node visitors, such as the {@link AlkemyPreorderReader}, the
+     * {@link AlkemyPostorderReader} and the {@link AlkemyControllerVisitor}, use this method to
+     * avoid any casting between {@link AbstractAlkemyElement} types.
+     * <p>
+     * Whenever a {@link AlkemyNodeReader} handles known {@link AbstractAlkemyElement}
+     * implementations, these methods are not required and the node visitor can directly
      * <code>alkemyElementVisitor.visit(new ConcreteAlkemyElement(node<impl>.data())</code>.
      */
     public <P, T extends AbstractAlkemyElement<T>> Object accept(AlkemyElementVisitor<P, T> v)
     {
-        if (cacheAcceptedRef())
+        if (useMappedRefCaching())
         {
             final T t = map(v);
-            return t != null ? v.visit(t) : null;
+            return t != null ? v.generate(t) : null;
         }
-        else return v.visit(v.map(view()));
+        else if (v.accepts(alkemyType)) return v.generate(v.map(view()));
+        else return null;
     }
 
     /**
@@ -175,7 +184,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      */
     public <P, T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<P, T> v, Object parent)
     {
-        if (cacheAcceptedRef())
+        if (useMappedRefCaching())
         {
             final T t = map(v);
             if (t != null)
@@ -195,7 +204,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      */
     public <P, T extends AbstractAlkemyElement<T>> boolean accept(AlkemyElementVisitor<P, T> v, Object parent, P parameter)
     {
-        if (cacheAcceptedRef())
+        if (useMappedRefCaching())
         {
             final T t = map(v);
             if (t != null)
@@ -209,7 +218,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     /**
-     * See {@link #cacheAcceptedRef()}
+     * See {@link #useMappedRefCaching()}
      */
     @SuppressWarnings("unchecked")
     protected <P, T extends AbstractAlkemyElement<T>> T map(AlkemyElementVisitor<P, T> v)
@@ -220,7 +229,8 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         }
         else if (node)
         {
-            return v.map(new AlkemyElement(this)); // do not cache nodes. Different AEVs might be visiting this node.
+            return v.map(new AlkemyElement(this)); // do not cache nodes. Different AEVs might be
+                                                   // visiting this node.
         }
         else
         {
@@ -246,15 +256,16 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      * <ul>
      * <li>v#map() maps statically for all visitors accepting this element <br>
      * { (consider) AlkemyElement e = ... (then) v.map(e) = v.map(e) = v.map(e) = ...
-     * <li>Further visitors accepting this element are consistent with the mapped type (either using it directly, or use a super
-     * class from it).
-     * <li>Visitors work on isolated trees generated by the {@link NodeFactory} or copied from a raw node (not visited) using
+     * <li>Further visitors accepting this element are consistent with the mapped type (either using
+     * it directly, or use a super class from it).
+     * <li>Visitors work on isolated trees generated by the {@link NodeFactory} or copied from a raw
+     * node (not visited) using
      * {@link Node#copy(Node, org.alkemy.util.Node.Builder, java.util.function.Function)}.
      * </ul>
      * <p>
      * Extend this method to return false otherwise.
      */
-    protected boolean cacheAcceptedRef()
+    protected boolean useMappedRefCaching()
     {
         return true;
     }
