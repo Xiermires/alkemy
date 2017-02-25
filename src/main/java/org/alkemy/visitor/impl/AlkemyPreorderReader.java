@@ -29,13 +29,14 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
 {
     private boolean includeNullNodes;
     private boolean instantiateNodes;
-    private boolean visitNodes;
-
+    private boolean includeLeafs;
+    
     public AlkemyPreorderReader(int conf)
     {
+        super((conf & VISIT_NODES) != 0);
         this.includeNullNodes = (conf & INCLUDE_NULL_BRANCHES) != 0;
         this.instantiateNodes = (conf & INSTANTIATE_NODES) != 0;
-        this.visitNodes = (conf & VISIT_NODES) != 0;
+        this.includeLeafs = !((conf & IGNORE_LEAFS) != 0);
     }
 
     @Override
@@ -53,7 +54,10 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
         }
         else
         {
-            e.data().accept(aev, parent, parameter);
+            if (includeLeafs)
+            {
+                e.data().accept(aev, parent, parameter);
+            }
         }
     }
 
@@ -90,6 +94,10 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
         {
             Assertions.nonNull(root);
 
+            if (visitNodes)
+            {
+                root.data().accept(aev, parameter);
+            }
             root.children().forEach(c -> processBranch(aev, c, parameter));
             return parameter;
         }

@@ -13,22 +13,15 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy;
 
-import java.util.List;
+import org.alkemy.AlkemyTest.Foo;
 
-import org.alkemy.util.TypedTable;
-
-public interface AlkemyElementFactory<T>
+public class TestMethodInvoker
 {
-    /**
-     * Creates an alkemy element for this target.
-     */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
-
-    /**
-     * Creates an alkemy element node for this target.
-     */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
+    @Foo
+    public String foo()
+    {
+        return "foo";
+    }
 }

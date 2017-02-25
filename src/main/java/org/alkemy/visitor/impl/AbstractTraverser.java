@@ -42,6 +42,18 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
      */
     public static final int VISIT_NODES = 0x4;
     
+    /**
+     * Leafs are ignored.
+     */
+    public static final int IGNORE_LEAFS = 0x8;
+    
+    protected boolean visitNodes;
+    
+    protected AbstractTraverser(boolean visitNodes)
+    {
+        this.visitNodes = visitNodes;
+    }
+    
     @Override
     public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {
@@ -49,6 +61,10 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
         final R instance = root.data().safeNewInstance(root.type());
         if (instance != null)
         {
+            if (visitNodes)
+            {
+                root.data().accept(aev, instance);
+            }
             root.children().forEach(c -> processBranch(aev, c, instance));
         }
         return instance;
@@ -62,6 +78,10 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
         final R instance = root.data().safeNewInstance(root.type());
         if (instance != null)
         {
+            if (visitNodes)
+            {
+                root.data().accept(aev, instance, parameter);
+            }
             root.children().forEach(c -> processBranch(aev, c, instance, parameter));
         }
         return instance;

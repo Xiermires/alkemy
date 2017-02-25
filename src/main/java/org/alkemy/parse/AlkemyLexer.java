@@ -15,7 +15,10 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
+import java.util.List;
+
 import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.MethodInvoker;
 import org.alkemy.parse.impl.NodeConstructor;
 import org.alkemy.parse.impl.ValueAccessor;
 import org.alkemy.util.TypedTable;
@@ -40,5 +43,6 @@ public interface AlkemyLexer<T>
     /**
      * Creates an unbound {@link AbstractAlkemyElement} for this node.
      */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor, Class<?> nodeType, TypedTable context);
+    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
 }

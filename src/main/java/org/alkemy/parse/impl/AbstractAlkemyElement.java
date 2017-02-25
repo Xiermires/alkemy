@@ -17,6 +17,10 @@ package org.alkemy.parse.impl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.alkemy.Alkemy.NodeFactory;
 import org.alkemy.exception.AccessException;
@@ -37,16 +41,19 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     private final AnnotatedElement desc;
     private final ValueAccessor valueAccessor;
     private final NodeConstructor nodeConstructor;
+    private final Map<String, MethodInvoker> methodInvokers;
     private final Class<? extends Annotation> alkemyType;
     private final boolean node;
     private final TypedTable context;
 
-    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers,
             Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
         this.nodeConstructor = nodeConstructor;
+        this.methodInvokers = new HashMap<String, MethodInvoker>();
+        methodInvokers.forEach(c -> this.methodInvokers.put(c.name(), c));
         this.alkemyType = alkemyType;
         this.node = node;
         this.context = context;
@@ -59,15 +66,16 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
         this.nodeConstructor = other.nodeConstructor;
+        this.methodInvokers = other.methodInvokers;
         this.alkemyType = other.alkemyType;
         this.node = other.node;
         this.context = other.context;
     }
 
     static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
+            List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
     {
-        return new AlkemyElement(desc, nodeConstructor, valueAccessor, alkemyType, node, context);
+        return new AlkemyElement(desc, nodeConstructor, valueAccessor, methodInvokers, alkemyType, node, context);
     }
 
     public AnnotatedElement desc()
@@ -118,6 +126,16 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     public void set(Object value, Object parent) throws AccessException
     {
         valueAccessor.set(value, parent);
+    }
+    
+    public Collection<MethodInvoker> getMethodInvokers()
+    {
+        return methodInvokers.values();
+    }
+    
+    public MethodInvoker getMethodInvoker(String name)
+    {
+        return methodInvokers.get(name);
     }
 
     @Override
@@ -298,10 +316,10 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
             super(other);
         }
 
-        AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+        AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,List<MethodInvoker> methodInvokers,
                 Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
         {
-            super(desc, nodeConstructor, valueAccessor, alkemyType, node, context);
+            super(desc, nodeConstructor, valueAccessor, methodInvokers, alkemyType, node, context);
         }
     }
 }

@@ -16,6 +16,7 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.List;
 
 import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.parse.AlkemyLexer;
@@ -57,8 +58,8 @@ class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
 
     @Override
     public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
-            ValueAccessor valueAccessor, Class<?> nodeType, TypedTable context)
+            ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
-        return factory.createNode(desc, valueConstructor, valueAccessor, nodeType, context);
+        return factory.createNode(desc, valueConstructor, valueAccessor, methodInvokers, nodeType, context);
     }
 }

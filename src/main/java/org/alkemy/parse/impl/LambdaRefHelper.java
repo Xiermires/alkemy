@@ -182,4 +182,9 @@ public class LambdaRefHelper
         }
         return null;
     }
+
+    static MethodHandle methodHandle(Method m) throws IllegalAccessException 
+    {
+        return MethodHandles.lookup().unreflect(m);
+    }
 }

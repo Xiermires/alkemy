@@ -119,6 +119,7 @@ public class AlkemyVisitorTests
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertTrue(ns.names.isEmpty());
     }
 
@@ -140,6 +141,7 @@ public class AlkemyVisitorTests
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertTrue(ns.names.isEmpty());
     }
 
@@ -167,6 +169,7 @@ public class AlkemyVisitorTests
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertTrue(ns.names.isEmpty());
     }
 
@@ -194,6 +197,7 @@ public class AlkemyVisitorTests
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertTrue(ns.names.isEmpty());
     }
 

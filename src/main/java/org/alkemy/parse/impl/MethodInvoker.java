@@ -15,20 +15,32 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.util.List;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Optional;
 
-import org.alkemy.util.TypedTable;
+import org.alkemy.exception.AlkemyException;
 
-public interface AlkemyElementFactory<T>
+public interface MethodInvoker
 {
+    AnnotatedElement desc();
+    
+    String name();
+    
+    Class<?> declaringClass();
+    
     /**
-     * Creates an alkemy element for this target.
+     * Invokes the method and returns the value if any (can be void).
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while invoking the method.
      */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
-
+    Optional<Object> invoke(Object parent, Object... args) throws AlkemyException;
+    
     /**
-     * Creates an alkemy element node for this target.
+     * Invokes the method and returns the value if is exactly of type T (not assignable!), null otherwise.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while invoking the method.
      */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
+    <R> R safeInvoke(Object parent, Class<R> retType, Object... args) throws AlkemyException;
 }

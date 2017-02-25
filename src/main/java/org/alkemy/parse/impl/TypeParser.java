@@ -18,8 +18,11 @@ package org.alkemy.parse.impl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.alkemy.annotations.AlkemyLeaf;
@@ -32,7 +35,8 @@ import org.alkemy.util.Nodes;
 import org.alkemy.util.TypedTable;
 
 /**
- * The main parser. It parses fields alkemizations (see {@link AlkemyLeaf}, as well as the {@link Order} annotation.
+ * The main parser. It parses fields and method alkemizations (see {@link AlkemyLeaf}, as well as
+ * the {@link Order} annotation.
  * <p>
  * Example:
  * 
@@ -46,22 +50,27 @@ import org.alkemy.util.TypedTable;
  *  
  *  @Mean("height")
  *  double bar;
+ *  
+ *  @Schedule(every = 5000)
+ *  @Using({"foo"},{"bar"})
+ *  void method(double foo, double bar) { ... }
+ *  
  * }
  * <code>
- * The parser will create a tree with two leafs such as : Root (Foo) { Leaf (bar) , Leaf (foo) }
+ * The parser will create a tree such as follows: Root (Foo { method }) { Leaf (bar) , Leaf (foo) }
  */
-class TypeFieldParser implements AlkemyParser
+class TypeParser implements AlkemyParser
 {
     private final AlkemyLexer<AnnotatedElement> lexer;
 
-    private TypeFieldParser(AlkemyLexer<AnnotatedElement> lexer)
+    private TypeParser(AlkemyLexer<AnnotatedElement> lexer)
     {
         this.lexer = lexer;
     }
 
     static AlkemyParser create(AlkemyLexer<AnnotatedElement> lexer)
     {
-        return new TypeFieldParser(lexer);
+        return new TypeParser(lexer);
     }
 
     @Override
@@ -71,8 +80,8 @@ class TypeFieldParser implements AlkemyParser
         return _parse(
                 type,
                 Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]),
-                        AccessorFactory.createConstructor(type), AccessorFactory.createSelfAccessor(), type, context)), context)
-                .build();
+                        AccessorFactory.createConstructor(type), AccessorFactory.createSelfAccessor(type),
+                        AccessorFactory.createInvokers(getLeafMethods(type)), type, context)), context).build();
     }
 
     private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent,
@@ -97,10 +106,24 @@ class TypeFieldParser implements AlkemyParser
             {
                 _parse(f.getType(),
                         parent.addChild(lexer.createNode(f, AccessorFactory.createConstructor(f.getType()),
-                                AccessorFactory.createAccessor(f), f.getType(), context)), context);
+                                AccessorFactory.createAccessor(f), AccessorFactory.createInvokers(getLeafMethods(f.getType())),
+                                f.getType(), context)), context);
             }
         }
         return parent;
+    }
+
+    private List<Method> getLeafMethods(Class<?> type)
+    {
+        final List<Method> ms = new ArrayList<Method>();
+        for (Method m : type.getDeclaredMethods())
+        {
+            if (lexer.isLeaf(m))
+            {
+                ms.add(m);
+            }
+        }
+        return ms;
     }
 
     private Field[] sortIfRequired(Field[] fields, Order order, final Class<?> type)
@@ -108,9 +131,12 @@ class TypeFieldParser implements AlkemyParser
         if (order != null)
         {
             final String[] names = order.value();
-            if (names.length != fields.length) { throw new InvalidOrder(
-                    "Missing fields within the FieldOrder annotation inside the type : '%s'. It must contain all mapped fields.",
-                    type.getSimpleName()); }
+            if (names.length != fields.length)
+            {
+                throw new InvalidOrder(
+                        "Missing fields within the FieldOrder annotation inside the type : '%s'. It must contain all mapped fields.",
+                        type.getSimpleName());
+            }
 
             final Map<String, Integer> nameOrder = new HashMap<String, Integer>();
             for (int i = 0; i < names.length; i++)
@@ -132,12 +158,16 @@ class TypeFieldParser implements AlkemyParser
                                 throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type
                                         .getSimpleName());
                             }
-                            else if (rhs == null) { throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1
-                                    .getName(), type.getSimpleName()); }
+                            else if (rhs == null)
+                            {
+                                throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type
+                                        .getSimpleName());
+                            }
 
                             return lhs < rhs ? -1 : rhs == lhs ? 0 : 1;
                         }
-                        else if (lexer.isLeaf(o1) || lexer.isNode(o1)) // Keep non mappings to the right.
+                        else if (lexer.isLeaf(o1) || lexer.isNode(o1)) // Keep non mappings to the
+                                                                       // right.
                         {
                             return 1;
                         }

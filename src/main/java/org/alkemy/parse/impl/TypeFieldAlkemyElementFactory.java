@@ -16,6 +16,8 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.Collections;
+import java.util.List;
 
 import org.alkemy.util.AnnotationUtils;
 import org.alkemy.util.TypedTable;
@@ -34,15 +36,15 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Annot
     @Override
     public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
     {
-        return AbstractAlkemyElement.create(desc, AccessorFactory.notSupported(), valueAccessor,
+        return AbstractAlkemyElement.create(desc, AccessorFactory.notSupported(), valueAccessor, Collections.emptyList(),
                 AnnotationUtils.findVisitorType(desc), false, context);
     }
 
     @Override
     public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
-            ValueAccessor valueAccessor, Class<?> nodeType, TypedTable context)
+            ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
-        return AbstractAlkemyElement.create(desc, valueConstructor, valueAccessor, AnnotationUtils.findVisitorType(desc), true,
-                context);
+        return AbstractAlkemyElement.create(desc, valueConstructor, valueAccessor, methodInvokers,
+                AnnotationUtils.findVisitorType(desc), true, context);
     }
 }

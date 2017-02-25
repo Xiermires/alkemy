@@ -16,7 +16,10 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
@@ -29,9 +32,9 @@ class AccessorFactory
     {
     }
 
-    static ValueAccessor createSelfAccessor()
+    static ValueAccessor createSelfAccessor(Class<?> type)
     {
-        return new SelfAccessor();
+        return new SelfAccessor(type);
     }
 
     static NodeConstructor notSupported()
@@ -55,8 +58,8 @@ class AccessorFactory
         }
         catch (IllegalAccessException | SecurityException e)
         {
-            // TODO (Security)
-            throw new RuntimeException("TODO", e);
+            throw new AlkemyException("Unable to create value accessor for field '%s'", e, f.getDeclaringClass() + "."
+                    + f.getName());
         }
     }
 
@@ -75,19 +78,41 @@ class AccessorFactory
         }
         catch (IllegalAccessException | SecurityException | NoSuchMethodException e)
         {
-            // TODO (Class not public // No default ctor // Security)
-            throw new RuntimeException("TODO", e);
+            throw new AlkemyException("Unable to create a constructor accessor for type '%s'", e, type.getName());
         }
+    }
+
+    public static List<MethodInvoker> createInvokers(List<Method> ms)
+    {
+        final List<MethodInvoker> invokers = new ArrayList<MethodInvoker>();
+        for (Method m : ms)
+        {
+            try
+            {
+                invokers.add(new MethodHandleBasedInvoker(m, m.getName(), m.getDeclaringClass(), LambdaRefHelper.methodHandle(m)));
+            }
+            catch (IllegalAccessException e)
+            {
+                throw new AlkemyException("Unable to create a method invoker for '%s'", e, m.getDeclaringClass() + "." + m.getName());
+            }
+        }
+        return invokers;
     }
 
     static class SelfAccessor implements ValueAccessor
     {
         Object ref;
+        Class<?> type;
 
+        SelfAccessor(Class<?> type)
+        {
+            this.type = type;
+        }
+        
         @Override
         public Class<?> type() throws AlkemyException
         {
-            return ref != null ? ref.getClass() : null;
+            return type;
         }
 
         @Override
@@ -105,11 +130,12 @@ class AccessorFactory
         @Override
         public String targetName()
         {
-            return ref != null ? ref.getClass().getTypeName() : null;
+            return type.getTypeName();
         }
 
         @Override
-        @SuppressWarnings("unchecked") // safe
+        @SuppressWarnings("unchecked")
+        // safe
         public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
         {
             return ref == null || type == ref.getClass() ? (T) ref : null;

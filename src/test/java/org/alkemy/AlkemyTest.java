@@ -36,11 +36,15 @@ import java.util.stream.Stream;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.parse.impl.MethodInvoker;
 import org.alkemy.util.Measure;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.util.PassThrough;
+import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
+import static org.alkemy.visitor.impl.AbstractTraverser.*;
 import org.alkemy.visitor.impl.SingleTypeReader;
 import org.junit.Test;
 
@@ -52,7 +56,7 @@ public class AlkemyTest
     {
         final PropertyConcatenation<TestClass> concat = new PropertyConcatenation<>();
         Alkemy.mature(new TestClass(), concat);
-        
+
         assertThat("01234", is(concat.get()));
     }
 
@@ -60,7 +64,7 @@ public class AlkemyTest
     public void testAssign()
     {
         final TestClass tc = Alkemy.mature(new TestClass(), new AssignConstant<>("bar"));
-        
+
         assertThat(tc.s0, is("0"));
         assertThat(tc.s1, is("1"));
         assertThat(tc.s2, is("2"));
@@ -175,13 +179,22 @@ public class AlkemyTest
         final SingleTypeReader<TestClass, TestClass> anv = Alkemy.reader(TestClass.class).preorder(0);
         final AssignConstant<TestClass, String> aev = new AssignConstant<>("foo");
         final Set<TestClass> tcs = new HashSet<>();
-        
+
         // s0.equals("0") always
         anv.stream(aev, upTo100()).filter(f -> !f.s0.equals("0")).forEach(c -> tcs.add(c));
         assertThat(tcs.size(), is(0));
 
         anv.stream(aev, upTo100()).filter(f -> f.s0.equals("0")).forEach(c -> tcs.add(c));
         assertThat(tcs.size(), is(100));
+    }
+
+    @Test
+    public void testMethodInvoker()
+    {
+        final FooInvoker<TestMethodInvoker> aev = new FooInvoker<TestMethodInvoker>();
+        Alkemy.reader(TestMethodInvoker.class).preorder(IGNORE_LEAFS | VISIT_NODES).accept(aev);
+        
+        assertThat(aev.foo, is("foo"));
     }
 
     @Test
@@ -247,7 +260,7 @@ public class AlkemyTest
             }
         }) / 1000000 + " ms");
     }
-    
+
     @Test
     public void peformanceFastVisitorAssignUsingParallelStream() throws Throwable
     {
@@ -255,16 +268,17 @@ public class AlkemyTest
         final FastSameFlatObjConcept<TestFastVisitor> anv = new FastSameFlatObjConcept<>();
         final TestFastVisitor tfv = new TestFastVisitor();
 
-        final Stream<TestFastVisitor> stream = anv.parallelStream(node, new InstanceProviderIterator<TestFastVisitor>(1000000, () -> tfv));
-        
+        final Stream<TestFastVisitor> stream = anv.parallelStream(node, new InstanceProviderIterator<TestFastVisitor>(1000000,
+                () -> tfv));
+
         System.out.println("Fast visitor 1e7 assign (parallel stream): " + Measure.measure(() ->
         {
             stream.forEach(AlkemyTest::sink);
         }) / 1000000 + " ms");
     }
-    
+
     static <R> void sink(R r)
-    {   
+    {
     }
 
     @Test
@@ -369,19 +383,44 @@ public class AlkemyTest
     {
         int value();
     }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.METHOD })
+    @AlkemyLeaf(Idx.class)
+    static @interface Foo
+    {
+    }
     
+    static class FooInvoker<T> implements AlkemyElementVisitor<T, AlkemyElement>
+    {
+        String foo; 
+        
+        @Override
+        public void visit(AlkemyElement e, Object parent)
+        {
+            final MethodInvoker mi = e.getMethodInvoker("foo");
+            foo = mi.safeInvoke(parent, String.class);
+        }
+        
+        @Override
+        public AlkemyElement map(AlkemyElement e)
+        {
+            return e;
+        }
+    }
+
     static class InstanceProviderIterator<R> implements Iterator<R>
     {
         private int i = 0;
         private int n;
         private Supplier<R> s;
-        
+
         InstanceProviderIterator(int n, Supplier<R> s)
         {
             this.n = n;
             this.s = s;
         }
-        
+
         @Override
         public boolean hasNext()
         {
