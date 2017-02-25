@@ -22,12 +22,16 @@
  * Alkemy elements are the result of parsing an "alkemized" type with an {@link AlkemyParser}, being
  * the concept of "alkemized" and the parser implementation user defined.
  * <p>
- * For instance the {@link AlkemyParsers#fieldParser()} searches fields "super" annotated as
+ * For instance the {@link AlkemyParsers#typeParser()} searches fields & methods "super" annotated as
  * {@link AlkemyLeaf} within the type hierarchy and groups them under a directed rooted tree
  * starting from the parsed type. The resulting tree contains all 'alkemizations' of the type.
  * <p>
  * Alkemized types can contain sub-types which also contain alkemizations and so on. Each of this
  * types is represented as a starting branch in the tree.
+ * <p>
+ * The order of the alkemizations within the tree is always deterministic.
+ * <br> It can be specified manually by using  the {@link org.alkemy.annotations.Order} annotation,
+ * or, if no annotation is found, follows the declaration order within the java class. 
  * <p>
  * If a type define alkemizations which are not supported by the used visitors, those alkemy
  * elements are left unprocessed.

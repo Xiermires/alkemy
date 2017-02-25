@@ -41,7 +41,7 @@ import org.alkemy.visitor.impl.SingleTypeReader.FluentSingleTypeReader;
  * Alkemy elements are the result of parsing an "alkemized" type with an {@link AlkemyParser}, being
  * "alkemized" and the parser user defined.
  * <p>
- * For instance the {@link AlkemyParsers#fieldParser()} searches fields "super" annotated as
+ * For instance the {@link AlkemyParsers#typeParser()} searches fields "super" annotated as
  * {@link AlkemyLeaf} within the type hierarchy and groups them as a directed rooted tree starting
  * from the parsed type.
  * <p>
@@ -71,11 +71,11 @@ public class Alkemy
     }
 
     /**
-     * As {@link #nodes(AlkemyParser)} but using the {@link AlkemyParsers#fieldParser()} by default.
+     * As {@link #nodes(AlkemyParser)} but using the {@link AlkemyParsers#typeParser()} by default.
      */
     public static NodeFactory nodes()
     {
-        return new AlkemyNodes(AlkemyParsers.fieldParser());
+        return new AlkemyNodes(AlkemyParsers.typeParser());
     }
 
     /**

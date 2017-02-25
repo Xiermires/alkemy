@@ -30,7 +30,7 @@ public class TypeFieldParserTest
     @Test
     public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser parser = AlkemyParsers.fieldParser();
+        final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
         parser.parse(TestClass.class).drainTo(result);
         
@@ -43,7 +43,7 @@ public class TypeFieldParserTest
     @Test
     public void parseTestNode() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser parser = AlkemyParsers.fieldParser();
+        final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
         parser.parse(TestNode.class).drainTo(result);
 
@@ -53,7 +53,7 @@ public class TypeFieldParserTest
     @Test
     public void testOrdered() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser parser = AlkemyParsers.fieldParser();
+        final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
         parser.parse(TestOrdered.class).drainTo(result);
 

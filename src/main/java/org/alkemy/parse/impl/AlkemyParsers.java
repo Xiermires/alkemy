@@ -38,12 +38,12 @@ public class AlkemyParsers
     /**
      * See {@link TypeParser}
      */
-    public static AlkemyParser fieldParser()
+    public static AlkemyParser typeParser()
     {
         return TypeParser.create(fieldLexer());
     }
 
-    public static AlkemyParser fieldParser(AlkemyLexer<AnnotatedElement> lexer)
+    public static AlkemyParser typeParser(AlkemyLexer<AnnotatedElement> lexer)
     {
         return TypeParser.create(lexer);
     }
