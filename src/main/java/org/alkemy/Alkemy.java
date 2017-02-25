@@ -101,6 +101,14 @@ public class Alkemy
     }
 
     /**
+     * As {@link #mature(Class, AlkemyElementVisitor)} but including a parameter.
+     */
+    public static <R, P> R mature(Class<R> r, AlkemyElementVisitor<P, ?> aev, P p)
+    {
+        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes().get(r), p);
+    }
+
+    /**
      * Simple alkemy method to parse an object type and apply the provided visitor to all leaves in
      * non-null branches.
      * <p>
@@ -118,29 +126,19 @@ public class Alkemy
      */
     @SuppressWarnings("unchecked")
     // safe
-    public static <R, P> R mature(R r, AlkemyElementVisitor<P, ?> aev)
+    public static <R> R mature(R r, AlkemyElementVisitor<R, ?> aev)
     {
-        return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes().get((Class<R>) r.getClass()));
+        return new FluentAlkemyPreorderReader<R>(0).accept(aev, nodes().get((Class<R>) r.getClass()), r);
     }
 
     /**
-     * Simple alkemy method to parse an object type and apply the provided visitor to all leaves in
-     * non-null branches providing an additional parameter.
-     * <ol>
-     * <li>Parses the type Class&lt;R&gt; into a Node.
-     * <li>Traverses in pre-order.
-     * <li>If any node found is null, any sub-nodes further in the branch are ignored.
-     * <li>For each leaf in a non-null branch calls
-     * {@link AlkemyElementVisitor#visit(AbstractAlkemyElement, Object, Object)} on the provided
-     * aev.
-     * <li>Returns the object R.
-     * </ol>
+     * As {@link #mature(Object, AlkemyElementVisitor)} but including a parameter.
      */
     @SuppressWarnings("unchecked")
     // safe
     public static <R, P> R mature(R r, P p, AlkemyElementVisitor<P, ?> aev)
     {
-        return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes().get((Class<R>) r.getClass()), p);
+        return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes().get((Class<R>) r.getClass()), r, p);
     }
 
     public static <R> FluentReaderFactory<R> reader(Class<R> retType)
