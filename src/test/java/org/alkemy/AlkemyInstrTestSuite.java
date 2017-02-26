@@ -38,6 +38,7 @@ instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.parse.impl.TestOrdered", //
         "org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder$FollowsOrder", //
         "org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder$FollowsDeclaration", //
+        "org.alkemy.parse.impl.TestCreatedDefaultCtor", //
         "org.alkemy.example.TestClass", //
         "org.alkemy.visitor.impl.TestClass", //
         "org.alkemy.visitor.impl.TestWriter", //

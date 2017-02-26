@@ -73,7 +73,7 @@ class AccessorFactory
             }
             else
             {
-                return new ReflectionBasedConstructorAccessor(type.getConstructor());
+                return new ReflectionBasedConstructorAccessor(type.getDeclaredConstructor());
             }
         }
         catch (IllegalAccessException | SecurityException | NoSuchMethodException e)

@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.alkemy;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.agenttools.AgentTools;
@@ -23,13 +22,13 @@ import org.alkemy.Alkemy.NodeFactory;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 class AlkemyNodes implements NodeFactory
 {
@@ -66,17 +65,14 @@ class AlkemyNodes implements NodeFactory
     @Override
     public <R> TypifiedNode<R, ? extends AbstractAlkemyElement<?>> get(Class<R> type)
     {
+        Assertions.nonNull(type);
         try
         {
             return new TypifiedNode<>(cache.get(type), type);
         }
-        catch (ExecutionException e) // TODO
+        catch (Exception e)
         {
-            throw new AlkemyException("Cache error.", e); 
-        }
-        catch (UncheckedExecutionException e)
-        {
-            throw new AlkemyException("Cache error.", e); 
+            throw new AlkemyException("Can't create an alkemy tree for The requested type '%s'.", e, type.getName());
         }
     }
 }

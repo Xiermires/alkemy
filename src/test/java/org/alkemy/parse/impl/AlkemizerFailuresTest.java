@@ -13,48 +13,18 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy;
+package org.alkemy.parse.impl;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.agenttools.AgentTools;
+import org.junit.Test;
 
-import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
-import org.alkemy.visitor.AlkemyElementVisitor;
-
-public class AssignConstant<P, T> implements AlkemyElementVisitor<P, AlkemyElement>
+// TODO figure out how to test log contents in LogBack 
+public class AlkemizerFailuresTest
 {
-    private final T t;
-
-    public AssignConstant(T t)
+    @Test
+    public void testFinalFieldsFailure()
     {
-        this.t = t;
-    }
-
-    @Override
-    public void visit(AlkemyElement e, Object parent)
-    {
-        e.set(t, parent);
-    }
-
-    @Override
-    public AlkemyElement map(AlkemyElement e)
-    {
-        return e;
-    }
-
-    @Override
-    public boolean accepts(Class<?> type)
-    {
-        return Bar.class.equals(type);
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD })
-    @AlkemyLeaf(Bar.class)
-    public @interface Bar
-    {
+        AgentTools.retransform(new AlkemizerCTF(), "org.alkemy.parse.impl.AlkemizerFinalFieldsFailure",
+                "org.alkemy.parse.impl.AlkemizerFailureSuperNoDefaultCtor");
     }
 }

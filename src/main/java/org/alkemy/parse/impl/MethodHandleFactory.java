@@ -44,13 +44,15 @@ public class MethodHandleFactory
     private static final Logger log = LoggerFactory.getLogger(MethodHandleFactory.class);
 
     @SuppressWarnings("unchecked")
-    // This method provides accessors for any types, except primitives. Uses functions with obj. references only.
+    // This method provides accessors for any types, except primitives. Uses functions with obj.
+    // references only.
     static ValueAccessor createAccessor(Field f) throws IllegalAccessException, SecurityException
     {
         final ValueAccessor mha;
         final Class<?> clazz = f.getDeclaringClass(); // TODO: Check inner classes.
 
-        // Enum setters are instrumented set$$enum_name(Object o) { ... } (the instrumented code allows String->Enum conversion).
+        // Enum setters are instrumented set$$enum_name(Object o) { ... } (the instrumented code
+        // allows String->Enum conversion).
         final Class<?> useObjIfEnum = f.getType().isEnum() ? Object.class : f.getType();
         if (Modifier.isStatic(f.getModifiers()))
         {
@@ -59,7 +61,8 @@ public class MethodHandleFactory
             final Consumer<Object> setter = (Consumer<Object>) ref2StaticSetter(
                     methodHandle(clazz, Alkemizer.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
-            mha = new StaticFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(), getter, setter);
+            mha = new StaticFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(),
+                    getter, setter);
         }
         else
         {
@@ -68,7 +71,8 @@ public class MethodHandleFactory
             final BiConsumer<Object, Object> setter = (BiConsumer<Object, Object>) ref2MemberSetter(
                     methodHandle(clazz, Alkemizer.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
-            mha = new MemberFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(), getter, setter);
+            mha = new MemberFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(),
+                    getter, setter);
         }
         return mha;
     }
@@ -78,14 +82,27 @@ public class MethodHandleFactory
         final List<Method> l = Arrays.asList(clazz.getMethods()).stream()
                 .filter(p -> Alkemizer.CREATE_INSTANCE.equals(p.getName())).collect(Collectors.toList());
 
-        Assertions.ofSize(l, 1); // we instrument only one factory method
+        // If an alkemizable class extends another alkemizable class, it receives two static
+        // methods. Get the explicit one of this type.
+        Method factory = null;
+        for (Method m : l)
+        {
+            if (m.getReturnType().equals(clazz))
+            {
+                factory = m;
+            }
+        }
 
-        final MethodHandle mh = methodHandle(clazz, Alkemizer.CREATE_INSTANCE, l.get(0).getParameterTypes());
+        Assertions.nonNull(factory);
+        final MethodHandle mh = methodHandle(clazz, Alkemizer.CREATE_INSTANCE, factory.getParameterTypes());
 
         try
         {
-            final MethodHandle dh = MethodHandles.lookup().unreflectConstructor(clazz.getDeclaredConstructor());
-            final Method m = NodeConstructorFunction.class.getMethod("newInstance", Object[].class);
+            final MethodHandle dh = MethodHandles.lookup().unreflectConstructor(clazz.getConstructor()); // default
+                                                                                                         // ctor
+            final Method m = NodeConstructorFunction.class.getMethod("newInstance", Object[].class); // static
+                                                                                                     // factory
+                                                                                                     // method
 
             return new StaticMethodLambdaBasedConstructor(clazz, ref2StaticGetter(dh, clazz, clazz), createLambdaRef(
                     NodeConstructorFunction.class, m, mh));

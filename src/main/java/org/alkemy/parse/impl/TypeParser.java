@@ -87,15 +87,6 @@ class TypeParser implements AlkemyParser
     private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent,
             TypedTable context)
     {
-        if (Object.class.equals(type))
-        {
-            return parent;
-        }
-        else
-        {
-            _parse(type.getSuperclass(), parent, context);
-        }
-
         for (final Field f : sortIfRequired(type.getDeclaredFields(), type.getAnnotation(Order.class), type))
         {
             if (lexer.isLeaf(f))
