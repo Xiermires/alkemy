@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 @InstrumentableLambdaClasses(//
 testClassNames = { "org.alkemy.AlkemyTest", //
         "org.alkemy.parse.impl.AlkemizerTest", //
-        "org.alkemy.parse.impl.TypeFieldParserTest",
+        "org.alkemy.parse.impl.TypeParserTest",
         "org.alkemy.visitor.impl.AlkemyVisitorTests", //
         "org.alkemy.example.RandomGenerator" //
 }, //
@@ -39,6 +39,12 @@ instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder$FollowsOrder", //
         "org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder$FollowsDeclaration", //
         "org.alkemy.parse.impl.TestCreatedDefaultCtor", //
+        "org.alkemy.parse.impl.TestDeepLeaves", //
+        "org.alkemy.parse.impl.TestDeepLeaves$Nested1", //
+        "org.alkemy.parse.impl.TestDeepLeaves$Nested2", //
+        "org.alkemy.parse.impl.TestDeepLeaves$Nested3", //
+        "org.alkemy.parse.impl.TestDeepLeaves$Nested4", //
+        "org.alkemy.parse.impl.TestDeepLeaves$Nested5", //
         "org.alkemy.example.TestClass", //
         "org.alkemy.visitor.impl.TestClass", //
         "org.alkemy.visitor.impl.TestWriter", //

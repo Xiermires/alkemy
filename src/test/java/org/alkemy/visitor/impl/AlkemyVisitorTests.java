@@ -57,7 +57,7 @@ public class AlkemyVisitorTests
         final AlkemyPreorderReader<TestWriter, Object> aew = new AlkemyPreorderReader<>(INCLUDE_NULL_BRANCHES | INSTANTIATE_NODES);
         final TypifiedNode<TestWriter, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestWriter.class);
         final ObjectWriter<Object> ow = new ObjectWriter<>(new Constant<>(55));
-        final TestWriter tw = TestWriter.class.cast(aew.accept(ow, node)); // TODO special case (how-to)
+        final TestWriter tw = TestWriter.class.cast(aew.accept(ow, node)); 
 
         assertThat(tw.a, is(55));
         assertThat(tw.b, is(55));

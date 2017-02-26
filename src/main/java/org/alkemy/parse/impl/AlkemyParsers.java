@@ -29,10 +29,10 @@ public class AlkemyParsers
     {
     }
 
-    public static AlkemyLexer<AnnotatedElement> fieldLexer()
+    public static AlkemyLexer<Class<?>, AnnotatedElement> fieldLexer()
     {
         final AlkemyElementFactory<AnnotatedElement> elementFactory = TypeFieldAlkemyElementFactory.create();
-        return TypeFieldLexer.create(elementFactory);
+        return TypeLexer.create(elementFactory);
     }
 
     /**
@@ -43,7 +43,7 @@ public class AlkemyParsers
         return TypeParser.create(fieldLexer());
     }
 
-    public static AlkemyParser typeParser(AlkemyLexer<AnnotatedElement> lexer)
+    public static AlkemyParser typeParser(AlkemyLexer<Class<?>, AnnotatedElement> lexer)
     {
         return TypeParser.create(lexer);
     }

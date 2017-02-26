@@ -15,10 +15,7 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.annotations.AlkemyNode;
-
 public class TestDeepCopy
 {
-    @AlkemyNode
     TestClass testClass;
 }

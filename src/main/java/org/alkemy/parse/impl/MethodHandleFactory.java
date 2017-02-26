@@ -49,7 +49,7 @@ public class MethodHandleFactory
     static ValueAccessor createAccessor(Field f) throws IllegalAccessException, SecurityException
     {
         final ValueAccessor mha;
-        final Class<?> clazz = f.getDeclaringClass(); // TODO: Check inner classes.
+        final Class<?> clazz = f.getDeclaringClass(); 
 
         // Enum setters are instrumented set$$enum_name(Object o) { ... } (the instrumented code
         // allows String->Enum conversion).

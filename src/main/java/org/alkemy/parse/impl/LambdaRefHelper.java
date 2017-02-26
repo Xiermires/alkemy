@@ -163,7 +163,7 @@ public class LambdaRefHelper
      * Assumption is that they hold enough so that the whole reflection fallbacks are generated and
      * we get the log message only once.
      * <p>
-     * TODO is this issue worth solving by better means ?
+     * This is good enough to avoid log flood in most situations. 
      */
     static final WeakHashMap<Class<?>, Object> failed = new WeakHashMap<>();
 

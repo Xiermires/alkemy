@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
-import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.visitor.impl.AlkemyVisitorTests.ObjectWriter.Foo;
 
 public class TestWriter
@@ -32,10 +31,8 @@ public class TestWriter
     @Foo
     int d;
     
-    @AlkemyNode
     NestedA na;
     
-    @AlkemyNode
     NestedB nb;
     
     public static class NestedA

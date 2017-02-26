@@ -25,10 +25,10 @@ import java.util.List;
 import org.alkemy.parse.AlkemyParser;
 import org.junit.Test;
 
-public class TypeFieldParserTest
+public class TypeParserTest
 {
     @Test
-    public void parseTestClass() throws IOException, InstantiationException, IllegalAccessException
+    public void parseTestClass() 
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
@@ -51,7 +51,7 @@ public class TypeFieldParserTest
     }
 
     @Test
-    public void testOrdered() throws IOException, InstantiationException, IllegalAccessException
+    public void testOrdered() 
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
@@ -67,5 +67,15 @@ public class TypeFieldParserTest
         });
 
         assertThat("This is an example of ordered alkemyElements ", is(sb.toString()));
+    }
+    
+    @Test
+    public void testDeepLeaves() 
+    {
+        final AlkemyParser parser = AlkemyParsers.typeParser();
+        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
+        parser.parse(TestDeepLeaves.class).drainTo(result);
+
+        assertThat(result.size(), is(6));
     }
 }

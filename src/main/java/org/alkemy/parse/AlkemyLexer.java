@@ -23,26 +23,26 @@ import org.alkemy.parse.impl.NodeConstructor;
 import org.alkemy.parse.impl.ValueAccessor;
 import org.alkemy.util.TypedTable;
 
-public interface AlkemyLexer<T>
+public interface AlkemyLexer<N, L>
 {
     /**
      * Returns if the descriptor defines an element with additional nested alkemy elements.
      */
-    boolean isNode(T desc);
+    boolean isNode(N desc);
 
     /**
      * Returns if the descriptor defines a single element.
      */
-    boolean isLeaf(T desc);
+    boolean isLeaf(L desc);
 
     /**
      * Creates an unbound {@link AbstractAlkemyElement} for this leaf.
      */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
+    AbstractAlkemyElement<?> createLeaf(L desc, ValueAccessor valueAccessor, TypedTable context);
 
     /**
      * Creates an unbound {@link AbstractAlkemyElement} for this node.
      */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    AbstractAlkemyElement<?> createNode(N desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
 }

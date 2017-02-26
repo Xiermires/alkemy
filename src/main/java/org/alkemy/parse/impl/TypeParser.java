@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -61,14 +60,14 @@ import org.alkemy.util.TypedTable;
  */
 class TypeParser implements AlkemyParser
 {
-    private final AlkemyLexer<AnnotatedElement> lexer;
+    private final AlkemyLexer<Class<?>, AnnotatedElement> lexer;
 
-    private TypeParser(AlkemyLexer<AnnotatedElement> lexer)
+    private TypeParser(AlkemyLexer<Class<?>, AnnotatedElement> lexer)
     {
         this.lexer = lexer;
     }
 
-    static AlkemyParser create(AlkemyLexer<AnnotatedElement> lexer)
+    static AlkemyParser create(AlkemyLexer<Class<?>, AnnotatedElement> lexer)
     {
         return new TypeParser(lexer);
     }
@@ -79,9 +78,9 @@ class TypeParser implements AlkemyParser
         final TypedTable context = new TypedTable();
         return _parse(
                 type,
-                Nodes.arborescence(lexer.createNode(new AnnotatedElementWrapper(new Annotation[0]),
-                        AccessorFactory.createConstructor(type), AccessorFactory.createSelfAccessor(type),
-                        AccessorFactory.createInvokers(getLeafMethods(type)), type, context)), context).build();
+                Nodes.arborescence(lexer.createNode(type, AccessorFactory.createConstructor(type),
+                        AccessorFactory.createSelfAccessor(type), AccessorFactory.createInvokers(getLeafMethods(type)), type,
+                        context)), context).build();
     }
 
     private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent,
@@ -93,12 +92,11 @@ class TypeParser implements AlkemyParser
             {
                 parent.addChild(lexer.createLeaf(f, AccessorFactory.createAccessor(f), context));
             }
-            else if (lexer.isNode(f))
+            else if (lexer.isNode(f.getType()))
             {
-                _parse(f.getType(),
-                        parent.addChild(lexer.createNode(f, AccessorFactory.createConstructor(f.getType()),
-                                AccessorFactory.createAccessor(f), AccessorFactory.createInvokers(getLeafMethods(f.getType())),
-                                f.getType(), context)), context);
+                _parse(f.getType(), parent.addChild(lexer.createNode(f.getType(), AccessorFactory.createConstructor(f.getType()),
+                        AccessorFactory.createAccessor(f), AccessorFactory.createInvokers(getLeafMethods(f.getType())),
+                        f.getType(), context)), context);
             }
         }
         return parent;
@@ -138,7 +136,7 @@ class TypeParser implements AlkemyParser
                     fields,
                     (o1, o2) ->
                     {
-                        if (lexer.isLeaf(o1) || lexer.isNode(o1) && lexer.isLeaf(o2) || lexer.isNode(o2))
+                        if (lexer.isLeaf(o1) || lexer.isNode(o1.getType()) && lexer.isLeaf(o2) || lexer.isNode(o2.getType()))
                         {
 
                             final Integer lhs = nameOrder.get(o1.getName());
@@ -157,12 +155,13 @@ class TypeParser implements AlkemyParser
 
                             return lhs < rhs ? -1 : rhs == lhs ? 0 : 1;
                         }
-                        else if (lexer.isLeaf(o1) || lexer.isNode(o1)) // Keep non mappings to the
-                                                                       // right.
+                        else if (lexer.isLeaf(o1) || lexer.isNode(o1.getType())) // Keep non
+                                                                                 // mappings to the
+                                                                                 // right
                         {
                             return 1;
                         }
-                        else if (lexer.isLeaf(o2) || lexer.isNode(o2))
+                        else if (lexer.isLeaf(o2) || lexer.isNode(o2.getType()))
                         {
                             return -1;
                         }

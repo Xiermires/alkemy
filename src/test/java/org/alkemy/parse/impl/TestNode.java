@@ -15,10 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import org.alkemy.annotations.AlkemyNode;
-
 public class TestNode
 {
-    @AlkemyNode
     TestClass testClass;
 }

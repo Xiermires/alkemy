@@ -59,12 +59,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.alkemy.annotations.AlkemyLeaf;
-import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.annotations.Order;
 import org.alkemy.util.AlkemyUtils;
 import org.objectweb.asm.AnnotationVisitor;
@@ -103,13 +103,16 @@ import org.slf4j.LoggerFactory;
  * <li>Conversions && castings (wrapper -> primitive && String -> enum).
  * </ul>
  */
+// TODO clean up this code
 public class Alkemizer extends ClassVisitor
 {
     static final String IS_INSTRUMENTED = "is$$instrumented";
     static final String CREATE_INSTANCE = "create$$instance";
 
     private static final Pattern DESC = Pattern.compile("^L(.+\\/.+)+;$");
-    private static final Logger log = LoggerFactory.getLogger(Alkemizer.class); // TODO why is LogBack not formatting
+    private static final Logger log = LoggerFactory.getLogger(Alkemizer.class); // TODO why is
+                                                                                // LogBack not
+                                                                                // formatting
 
     private final List<AlkemizableField> alkemizableFields = new ArrayList<>();
     private final Set<String> alkemizableAnnotations = new HashSet<>();
@@ -177,9 +180,9 @@ public class Alkemizer extends ClassVisitor
                 }
                 else
                 {
-                    log.debug(String.format(
-                            "Trying to alkemize the class '%s' which extends from the super class '%s' without an accessible default ctor",
-                            className, toQualifiedName(superName))); 
+                    log.debug(String
+                            .format("Trying to alkemize the class '%s' which extends from the super class '%s' without an accessible default ctor",
+                                    className, toQualifiedName(superName)));
                     throw new Stop();
                 }
             }
@@ -294,9 +297,9 @@ public class Alkemizer extends ClassVisitor
 
         if (!finalFields.isEmpty() && !hasDefaultCtor)
         {
-            log.debug(String.format(
-                    "Trying to alkemize the class '%s' which contains non alkemizable final fields '%s' which will remain unacessible.",
-                    className, Arrays.asList(finalFields))); 
+            log.debug(String
+                    .format("Trying to alkemize the class '%s' which contains non alkemizable final fields '%s' which will remain unacessible.",
+                            className, Arrays.asList(finalFields)));
             throw new Stop();
         }
     }
@@ -644,14 +647,36 @@ public class Alkemizer extends ClassVisitor
             {
                 alkemizables.add(alkemizable);
             }
+            else
+            {
+                final String qualifiedName = toQualifiedNameFromDesc(type);
+                try
+                {
+                    // Avoid cycles
+                    final Set<String> visited = new HashSet<String>();
+                    visited.add(type);
+                    
+                    final ClassReader cr = new ClassReader(qualifiedName);
+                    final LeafFound leafFound = new LeafFound();
+                    final FindLeaf cv = new FindLeaf(visited, alkemizableAnnotations, nonAlkemizableAnnotations, leafFound);
+                    cr.accept(cv, ClassReader.SKIP_CODE);
+                    if (leafFound.get())
+                    {
+                        alkemizables.add(new AlkemizableField(name, type, isEnum, isStatic));
+                    }
+                }
+                catch (IOException e)
+                {
+                    log.trace("Cannot read the annotation '%s'. Ignore.", name);
+                }
+            }
             super.visitEnd();
         }
 
         private boolean isAlkemizable(String desc)
         {
             return !nonAlkemizableAnnotations.contains(desc)
-                    && (alkemizableAnnotations.contains(desc) || AlkemyNode.class.getName().equals(toQualifiedNameFromDesc(desc)) || isAnnotationPresent(
-                            desc, AlkemyLeaf.class));
+                    && (alkemizableAnnotations.contains(desc) | isAnnotationPresent(desc, AlkemyLeaf.class));
         }
 
         private boolean isAnnotationPresent(String desc, Class<? extends Annotation> clazz)
@@ -747,6 +772,109 @@ public class Alkemizer extends ClassVisitor
         }
     }
 
+    static class FindLeaf extends ClassVisitor
+    {
+        private final Set<String> visited;
+        private final Set<String> alkemizableAnnotations;
+        private final Set<String> nonAlkemizableAnnotations;
+        private final LeafFound leafFound;
+        
+        public FindLeaf(Set<String> visited, Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations, LeafFound leafFound)
+        {
+            super(ASM5);
+            
+            this.visited = visited;
+            this.alkemizableAnnotations = alkemizableAnnotations;
+            this.nonAlkemizableAnnotations = nonAlkemizableAnnotations;
+            this.leafFound = leafFound;
+        }
+
+        @Override
+        public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
+        {
+            return new FieldLeafVisitor(visited, name, desc, alkemizableAnnotations, nonAlkemizableAnnotations, leafFound);
+        }
+    }
+
+    static class FieldLeafVisitor extends FieldVisitor
+    {
+        private final Set<String> visited;
+        private final String name;
+        private final String type;
+        private final Set<String> alkemizableAnnotations;
+        private final Set<String> nonAlkemizableAnnotations;
+        private final LeafFound leafFound;
+        
+        FieldLeafVisitor(Set<String> visited, String name, String type, Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations, LeafFound leafFound)
+        {
+            super(ASM5);
+
+            this.visited = visited;
+            this.name = name;
+            this.type = type;
+            this.alkemizableAnnotations = alkemizableAnnotations;
+            this.nonAlkemizableAnnotations = nonAlkemizableAnnotations;
+            this.leafFound = leafFound;
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible)
+        {
+            if (visible && isAlkemizable(desc))
+            {
+                leafFound.found = true;
+            }
+            return super.visitAnnotation(desc, visible);
+        }
+
+        @Override
+        public void visitEnd()
+        {
+            if (leafFound.get())
+            {
+                super.visitEnd();
+            }
+            else if (!visited.contains(type) && type.startsWith("L"))
+            {
+                visited.add(type);
+                final String qualifiedName = toQualifiedNameFromDesc(type);
+                try
+                {
+                    final ClassReader cr = new ClassReader(qualifiedName);
+                    final FindLeaf cv = new FindLeaf(visited, alkemizableAnnotations, nonAlkemizableAnnotations, leafFound);
+                    cr.accept(cv, ClassReader.SKIP_CODE);
+                }
+                catch (IOException e)
+                {
+                    log.trace("Cannot read the annotation '%s'. Ignore.", name);
+                }
+            }
+        }
+
+        private boolean isAlkemizable(String desc)
+        {
+            return !nonAlkemizableAnnotations.contains(desc)
+                    && (alkemizableAnnotations.contains(desc) | isAnnotationPresent(desc, AlkemyLeaf.class));
+        }
+
+        private boolean isAnnotationPresent(String desc, Class<? extends Annotation> clazz)
+        {
+            final String qualifiedName = toQualifiedNameFromDesc(desc);
+            try
+            {
+                final ClassReader cr = new ClassReader(qualifiedName);
+                final FindAnnotation cv = new FindAnnotation(clazz, nonAlkemizableAnnotations);
+                cr.accept(cv, ClassReader.SKIP_CODE);
+                return cv.annotated;
+            }
+            catch (IOException e)
+            {
+                log.trace("Cannot read the annotation '%s'. Ignore.", desc);
+            }
+            return false;
+        }
+    };
+    
     static class OrderValueReader extends AnnotationVisitor
     {
         private int i = 0;
@@ -769,6 +897,17 @@ public class Alkemizer extends ClassVisitor
         {
             m.put(String.valueOf(value), i++);
             super.visit(name, value);
+        }
+    }
+    
+    static class LeafFound implements Supplier<Boolean>
+    {
+        boolean found;
+        
+        @Override
+        public Boolean get()
+        {
+            return found;
         }
     }
 

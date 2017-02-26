@@ -25,7 +25,6 @@ public class AlkemyControllerVisitor<P, E extends AbstractAlkemyElement<E>> impl
     @Override
     public E map(AlkemyElement e)
     {
-        // TODO Auto-generated method stub
         return null;
     }
     // TODO AlkemyControllerVisitor.

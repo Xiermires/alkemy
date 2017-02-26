@@ -16,32 +16,45 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.function.Supplier;
 
-import org.alkemy.annotations.AlkemyNode;
 import org.alkemy.parse.AlkemyLexer;
+import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.AnnotationUtils;
+import org.alkemy.util.Node;
 import org.alkemy.util.TypedTable;
 
-class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
+public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, AnnotatedElement>, Supplier<Boolean>
 {
-    private AlkemyElementFactory<AnnotatedElement> factory;
-
-    private TypeFieldLexer(AlkemyElementFactory<AnnotatedElement> factory)
-    {
-        this.factory = factory;
-    }
-
-    static AlkemyLexer<AnnotatedElement> create(AlkemyElementFactory<AnnotatedElement> factory)
-    {
-        return new TypeFieldLexer(factory);
-    }
-
+    private boolean leafFound;
+    
     @Override
-    public boolean isNode(AnnotatedElement desc)
+    public Node<AbstractAlkemyElement<?>> parse(Class<?> type)
     {
-        // TODO : Deep search for leaves
-        return desc.isAnnotationPresent(AlkemyNode.class);
+        for (final Field f : type.getDeclaredFields())
+        {
+            if (isLeaf(f))
+            {
+                leafFound = true;
+                break;
+            }
+            else if (isNode(f.getType()))
+            {
+                // nothing
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public boolean isNode(Class<?> desc)
+    {
+        final TypeLeafFinder leafFinder = new TypeLeafFinder();
+        leafFinder.parse(desc);
+        leafFound = leafFinder.get();
+        return false;
     }
 
     @Override
@@ -53,13 +66,19 @@ class TypeFieldLexer implements AlkemyLexer<AnnotatedElement>
     @Override
     public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
     {
-        return factory.createLeaf(desc, valueAccessor, context);
+        return null;
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
-            ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
+    public AbstractAlkemyElement<?> createNode(Class<?> desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
-        return factory.createNode(desc, valueConstructor, valueAccessor, methodInvokers, nodeType, context);
+        return null;
+    }
+
+    @Override
+    public Boolean get()
+    {
+        return leafFound;
     }
 }

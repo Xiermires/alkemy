@@ -13,16 +13,37 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.annotations;
+package org.alkemy.parse.impl;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.alkemy.util.PassThrough.Foo;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface AlkemyNode
+public class TestDeepLeaves
 {
-    // TODO: This marker class is to go once AlkemyLexer#isNode() does a deep AlkemyElement search.
+    Nested1 a;
+    
+    public static class Nested1
+    {
+        Nested2 b;
+    }
+    
+    public static class Nested2
+    {
+        Nested3 c;
+    }
+    
+    public static class Nested3
+    {
+        Nested4 d;
+    }
+    
+    public static class Nested4
+    {
+        Nested5 e;
+    }
+    
+    public static class Nested5
+    {
+        @Foo
+        int f;
+    }
 }
