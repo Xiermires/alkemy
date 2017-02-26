@@ -53,6 +53,7 @@ instrs = @Instr(classNames = { "org.alkemy.TestClass", //
         "org.alkemy.visitor.impl.TestReader$NestedB", //
         "org.alkemy.visitor.impl.TestWriter$NestedA", //
         "org.alkemy.visitor.impl.TestWriter$NestedB" }, ctf = AlkemizerCTF.class))
+// Run alone
 public class AlkemyInstrTestSuite
 {
 }

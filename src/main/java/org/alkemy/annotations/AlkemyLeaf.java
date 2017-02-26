@@ -20,10 +20,15 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.AnnotatedElement;
+
+import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 
 /**
  * A marker which indicates the annotated annotation annotates itself an alkemy element.
  * 
+ * <pre>
  * <code> 
  * 
     <br>@Retention(RetentionPolicy.RUNTIME)
@@ -44,6 +49,29 @@ import java.lang.annotation.Target;
     <br>AlkemyParsers.fieldParser().parse(Foo.class); 
   
  * </code>
+ * 
+ * Only one annotation annotated as {@link AlkemyElement} is allowed per element. That identifies
+ * the type of the alkemization {@link AbstractAlkemyElement#alkemyType()}. This type can be used
+ * by the visitors to filter out alkemy types. There is no restriction on how many visitors can
+ * support alkemy types, or how many alkemy types can be supported by a visitor.
+ * <p>
+ * Only one marker per element, doesn't mean all information must be part of the marker. 
+ * For instance this is perfectly acceptable:
+ * <pre>
+ * <code>
+ *  <br>public class Foo
+    <br>{
+    <br>    @Marker
+    <br>    int foo;
+
+    <br>    @ReadOnly    
+    <br>    @Marker
+    <br>    int bar;
+    <br>}
+ * </code>
+ * The visitors can access the extra information via {@link AbstractAlkemyElement#desc()} which
+ * returns an {@link AnnotatedElement}, representing a field / method, that can itself be queried 
+ * for additional non-marker annotations.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)

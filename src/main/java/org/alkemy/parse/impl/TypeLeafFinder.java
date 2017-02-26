@@ -60,7 +60,7 @@ public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, Annot
     @Override
     public boolean isLeaf(AnnotatedElement desc)
     {
-        return AnnotationUtils.findVisitorType(desc) != null;
+        return AnnotationUtils.findAlkemyTypes(desc) != null;
     }
 
     @Override

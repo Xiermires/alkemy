@@ -25,16 +25,14 @@ import org.alkemy.exception.AlkemyException;
 
 public class AnnotationUtils
 {
-    public static Class<? extends Annotation> findVisitorType(AnnotatedElement ae)
+    public static Class<? extends Annotation> findAlkemyTypes(AnnotatedElement ae)
     {
-        final List<Pair<Annotation, AlkemyLeaf>> visitors = AnnotationUtils.getAnnotationsQualifiedAs(ae, AlkemyLeaf.class);
-
-        // TODO: temporary restriction. Allow one visitor type per AlkemyElement only.
-        if (visitors.size() > 1)
+        final List<Pair<Annotation, AlkemyLeaf>> alkemyType = AnnotationUtils.getAnnotationsQualifiedAs(ae, AlkemyLeaf.class);
+        if (alkemyType.size() > 1)
         {
             throw new AlkemyException("Invalid configuration. Multiple alkemy visitors defined for a single element.");
         }
-        return visitors.isEmpty() ? null : visitors.get(0).second.value();
+        return alkemyType.isEmpty() ? null : alkemyType.get(0).second.value();
     }
 
     private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(

@@ -47,7 +47,7 @@ class TypeLexer implements AlkemyLexer<Class<?>, AnnotatedElement>
     @Override
     public boolean isLeaf(AnnotatedElement desc)
     {
-        return AnnotationUtils.findVisitorType(desc) != null;
+        return AnnotationUtils.findAlkemyTypes(desc) != null;
     }
 
     @Override

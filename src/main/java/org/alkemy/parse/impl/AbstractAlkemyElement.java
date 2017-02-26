@@ -30,7 +30,6 @@ import org.alkemy.util.Node;
 import org.alkemy.util.TypedTable;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
-import org.alkemy.visitor.impl.AlkemyControllerVisitor;
 import org.alkemy.visitor.impl.AlkemyPostorderReader;
 import org.alkemy.visitor.impl.AlkemyPreorderReader;
 
@@ -46,8 +45,8 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     private final boolean node;
     private final TypedTable context;
 
-    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers,
-            Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
+    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+            List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
@@ -127,18 +126,18 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     {
         return valueAccessor.getIfAssignable(parent, type);
     }
-    
+
     @Override
     public void set(Object value, Object parent) throws AccessException
     {
         valueAccessor.set(value, parent);
     }
-    
+
     public Collection<MethodInvoker> getMethodInvokers()
     {
         return methodInvokers.values();
     }
-    
+
     public MethodInvoker getMethodInvoker(String name)
     {
         return methodInvokers.get(name);
@@ -182,9 +181,9 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
      * The accept methods are used to bridge between {@link AlkemyNodeReader}, which traverses a
      * tree of unknown {@link AbstractAlkemyElement} implementations, and an
      * {@link AlkemyElementVisitor} which requires an explicit {@link AbstractAlkemyElement} type.
-     * Multi-purpose node visitors, such as the {@link AlkemyPreorderReader}, the
-     * {@link AlkemyPostorderReader} and the {@link AlkemyControllerVisitor}, use this method to
-     * avoid any casting between {@link AbstractAlkemyElement} types.
+     * Multi-purpose node visitors, such as the {@link AlkemyPreorderReader} and the
+     * {@link AlkemyPostorderReader}, use this method to avoid any casting between
+     * {@link AbstractAlkemyElement} types.
      * <p>
      * Whenever a {@link AlkemyNodeReader} handles known {@link AbstractAlkemyElement}
      * implementations, these methods are not required and the node visitor can directly
@@ -322,8 +321,8 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
             super(other);
         }
 
-        AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,List<MethodInvoker> methodInvokers,
-                Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
+        AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+                List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
         {
             super(desc, nodeConstructor, valueAccessor, methodInvokers, alkemyType, node, context);
         }

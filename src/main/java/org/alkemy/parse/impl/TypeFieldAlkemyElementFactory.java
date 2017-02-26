@@ -37,7 +37,7 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Annot
     public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
     {
         return AbstractAlkemyElement.create(desc, AccessorFactory.notSupported(), valueAccessor, Collections.emptyList(),
-                AnnotationUtils.findVisitorType(desc), false, context);
+                AnnotationUtils.findAlkemyTypes(desc), false, context);
     }
 
     @Override
@@ -45,6 +45,6 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Annot
             ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
         return AbstractAlkemyElement.create(desc, valueConstructor, valueAccessor, methodInvokers,
-                AnnotationUtils.findVisitorType(desc), true, context);
+                AnnotationUtils.findAlkemyTypes(desc), true, context);
     }
 }

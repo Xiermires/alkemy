@@ -29,9 +29,11 @@
  * Alkemized types can contain sub-types which also contain alkemizations and so on. Each of this
  * types is represented as a starting branch in the tree.
  * <p>
- * The order of the alkemizations within the tree is always deterministic.
+ * The order of the alkemizations within the tree is always deterministic whenever instrumentation is on.
  * <br> It can be specified manually by using  the {@link org.alkemy.annotations.Order} annotation,
  * or, if no annotation is found, follows the declaration order within the java class. 
+ * If instrumentation is not on, unless Order is in place, it is not possible to guarantee determinism
+ * using reflection.
  * <p>
  * If a type define alkemizations which are not supported by the used visitors, those alkemy
  * elements are left unprocessed.
