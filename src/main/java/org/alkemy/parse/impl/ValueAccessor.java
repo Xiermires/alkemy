@@ -40,7 +40,17 @@ public interface ValueAccessor
      *             If an error occurs while recovering the value.
      */
     <T> T safeGet(Object parent, Class<T> type) throws AlkemyException;
-    
+
+    /**
+     * Returns the value if is a assignable to type T, null otherwise.
+     * <p>
+     * This method performs worse than {@link #safeGet(Object, Class)}.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while recovering the value.
+     */
+    <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException;
+
     /**
      * Sets a value.
      * 

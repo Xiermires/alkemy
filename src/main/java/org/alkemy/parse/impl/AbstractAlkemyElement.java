@@ -123,6 +123,12 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     @Override
+    public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
+    {
+        return valueAccessor.getIfAssignable(parent, type);
+    }
+    
+    @Override
     public void set(Object value, Object parent) throws AccessException
     {
         valueAccessor.set(value, parent);

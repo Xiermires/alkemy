@@ -27,7 +27,7 @@ import org.alkemy.util.NumberConversion;
 /**
  * This implementation uses reflection to access and modify fields.
  */
-public class AbstractReflectionBasedValueAccessor implements ValueAccessor
+public abstract class AbstractReflectionBasedValueAccessor implements ValueAccessor
 {
     protected final Field f;
     private final boolean isEnum;
@@ -67,6 +67,14 @@ public class AbstractReflectionBasedValueAccessor implements ValueAccessor
         return v == null || type == v.getClass() ? (T) v : null;
     }
 
+    @Override
+    @SuppressWarnings("unchecked") // safe
+    public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
+    {
+        final Object v = get(parent);
+        return v == null || v.getClass().isAssignableFrom(type) ? (T) v : null;
+    }
+    
     @Override
     public void set(Object value, Object parent) throws AccessException
     {
@@ -133,6 +141,16 @@ public class AbstractReflectionBasedValueAccessor implements ValueAccessor
         }
         
         @Override
+        public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
+        {
+            if (Objects.nonNull(parent))
+            {
+                return super.getIfAssignable(parent, type);
+            }
+            return null;
+        }
+        
+        @Override
         public void set(Object value, Object parent) throws AccessException
         {
             if (Objects.nonNull(parent))
@@ -147,18 +165,6 @@ public class AbstractReflectionBasedValueAccessor implements ValueAccessor
         public StaticFieldReflectionBasedAccessor(Field field)
         {
             super(field);
-        }
-
-        @Override
-        public Object get(Object parent)
-        {
-            return super.get(null);
-        }
-
-        @Override
-        public void set(Object value, Object parent) throws AccessException
-        {
-            super.set(value, null);
         }
     }
 }

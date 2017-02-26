@@ -93,7 +93,8 @@ class AccessorFactory
             }
             catch (IllegalAccessException e)
             {
-                throw new AlkemyException("Unable to create a method invoker for '%s'", e, m.getDeclaringClass() + "." + m.getName());
+                throw new AlkemyException("Unable to create a method invoker for '%s'", e, m.getDeclaringClass() + "."
+                        + m.getName());
             }
         }
         return invokers;
@@ -108,7 +109,7 @@ class AccessorFactory
         {
             this.type = type;
         }
-        
+
         @Override
         public Class<?> type() throws AlkemyException
         {
@@ -122,6 +123,21 @@ class AccessorFactory
         }
 
         @Override
+        @SuppressWarnings("unchecked")
+        // safe
+        public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
+        {
+            return ref == null || type == ref.getClass() ? (T) ref : null;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
+        {
+            return ref == null || ref.getClass().isAssignableFrom(type) ? (T) ref : null;
+        }
+
+        @Override
         public void set(Object value, Object unused) throws AccessException
         {
             ref = value;
@@ -131,14 +147,6 @@ class AccessorFactory
         public String targetName()
         {
             return type.getTypeName();
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        // safe
-        public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
-        {
-            return ref == null || type == ref.getClass() ? (T) ref : null;
         }
     }
 
