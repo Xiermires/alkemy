@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.alkemy.visitor.impl;
 
+import static org.alkemy.visitor.impl.AbstractTraverser.INCLUDE_NULL_BRANCHES;
+import static org.alkemy.visitor.impl.AbstractTraverser.INSTANTIATE_NODES;
+import static org.alkemy.visitor.impl.AbstractTraverser.VISIT_NODES;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -23,9 +26,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 import java.util.Stack;
 
-import static org.alkemy.visitor.impl.AbstractTraverser.*;
 import org.alkemy.Alkemy;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
@@ -201,6 +204,19 @@ public class AlkemyVisitorTests
         assertTrue(ns.names.isEmpty());
     }
 
+    @Test
+    public void testVisitorController()
+    {
+        final AlkemyTypeCounter<TestVisitorController> countAs = new AlkemyTypeCounter<>(A.class);
+        final AlkemyTypeCounter<TestVisitorController>countBs = new AlkemyTypeCounter<>(B.class);
+        final AlkemyVisitorController<TestVisitorController> avc = new AlkemyVisitorController<>(Arrays.asList(countAs, countBs));
+        
+        Alkemy.reader(TestVisitorController.class).preorder(0).accept(avc, new TestVisitorController());
+        
+        assertThat(countAs.counter, is(5));
+        assertThat(countBs.counter, is(5));
+    }
+    
     // Implements both supplier & consumer
     static class ObjectReader<P> implements AlkemyElementVisitor<P, AlkemyElement>
     {
@@ -316,5 +332,50 @@ public class AlkemyVisitorTests
         {
             return Bar.class == type;
         }
+    }
+    
+    static class AlkemyTypeCounter<P> implements AlkemyElementVisitor<P, AlkemyElement>
+    {
+        int counter = 0;
+        Class<?> type;
+        
+        AlkemyTypeCounter(Class<?> type)
+        {
+            this.type = type;
+        }
+
+        @Override
+        public void visit(AlkemyElement e, Object parent)
+        {
+            counter++;
+        }
+        
+        @Override
+        public AlkemyElement map(AlkemyElement e)
+        {
+            return e;
+        }
+        
+        @Override
+        public boolean accepts(Class<?> type)
+        {
+            return this.type == type;
+        }
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD })
+    @AlkemyLeaf
+    static @interface A
+    {
+        
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD })
+    @AlkemyLeaf
+    static @interface B
+    {
+        
     }
 }

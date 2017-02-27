@@ -25,6 +25,12 @@ import org.alkemy.exception.AlkemyException;
 
 public class AnnotationUtils
 {
+    /**
+     * If the annotated element is an alkemy element, it returns its type.
+     * <p>
+     * The alkemy type either, the {@link AlkemyLeaf#value()} if specified, or the annotation
+     * qualified as {@link AlkemyLeaf} type.
+     */
     public static Class<? extends Annotation> findAlkemyTypes(AnnotatedElement ae)
     {
         final List<Pair<Annotation, AlkemyLeaf>> alkemyType = AnnotationUtils.getAnnotationsQualifiedAs(ae, AlkemyLeaf.class);
@@ -32,7 +38,15 @@ public class AnnotationUtils
         {
             throw new AlkemyException("Invalid configuration. Multiple alkemy visitors defined for a single element.");
         }
-        return alkemyType.isEmpty() ? null : alkemyType.get(0).second.value();
+        if (alkemyType.isEmpty())
+        {
+            return null;
+        }
+        else
+        {
+            final Class<? extends Annotation> value = alkemyType.get(0).second.value();
+            return Annotation.class == value ? alkemyType.get(0).first.annotationType() : value;
+        }
     }
 
     private static <QualifyingType extends Annotation> List<Pair<Annotation, QualifyingType>> getAnnotationsQualifiedAs(

@@ -77,5 +77,5 @@ import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface AlkemyLeaf
 {
-    Class<? extends Annotation> value(); 
+    Class<? extends Annotation> value() default Annotation.class; 
 }
