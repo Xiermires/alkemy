@@ -16,58 +16,27 @@ Overview
 Description
 -----------
 
-This library allows to qualify types through user defined annotations 
-and parse them into a directed rooted tree (this process will be referred as Alkemization).
+This library allows to parse types into a directed rooted tree (this process will be referred as Alkemization) 
+which provides set / get access for fields and invoke for methods.
 
-Once alkemized, any concrete instance of that type can be imbued with different 
-properties / behaviours through visitor classes (visit node / visit element).
+The library comes with an in-built parser which recognises annotations qualified as AlkemyLeafs in both methods / fields. 
 
-A type can define several different qualifiers, which will alkemize into different alkemy elements. 
-Alkemy elements can be supported by one / many visitors. 
+Once an Alkemization has taken place, the resulting tree can be traversed applying effects on each of the nodes / leafs.
 
+There are three in-built ways to traverse a node:
 
--------
-Insides 
--------
+1. Using Node#traverse(Consumer c) function. 
+2. Using a AlkemyNodeReader to process the nodes in combination with AlkemyElementVisitors to process the leafs (preorder and postorder node readers are provided)
+3. Using a AlkemyNodeHandler that will handle the whole process.
 
-This library instruments the classes and wrap the generated code using lambdas. 
-If lambdas are unable to be created, the library fallbacks to reflection (which is considerably slower).
+There is no limit in how many different alkemy elements a type can define, or how many different alkemy types an element visitor
+can handle.
 
-The instrumentation happens transparently to the user through the agent-tools library. 
-It is important to remark though, that due to the instrumentation restrictions,
-this library should start up before any of the alkemized classes are used !! (can't modify the stack of loaded classes).
+-------------
+Some Examples
+-------------
 
-
------------
-Performance 
------------
-
-The performance of the lambda operations is around 20 times slower than regular code (reflection is around 200 times slower). 
-This measurements might vary between different machines.
-
-The framework add significant overhead (processing 1 million of simple objects ranges from 200-450 ms).
-
-Performance can be significantly improved in some cases by writing specific visitors.
-
-This is due to three factors:
-
-1. A convenient AlkemyElement#newInstance(Object... args) method is included where each argument represents an alkemy element within the type. 
-2. The args order of the newInstance method preserves the alkemy element declaration order / or the user specified order through the @Order annotation. 
-2. Nodes include a branchDepth() method which indicates how many jumps are required from itself to the furthest children in the branch. 
-
-Combining this three concepts, we can write node visitors that instantiate nodes at almost new() speed. 
-Notice that a node with branch depth of 1 is flat (no grand children), and can handle the tree as a list and call newInstance(...) directly.
-
-
---------
-Example
---------
-
-It is probably easier to understand how-to use this library through an example. 
-
-This particular example can be found in : 'org.alkemy.example.RandomGenerator' (other examples can be found in the test classes)
-
-Alkemizing this the test results into : root (TestClass) -> { leaf (TestClass.i), leaf (TestClass.d) } }.
+1. Injection.
 
 ```java
 public class TestClass
@@ -80,104 +49,135 @@ public class TestClass
 }
 ```
 
-And then we can instantiate an Alkemist and imbue properties to the alkemized tree through a visitor.
+```java
+@Test
+public void generateRandoms()
+{
+	// Reads TestClass, identifies the @Random elements and applies XorRandomGenerator on them.
+	final TestClass tc = Alkemy.mature(TestClass.class, new XorRandomGenerator());
+	
+	... // asserts
+}
 
-The visitor, in this case a very simple RandomGenerator which uses xorshift64.
+// The visitor that works on the AlkemyElements.
+static class XorRandomGenerator implements AlkemyElementVisitor<Void, RandomElement>
+{
+	@Override
+	public void visit(RandomElement e, Object parent)
+	{
+		e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
+	}
+
+	@Override
+	public RandomElement map(AlkemyElement e)
+	{
+		return new RandomElement(e);
+	}
+	
+	... // PRNG code 
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.FIELD })
+@AlkemyLeaf
+@interface Random
+{
+	double min();
+
+	double max();
+}
+```
+
+In this example we map the result of generating a random into a field, but there is no 
+restriction regarding the source of the data. Sockets, db, service locators, ...
+
+2. Map streams
 
 ```java
-// Injecting random generated values
-public class RandomGenerator
+public class TestClass
 {
-    @Test
-    public void generateRandoms()
-    {
-		// Reads TestClass, identifies the @Random elements and applies XorRandomGenerator on them.
-        final TestClass tc = Alkemy.mature(TestClass.class, new XorRandomGenerator());
-
-        assertThat(tc.i, is(both(greaterThan(5)).and(lessThan(10)).or(equalTo(5)).or(equalTo(10))));
-        assertThat(tc.d, is(both(greaterThan(9.25)).and(lessThan(11.5)).or(equalTo(9.25)).or(equalTo(11.5))));
-    }
+    @Index(0)
+    int a;
     
-    // The visitor that works on the AlkemyElements.
-    static class XorRandomGenerator implements AlkemyElementVisitor<Void, RandomElement>
+    @Index(1)
+    double b;
+    
+    @Index(2)
+    float c;
+}
+
+
+@Test
+public void testCsvReader() throws IOException
+{
+	final String NEW_LINE = System.getProperty("line.separator");
+	final String EXAMPLE = "0,1.2,2.3,12345678902,4" + NEW_LINE + "9,1.65,7f,12345678901,5";
+
+	// Simulate the whole csv is a file process (although we only need an Iterator<String>)
+	final BufferedReader reader = new BufferedReader(new InputStreamReader(
+			new ByteArrayInputStream(EXAMPLE.getBytes("UTF-8"))));
+
+	final CsvReader mapper = new CsvReader();
+
+	final List<TestClass> tcs = reader.lines().map(l -> l.split(",")).map(l -> Alkemy.mature(TestClass.class, mapper, l))
+			.collect(Collectors.toList());
+			
+	// asserts ...
+}
+
+public class CsvReader extends IndexedElementVisitor<String[]>
+{
+    final TypedValueFromStringArray tvfs = new TypedValueFromStringArray();
+
+    @Override
+    public void visit(IndexedElement e, Object parent, String[] parameter)
     {
-        @Override
-        public void visit(RandomElement e, Object parent)
-        {
-            e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
-        }
-
-        @Override
-        public RandomElement map(AlkemyElement e)
-        {
-            return new RandomElement(e);
-        }
-		
-		/* RNG */
-
-        private double nextDouble(double min, double max)
-        {
-            return min + (nextDouble() * ((max - min)));
-        }
-
-        private long seed = System.nanoTime();
-
-        /**
-         * Return an uniformly distributed double number between (0-1).
-         * <p>
-         * Zero is not inclusive since we are using Xorshift.
-         * <p>
-         * One is excluded as well via the +1 in Long.MAX_VALUE + 1.
-         */
-        double nextDouble()
-        {
-            double d = xorshift64() / (double) (Long.MAX_VALUE + 1);
-            return d < 0 ? -d : d; // xorshift64() generates values in the whole Long.MIN_VALUE to
-                                   // Long.MAX_VALUE. Ensure we
-                                   // return positive numbers (0-1).
-        }
-
-        /**
-         * Xorshift implementation 2^64 version.
-         * <p>
-         * Shifting triplet values selected from G. Marsaglia '<a
-         * href="https://www.jstatsoft.org/article/view/v008i14">Xorshift RNGs</a>'.</a>'
-         */
-        long xorshift64()
-        {
-            seed ^= seed << 13;
-            seed ^= seed >>> 7;
-            seed ^= seed << 17;
-            return seed;
-        }
-    }
-
-    // The custom AlkemyElement built out of the Random marker.
-    static class RandomElement extends AbstractAlkemyElement<RandomElement>
-    {
-        double min, max;
-
-        protected RandomElement(AbstractAlkemyElement<?> other)
-        {
-            super(other);
-
-            final Random a = other.desc().getAnnotation(Random.class);
-            Conditions.requireNonNull(a); 
-
-            min = a.min();
-            max = a.max();
-        }
-    }
-
-    // The visitor marker
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.FIELD })
-    @AlkemyLeaf(XorRandomGenerator.class)
-    @interface Random
-    {
-        double min();
-
-        double max();
+        e.set(tvfs.getValue(e, parameter), parent);
     }
 }
 ```
+
+Resultsets and other typical stream sources follow similar fashion. Reverse mapping from the object to the stream is also fairly simple (simply reverse the mapper logic). 
+
+3. There is no example as today, but it is possible to write visitors to support scenarios such as this...
+
+```java
+public class Foo
+{
+	@Property
+	int foo;
+	
+	@Property
+	int bar;
+	
+	@Use("foo", "bar")
+	@Schedule(every = 5000, unit = TimeUnit.MILLISECONDS)
+	public void method(int foo, int bar)
+	{
+		...
+	}
+}
+
+-------
+INSIDES
+-------
+
+The library instruments the classes and wrap the generated code using lambdas. 
+If instrumentation is not possible, the library fallbacks to reflection (which is considerably slower).
+
+The instrumentation happens transparently to the user through the agent-tools library. 
+It is important to remark though, that due to the instrumentation restrictions,
+this library should start up before any of the alkemized classes are used !! (can't modify the stack of loaded classes).
+
+Although the library doesn't include it. An approach such as the Spring boot one is straight forward to code.
+
+-----------
+Performance 
+-----------
+
+The performance of the lambda operations is around 20 times slower than regular code (reflection is around 200 times slower). 
+This measurements might vary between different machines.
+
+The framework add significant overhead (processing 1 million of objects ranges from 200-350 ms).
+
+Performance can be significantly improved in some cases by writing specific AlkemyNodeHandler's (processing 1 million object ranges from 50-70 ms).
