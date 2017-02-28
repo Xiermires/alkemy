@@ -26,7 +26,7 @@ import org.alkemy.visitor.AlkemyNodeReader;
 public class AlkemyElementWriter<R, P> implements AlkemyNodeReader<R, P>
 {
     @Override
-    public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
+    public R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {
         final Parameters<P> params = new Parameters<>(aev, root.children().size());
         root.children().forEach(c -> processNode(aev, c, params));

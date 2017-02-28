@@ -19,12 +19,12 @@ import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeHandler;
 
 /**
  * Adapter between a reader and a visitor to access the Iterable functionality.
  */
-public class NodeReaderToVisitorAdapter<R, P> implements AlkemyNodeReader<R, P>, AlkemyNodeVisitor<R, P>
+public class NodeReaderToVisitorAdapter<R, P> implements AlkemyNodeReader<R, P>, AlkemyNodeHandler<R, P>
 {
     private final AlkemyNodeReader<R, P> reader;
     private final AlkemyElementVisitor<P, ?> aev;
@@ -36,14 +36,14 @@ public class NodeReaderToVisitorAdapter<R, P> implements AlkemyNodeReader<R, P>,
     }
 
     @Override
-    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
+    public R create(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
     {
-        return reader.accept(aev, node);
+        return reader.create(aev, node);
     }
 
     @Override
-    public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
+    public R create(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
     {
-        return reader.accept(aev, node, parameter);
+        return reader.create(aev, node, parameter);
     }
 }

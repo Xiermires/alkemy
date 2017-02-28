@@ -24,7 +24,7 @@ import java.util.stream.StreamSupport;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
-import org.alkemy.visitor.AlkemyNodeVisitor.Entry;
+import org.alkemy.visitor.AlkemyNodeHandler.Entry;
 import org.alkemy.visitor.impl.NodeReaderToVisitorAdapter;
 
 /**
@@ -44,7 +44,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * Generates an element of type R.
      */
-    default R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
+    default R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
@@ -52,7 +52,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * Generates an element of type R using a parameter P.
      */
-    default R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
+    default R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
@@ -164,7 +164,7 @@ public interface AlkemyNodeReader<R, P>
     /* * ITERABLE SUPPORT * */
     
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Iterable)}
+     * See {@link AlkemyNodeHandler#iterable(Node, Iterable)}
      */
     default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
             Iterable<P> items)
@@ -173,7 +173,7 @@ public interface AlkemyNodeReader<R, P>
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Iterator)}
+     * See {@link AlkemyNodeHandler#iterable(Node, Iterator)}
      */
     default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
             Iterator<P> items)
@@ -182,7 +182,7 @@ public interface AlkemyNodeReader<R, P>
     }
     
     /**
-     * See {@link AlkemyNodeVisitor#peekIterable(Node, Iterable)}
+     * See {@link AlkemyNodeHandler#peekIterable(Node, Iterable)}
      */
     default Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
             Iterable<P> items)
@@ -191,7 +191,7 @@ public interface AlkemyNodeReader<R, P>
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#peekIterable(Node, Iterator)}
+     * See {@link AlkemyNodeHandler#peekIterable(Node, Iterator)}
      */
     default Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
             Iterator<P> items)
@@ -200,7 +200,7 @@ public interface AlkemyNodeReader<R, P>
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Supplier, Class)}
+     * See {@link AlkemyNodeHandler#iterable(Node, Supplier, Class)}
      */
     default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
             Supplier<Boolean> hasNext)

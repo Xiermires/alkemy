@@ -90,7 +90,7 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
         }
 
         @Override
-        public R accept(AlkemyElementVisitor<R, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, R parameter)
+        public R create(AlkemyElementVisitor<R, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, R parameter)
         {
             Assertions.nonNull(root);
 

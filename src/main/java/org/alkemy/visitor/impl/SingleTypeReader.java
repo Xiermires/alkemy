@@ -27,8 +27,8 @@ import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
-import org.alkemy.visitor.AlkemyNodeVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor.Entry;
+import org.alkemy.visitor.AlkemyNodeHandler;
+import org.alkemy.visitor.AlkemyNodeHandler.Entry;
 
 /**
  * Part of the simple Alkemy syntax sugar. See {@link Alkemy}.
@@ -51,7 +51,7 @@ public class SingleTypeReader<R, P>
      */
     public R accept(AlkemyElementVisitor<P, ?> aev)
     {
-        return anv.accept(aev, root);
+        return anv.create(aev, root);
     }
 
     /**
@@ -59,7 +59,7 @@ public class SingleTypeReader<R, P>
      */
     public R accept(AlkemyElementVisitor<P, ?> aev, P parameter)
     {
-        return anv.accept(aev, root, parameter);
+        return anv.create(aev, root, parameter);
     }
 
     /**
@@ -167,7 +167,7 @@ public class SingleTypeReader<R, P>
     /* * ITERABLE SUPPORT * */
 
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Iterable)}
+     * See {@link AlkemyNodeHandler#iterable(Node, Iterable)}
      */
     public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
     {
@@ -175,7 +175,7 @@ public class SingleTypeReader<R, P>
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Iterator)}
+     * See {@link AlkemyNodeHandler#iterable(Node, Iterator)}
      */
     public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
     {
@@ -183,7 +183,7 @@ public class SingleTypeReader<R, P>
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#peekIterable(Node, Iterable)}
+     * See {@link AlkemyNodeHandler#peekIterable(Node, Iterable)}
      */
     public Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
     {
@@ -191,7 +191,7 @@ public class SingleTypeReader<R, P>
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#peekIterable(Node, Iterator)}
+     * See {@link AlkemyNodeHandler#peekIterable(Node, Iterator)}
      */
     public Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
     {
@@ -199,7 +199,7 @@ public class SingleTypeReader<R, P>
     }
 
     /**
-     * See {@link AlkemyNodeVisitor#iterable(Node, Supplier, Class)}
+     * See {@link AlkemyNodeHandler#iterable(Node, Supplier, Class)}
      */
     public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Supplier<Boolean> hasNext)
     {

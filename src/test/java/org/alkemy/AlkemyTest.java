@@ -44,7 +44,7 @@ import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.util.PassThrough;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeVisitor.FluentAlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeHandler.FluentAlkemyNodeVisitor;
 import org.alkemy.visitor.impl.SingleTypeReader;
 import org.junit.Test;
 
@@ -87,7 +87,7 @@ public class AlkemyTest
         tdc.testClass = tc;
 
         final ObjectCopier<TestDeepCopy> copier = new ObjectCopier<>();
-        final TestDeepCopy copy = copier.visit(Alkemy.nodes().get(TestDeepCopy.class), tdc);
+        final TestDeepCopy copy = copier.create(Alkemy.nodes().get(TestDeepCopy.class), tdc);
 
         assertThat(copy.testClass, is(not(nullValue())));
         assertThat(copy.testClass.s0, is("0"));
@@ -261,7 +261,7 @@ public class AlkemyTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.visit(node, tfv);
+                anv.create(node, tfv);
             }
         }) / 1000000 + " ms");
     }
@@ -296,7 +296,7 @@ public class AlkemyTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.visit(node);
+                anv.create(node);
             }
         }) / 1000000 + " ms");
     }
@@ -328,7 +328,7 @@ public class AlkemyTest
 
         // create
         @Override
-        public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
+        public R create(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
         {
             args = args != null ? args : new Object[node.children().size()];
             if (mapped == null) // map once
@@ -344,7 +344,7 @@ public class AlkemyTest
 
         // assign
         @Override
-        public R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R parent)
+        public R create(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R parent)
         {
             if (mapped == null)
             {

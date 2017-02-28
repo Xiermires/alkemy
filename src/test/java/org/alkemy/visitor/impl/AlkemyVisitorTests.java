@@ -60,7 +60,7 @@ public class AlkemyVisitorTests
         final AlkemyPreorderReader<TestWriter, Object> aew = new AlkemyPreorderReader<>(INCLUDE_NULL_BRANCHES | INSTANTIATE_NODES);
         final TypifiedNode<TestWriter, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestWriter.class);
         final ObjectWriter<Object> ow = new ObjectWriter<>(new Constant<>(55));
-        final TestWriter tw = TestWriter.class.cast(aew.accept(ow, node)); 
+        final TestWriter tw = TestWriter.class.cast(aew.create(ow, node)); 
 
         assertThat(tw.a, is(55));
         assertThat(tw.b, is(55));
@@ -83,7 +83,7 @@ public class AlkemyVisitorTests
         {
             for (int i = 0; i < 1000000; i++)
             {
-                aew.accept(ow, node);
+                aew.create(ow, node);
             }
         }) / 1000000 + " ms");
     }
@@ -99,7 +99,7 @@ public class AlkemyVisitorTests
         {
             for (int i = 0; i < 1000000; i++)
             {
-                apr.accept(ow, node);
+                apr.create(ow, node);
             }
         }) / 1000000 + " ms");
     }
@@ -113,7 +113,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPreorderReader<TestReader>(VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPreorderReader<TestReader>(VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -135,7 +135,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPostorderReader<TestReader>(VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPostorderReader<TestReader>(VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -157,7 +157,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPreorderReader<TestReader>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPreorderReader<TestReader>(INCLUDE_NULL_BRANCHES | VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -185,7 +185,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPostorderReader<TestReader>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new FluentAlkemyPostorderReader<TestReader>(INCLUDE_NULL_BRANCHES | VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));

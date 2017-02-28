@@ -44,7 +44,7 @@
  * When implementing any of the 'org.alkemy.visitor' interfaces
  * <ul>
  * <li>{@link org.alkemy.visitor.AlkemyNodeReader}
- * <li>{@link org.alkemy.visitor.AlkemyNodeVisitor}
+ * <li>{@link org.alkemy.visitor.AlkemyNodeHandler}
  * <li>{@link org.alkemy.visitor.AlkemyElementVisitor} 
  * </ul>
  * There is freedom to choose which methods to implement. That is because it is difficult to predict which

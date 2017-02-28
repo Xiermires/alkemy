@@ -55,7 +55,7 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     }
     
     @Override
-    public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
+    public R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {
         Assertions.nonNull(root);
         final R instance = root.data().safeNewInstance(root.type());
@@ -71,7 +71,7 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     }
 
     @Override
-    public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, P parameter)
+    public R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, P parameter)
     {
         Assertions.nonNull(root);
 

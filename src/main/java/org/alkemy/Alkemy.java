@@ -26,7 +26,7 @@ import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeReader;
-import org.alkemy.visitor.AlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeHandler;
 import org.alkemy.visitor.impl.AlkemyPostorderReader;
 import org.alkemy.visitor.impl.AlkemyPreorderReader;
 import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
@@ -35,7 +35,7 @@ import org.alkemy.visitor.impl.SingleTypeReader.FluentSingleTypeReader;
 
 /**
  * The Alkemy library allows applying user specific {@link AlkemyNodeReader},
- * {@link AlkemyNodeVisitor} and {@link AlkemyElementVisitor} strategies to a set of alkemy
+ * {@link AlkemyNodeHandler} and {@link AlkemyElementVisitor} strategies to a set of alkemy
  * elements.
  * <p>
  * Alkemy elements are the result of parsing an "alkemized" type with an {@link AlkemyParser}, being
@@ -95,7 +95,7 @@ public class Alkemy
      * The node factory is the starting point of any alkemizing process.
      * <p>
      * Types can be converted into directed rooted trees of alkemy elements, which can be later feed
-     * to any {@link AlkemyNodeVisitor} and {@link AlkemyNodeReader} implementations.
+     * to any {@link AlkemyNodeHandler} and {@link AlkemyNodeReader} implementations.
      * <p>
      * Nodes are created using an {@link AlkemyParser} which is responsible for finding defined
      * alkemizations and creating alkemy elements out of a type.
@@ -110,7 +110,7 @@ public class Alkemy
      * leaves.
      * <p>
      * Simple alkemy methods are provided as a quick access to some common, non-intensive uses. But
-     * should be avoided in favor of creating specialized facades for the {@link AlkemyNodeVisitor}s
+     * should be avoided in favor of creating specialized facades for the {@link AlkemyNodeHandler}s
      * and {@link AlkemyNodeReader}s.
      * <ol>
      * <li>Parses the type Class&lt;R&gt; into a Node.
@@ -124,7 +124,7 @@ public class Alkemy
      */
     public static <R, P> R mature(Class<R> r, AlkemyElementVisitor<P, ?> aev)
     {
-        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes.get(r));
+        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).create(aev, nodes.get(r));
     }
 
     /**
@@ -132,7 +132,7 @@ public class Alkemy
      */
     public static <R, P> R mature(Class<R> r, AlkemyElementVisitor<P, ?> aev, P p)
     {
-        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes.get(r), p);
+        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).create(aev, nodes.get(r), p);
     }
 
     /**
@@ -140,7 +140,7 @@ public class Alkemy
      * non-null branches.
      * <p>
      * Simple alkemy methods are provided as a quick access to some common, non-intensive uses. But
-     * should be avoided in favor of creating specialized facades for the {@link AlkemyNodeVisitor}s
+     * should be avoided in favor of creating specialized facades for the {@link AlkemyNodeHandler}s
      * and {@link AlkemyNodeReader}s.
      * <ol>
      * <li>Parses the type Class&lt;R&gt; into a Node.
@@ -155,7 +155,7 @@ public class Alkemy
     // safe
     public static <R> R mature(R r, AlkemyElementVisitor<R, ?> aev)
     {
-        return new FluentAlkemyPreorderReader<R>(0).accept(aev, nodes.get((Class<R>) r.getClass()), r);
+        return new FluentAlkemyPreorderReader<R>(0).create(aev, nodes.get((Class<R>) r.getClass()), r);
     }
 
     /**
