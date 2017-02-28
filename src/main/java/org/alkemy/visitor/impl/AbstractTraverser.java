@@ -55,7 +55,7 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     }
     
     @Override
-    public R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
+    public R create(AlkemyElementVisitor<?, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {
         Assertions.nonNull(root);
         final R instance = root.data().safeNewInstance(root.type());
@@ -87,9 +87,35 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
         return instance;
     }
 
+    @Override
+    public R accept(AlkemyElementVisitor<?, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, R parameter)
+    {
+        Assertions.nonNull(root);
+
+        if (visitNodes)
+        {
+            root.data().accept(aev, parameter);
+        }
+        root.children().forEach(c -> processBranch(aev, c, parameter));
+        return parameter;
+    }
+
+    @Override
+    public R accept(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, R param1, P param2)
+    {
+        Assertions.nonNull(root);
+
+        if (visitNodes)
+        {
+            root.data().accept(aev, param1, param2);
+        }
+        root.children().forEach(c -> processBranch(aev, c, param1, param2));
+        return param1;
+    }
+    
     protected abstract void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e,
             Object parent, P parameter);
 
-    protected abstract void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e,
+    protected abstract void processBranch(AlkemyElementVisitor<?, ?> aev, Node<? extends AbstractAlkemyElement<?>> e,
             Object parent);
 }

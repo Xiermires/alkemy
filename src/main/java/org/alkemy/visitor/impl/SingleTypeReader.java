@@ -49,7 +49,7 @@ public class SingleTypeReader<R, P>
     /**
      * Generates an element of type R.
      */
-    public R accept(AlkemyElementVisitor<P, ?> aev)
+    public R create(AlkemyElementVisitor<?, ?> aev)
     {
         return anv.create(aev, root);
     }
@@ -57,11 +57,19 @@ public class SingleTypeReader<R, P>
     /**
      * Generates an element of type R using a parameter P.
      */
-    public R accept(AlkemyElementVisitor<P, ?> aev, P parameter)
+    public R create(AlkemyElementVisitor<P, ?> aev, P parameter)
     {
         return anv.create(aev, root, parameter);
     }
 
+    /**
+     * Generates an element of type R, or modifies and returns the received param1 of type R.
+     */
+    public R accept(AlkemyElementVisitor<?, ?> aev, R parameter)
+    {
+        return anv.accept(aev, root, parameter);
+    }
+    
     /**
      * Generates an element of type R, or modifies and returns the received param1 of type R, using
      * the param2 of type P.

@@ -153,9 +153,9 @@ public class Alkemy
      */
     @SuppressWarnings("unchecked")
     // safe
-    public static <R> R mature(R r, AlkemyElementVisitor<R, ?> aev)
+    public static <R, P> R mature(R r, AlkemyElementVisitor<P, ?> aev)
     {
-        return new FluentAlkemyPreorderReader<R>(0).create(aev, nodes.get((Class<R>) r.getClass()), r);
+        return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes.get((Class<R>) r.getClass()), r);
     }
 
     /**

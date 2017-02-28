@@ -62,7 +62,7 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
     }
 
     @Override
-    protected void processBranch(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent)
+    protected void processBranch(AlkemyElementVisitor<?, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Object parent)
     {
         if (e.hasChildren())
         {

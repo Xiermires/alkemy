@@ -26,14 +26,14 @@ import org.alkemy.visitor.AlkemyNodeReader;
 public class AlkemyElementWriter<R, P> implements AlkemyNodeReader<R, P>
 {
     @Override
-    public R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
+    public R create(AlkemyElementVisitor<?, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
     {
         final Parameters<P> params = new Parameters<>(aev, root.children().size());
         root.children().forEach(c -> processNode(aev, c, params));
         return root.data().safeNewInstance(root.type(), params.get());
     }
 
-    private void processNode(AlkemyElementVisitor<P, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters<P> params)
+    private void processNode(AlkemyElementVisitor<?, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters<P> params)
     {
         if (e.hasChildren())
         {
@@ -55,9 +55,9 @@ public class AlkemyElementWriter<R, P> implements AlkemyNodeReader<R, P>
         int c = 0;
         Object[] params;
         boolean unsupported = false;
-        AlkemyElementVisitor<P, ?> aev;
+        AlkemyElementVisitor<?, ?> aev;
 
-        Parameters(AlkemyElementVisitor<P, ?> aev, int size)
+        Parameters(AlkemyElementVisitor<?, ?> aev, int size)
         {
             this.aev = aev;
             params = new Object[size];

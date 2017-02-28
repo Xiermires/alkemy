@@ -211,7 +211,7 @@ public class AlkemyVisitorTests
         final AlkemyTypeCounter<TestVisitorController>countBs = new AlkemyTypeCounter<>(B.class);
         final AlkemyVisitorController<TestVisitorController> avc = new AlkemyVisitorController<>(Arrays.asList(countAs, countBs));
         
-        Alkemy.reader(TestVisitorController.class).preorder(0).accept(avc, new TestVisitorController());
+        Alkemy.reader(TestVisitorController.class).preorder(0).create(avc, new TestVisitorController());
         
         assertThat(countAs.counter, is(5));
         assertThat(countBs.counter, is(5));

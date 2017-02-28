@@ -56,10 +56,18 @@ public interface AlkemyNodeHandler<R, P>
     }
 
     /**
+     * Generates an element of type R, or modifies and returns the received param1 of type R.
+     */
+    default R handle(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R parameter)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    /**
      * Generates an element of type R, or modifies and returns the received param1 of type R, using
      * the param2 of type P.
      */
-    default R visit(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R param1, P param2)
+    default R handle(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R param1, P param2)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }

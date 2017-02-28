@@ -44,7 +44,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * Generates an element of type R.
      */
-    default R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
+    default R create(AlkemyElementVisitor<?, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
@@ -53,6 +53,14 @@ public interface AlkemyNodeReader<R, P>
      * Generates an element of type R using a parameter P.
      */
     default R create(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, P parameter)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+    
+    /**
+     * Generates an element of type R, or modifies and returns the received param1 of type R, using the param2 of type P.
+     */
+    default R accept(AlkemyElementVisitor<?, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, R parameter)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }

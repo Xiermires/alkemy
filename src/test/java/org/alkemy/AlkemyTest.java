@@ -192,12 +192,12 @@ public class AlkemyTest
     public void testMethodInvoker()
     {
         final FooInvoker<TestMethodInvoker> aev = new FooInvoker<TestMethodInvoker>();
-        Alkemy.reader(TestMethodInvoker.class).preorder(VISIT_NODES).accept(aev);
+        Alkemy.reader(TestMethodInvoker.class).preorder(VISIT_NODES).create(aev);
         
         assertThat(aev.foo, is("foo"));
         
         final BarInvoker aev2 = new BarInvoker();
-        Alkemy.reader(TestMethodInvoker.class, String.class).preorder(VISIT_NODES).accept(aev2, "bar");
+        Alkemy.reader(TestMethodInvoker.class, String.class).preorder(VISIT_NODES).create(aev2, "bar");
         
         assertThat(aev2.bar, is("bar"));
     }
@@ -213,7 +213,7 @@ public class AlkemyTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.accept(aev, tc);
+                anv.create(aev, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -229,7 +229,7 @@ public class AlkemyTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.accept(aev, tc);
+                anv.create(aev, tc);
             }
         }) / 1000000 + " ms");
     }
@@ -245,7 +245,7 @@ public class AlkemyTest
         {
             for (int i = 0; i < 1000000; i++)
             {
-                anv.accept(aev, tc);
+                anv.create(aev, tc);
             }
         }) / 1000000 + " ms");
     }
