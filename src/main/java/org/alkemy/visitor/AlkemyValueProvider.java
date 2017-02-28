@@ -17,25 +17,25 @@ package org.alkemy.visitor;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 
-public interface AlkemyValueProvider<E extends AbstractAlkemyElement<E>>
+public interface AlkemyValueProvider<E extends AbstractAlkemyElement<E>, P>
 {
-    Object getValue(E e);
+    Object getValue(E e, P p);
     
-    Double getDouble(E e);
+    Double getDouble(E e, P p);
     
-    Float getFloat(E e);
+    Float getFloat(E e, P p);
     
-    Long getLong(E e);
+    Long getLong(E e, P p);
     
-    Integer getInteger(E e);
+    Integer getInteger(E e, P p);
     
-    Short getShort(E e);
+    Short getShort(E e, P p);
     
-    Byte getByte(E e);
+    Byte getByte(E e, P p);
     
-    Character getChar(E e);
+    Character getChar(E e, P p);
     
-    Boolean getBoolean(E e);
+    Boolean getBoolean(E e, P p);
     
-    Object getObject(E e);
+    Object getObject(E e, P p);
 }

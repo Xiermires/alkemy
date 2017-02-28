@@ -22,7 +22,7 @@ import org.alkemy.visitor.AlkemyValueProvider;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
-public abstract class AbstractAlkemyValueProvider<E extends AbstractAlkemyElement<E>> implements AlkemyValueProvider<E>
+public abstract class AbstractAlkemyValueProvider<E extends AbstractAlkemyElement<E>, P> implements AlkemyValueProvider<E, P>
 {
     // enums are slower.
     static final int DOUBLE = 0;
@@ -68,83 +68,83 @@ public abstract class AbstractAlkemyValueProvider<E extends AbstractAlkemyElemen
     }
 
     @Override
-    public Object getValue(E e)
+    public Object getValue(E e, P p)
     {
         switch (type(e))
         {
             case 0:
-                return getDouble(e);
+                return getDouble(e, p);
             case 1:
-                return getFloat(e);
+                return getFloat(e, p);
             case 2:
-                return getLong(e);
+                return getLong(e, p);
             case 3:
-                return getInteger(e);
+                return getInteger(e, p);
             case 4:
-                return getShort(e);
+                return getShort(e, p);
             case 5:
-                return getByte(e);
+                return getByte(e, p);
             case 6:
-                return getChar(e);
+                return getChar(e, p);
             case 7:
-                return getBoolean(e);
+                return getBoolean(e, p);
             case 8:
-                return getObject(e);
+                return getObject(e, p);
             default:
                 throw new AlkemyException("Undefined type '%d'", e.type());
         }
     }
 
     @Override
-    public Double getDouble(E e)
+    public Double getDouble(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Float getFloat(E e)
+    public Float getFloat(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Long getLong(E e)
+    public Long getLong(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Integer getInteger(E e)
+    public Integer getInteger(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Short getShort(E e)
+    public Short getShort(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Byte getByte(E e)
+    public Byte getByte(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Character getChar(E e)
+    public Character getChar(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Boolean getBoolean(E e)
+    public Boolean getBoolean(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }
 
     @Override
-    public Object getObject(E e)
+    public Object getObject(E e, P p)
     {
         throw new UnsupportedOperationException("not implemented.");
     }

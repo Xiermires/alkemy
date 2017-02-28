@@ -92,8 +92,8 @@ public class AlkemyVisitorTests
     public void performanceWriteAnObjUsingPreorderVisitor() throws Throwable
     {
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        final ObjectWriter<TestClass> ow = new ObjectWriter<>(new Constant<AlkemyElement>(55));
-        final AlkemyPreorderReader<TestClass, TestClass> apr = new AlkemyPreorderReader<TestClass, TestClass>(INCLUDE_NULL_BRANCHES | INSTANTIATE_NODES);
+        final ObjectWriter<Object> ow = new ObjectWriter<Object>(new Constant<AlkemyElement>(55));
+        final AlkemyPreorderReader<TestClass, Object> apr = new AlkemyPreorderReader<TestClass, Object>(INSTANTIATE_NODES);
 
         System.out.println("Create 1e6 objects (preorder): " + Measure.measure(() ->
         {
@@ -255,9 +255,9 @@ public class AlkemyVisitorTests
 
     static class ObjectWriter<P> implements AlkemyElementVisitor<P, AlkemyElement>
     {
-        private AlkemyValueProvider<AlkemyElement> avp;
+        private AlkemyValueProvider<AlkemyElement, P> avp;
 
-        ObjectWriter(AlkemyValueProvider<AlkemyElement> avp)
+        ObjectWriter(AlkemyValueProvider<AlkemyElement, P> avp)
         {
             this.avp = avp;
         }
@@ -265,13 +265,13 @@ public class AlkemyVisitorTests
         @Override
         public Object generate(AlkemyElement e)
         {
-            return avp.getValue(e);
+            return avp.getValue(e, null);
         }
 
         @Override
         public void visit(AlkemyElement e, Object parent)
         {
-            e.set(avp.getValue(e), parent);
+            e.set(avp.getValue(e, null), parent);
         }
 
         @Override
@@ -295,7 +295,7 @@ public class AlkemyVisitorTests
     }
 
     // TestClass always int.
-    static class Constant<E extends AbstractAlkemyElement<E>> extends AbstractAlkemyValueProvider<E>
+    static class Constant<E extends AbstractAlkemyElement<E>> extends AbstractAlkemyValueProvider<E, Object>
     {
         final int c;
 
@@ -305,7 +305,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public Integer getInteger(E key)
+        public Integer getInteger(E key, Object p)
         {
             return c;
         }

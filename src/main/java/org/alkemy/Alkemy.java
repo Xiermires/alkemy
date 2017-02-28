@@ -70,12 +70,39 @@ public class Alkemy
         }
     }
 
+    private static NodeFactory nodes = nodes();
+
+    /**
+     * Clears the default {@link NodeFactory}.
+     * <p>
+     * This might be necessary in some scenarios. See
+     * {@link AbstractAlkemyElement#useMappedRefCaching}.
+     */
+    public static void clearCache()
+    {
+        nodes = nodes();
+    }
+
     /**
      * As {@link #nodes(AlkemyParser)} but using the {@link AlkemyParsers#typeParser()} by default.
      */
     public static NodeFactory nodes()
     {
         return new AlkemyNodes(AlkemyParsers.typeParser());
+    }
+
+    /**
+     * The node factory is the starting point of any alkemizing process.
+     * <p>
+     * Types can be converted into directed rooted trees of alkemy elements, which can be later feed
+     * to any {@link AlkemyNodeVisitor} and {@link AlkemyNodeReader} implementations.
+     * <p>
+     * Nodes are created using an {@link AlkemyParser} which is responsible for finding defined
+     * alkemizations and creating alkemy elements out of a type.
+     */
+    public static NodeFactory nodes(AlkemyParser parser)
+    {
+        return new AlkemyNodes(parser);
     }
 
     /**
@@ -97,7 +124,7 @@ public class Alkemy
      */
     public static <R, P> R mature(Class<R> r, AlkemyElementVisitor<P, ?> aev)
     {
-        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes().get(r));
+        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes.get(r));
     }
 
     /**
@@ -105,7 +132,7 @@ public class Alkemy
      */
     public static <R, P> R mature(Class<R> r, AlkemyElementVisitor<P, ?> aev, P p)
     {
-        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes().get(r), p);
+        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).accept(aev, nodes.get(r), p);
     }
 
     /**
@@ -128,7 +155,7 @@ public class Alkemy
     // safe
     public static <R> R mature(R r, AlkemyElementVisitor<R, ?> aev)
     {
-        return new FluentAlkemyPreorderReader<R>(0).accept(aev, nodes().get((Class<R>) r.getClass()), r);
+        return new FluentAlkemyPreorderReader<R>(0).accept(aev, nodes.get((Class<R>) r.getClass()), r);
     }
 
     /**
@@ -138,31 +165,17 @@ public class Alkemy
     // safe
     public static <R, P> R mature(R r, P p, AlkemyElementVisitor<P, ?> aev)
     {
-        return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes().get((Class<R>) r.getClass()), r, p);
+        return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes.get((Class<R>) r.getClass()), r, p);
     }
 
     public static <R> FluentReaderFactory<R> reader(Class<R> retType)
     {
-        return new FluentReaderFactory<R>(nodes().get(retType));
+        return new FluentReaderFactory<R>(nodes.get(retType));
     }
 
     public static <R, P> ReaderFactory<R, P> reader(Class<R> retType, Class<P> paramType)
     {
-        return new ReaderFactory<R, P>(nodes().get(retType));
-    }
-
-    /**
-     * The node factory is the starting point of any alkemizing process.
-     * <p>
-     * Types can be converted into directed rooted trees of alkemy elements, which can be later feed
-     * to any {@link AlkemyNodeVisitor} and {@link AlkemyNodeReader} implementations.
-     * <p>
-     * Nodes are created using an {@link AlkemyParser} which is responsible for finding defined
-     * alkemizations and creating alkemy elements out of a type.
-     */
-    public static NodeFactory nodes(AlkemyParser parser)
-    {
-        return new AlkemyNodes(parser);
+        return new ReaderFactory<R, P>(nodes.get(retType));
     }
 
     public static interface NodeFactory
