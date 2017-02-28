@@ -167,7 +167,7 @@ public interface AlkemyNodeHandler<R, P>
      */
     default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
     {
-        return new FluentIterable<R, P>(this, node, items.iterator());
+        return new ProcessIterable<R, P>(this, node, items.iterator());
     }
 
     /**
@@ -175,7 +175,7 @@ public interface AlkemyNodeHandler<R, P>
      */
     default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
     {
-        return new FluentIterable<R, P>(this, node, items);
+        return new ProcessIterable<R, P>(this, node, items);
     }
 
     /**
@@ -277,11 +277,11 @@ public interface AlkemyNodeHandler<R, P>
         }
     }
 
-    static class FluentIterable<R, P> extends AbstractIter<R, P> implements Iterable<R>
+    static class ProcessIterable<R, P> extends AbstractIter<R, P> implements Iterable<R>
     {
         private final Iterator<R> items;
 
-        FluentIterable(AlkemyNodeHandler<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+        ProcessIterable(AlkemyNodeHandler<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
                 Iterator<R> items)
         {
             super(visitor, node);
@@ -291,7 +291,7 @@ public interface AlkemyNodeHandler<R, P>
         @Override
         public Iterator<R> iterator()
         {
-            return new FluentIterator<R, P>(visitor, node, items);
+            return new ProcessIterator<R, P>(visitor, node, items);
         }
     }
 
@@ -355,11 +355,11 @@ public interface AlkemyNodeHandler<R, P>
         }
     }
 
-    static class FluentIterator<R, P> extends AbstractIter<R, P> implements Iterator<R>
+    static class ProcessIterator<R, P> extends AbstractIter<R, P> implements Iterator<R>
     {
         private final Iterator<R> items;
 
-        FluentIterator(AlkemyNodeHandler<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
+        ProcessIterator(AlkemyNodeHandler<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
                 Iterator<R> items)
         {
             super(visitor, node);
