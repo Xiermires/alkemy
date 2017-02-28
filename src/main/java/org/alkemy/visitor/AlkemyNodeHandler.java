@@ -72,23 +72,12 @@ public interface AlkemyNodeHandler<R, P>
         throw new UnsupportedOperationException("Not implemented.");
     }
 
-    /**
-     * Syntax sugar. Fluent version of the {@link AlkemyNodeHandler}.
-     * <p>
-     * An {@link AlkemyNodeHandler} where both parameter and return are from the same type. Usually
-     * represents a fluent operation where the parameter object is worked on and returned just
-     * after.
-     */
-    public interface FluentAlkemyNodeVisitor<R> extends AlkemyNodeHandler<R, R>
-    {
-    }
-
     /* * STREAM SUPPORT * */
 
     /**
      * Stream of {@link #iterable(TypifiedNode, Iterable)}
      */
-    default Stream<R> stream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    default Stream<R> stream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), -1, 0), false);
     }
@@ -96,7 +85,7 @@ public interface AlkemyNodeHandler<R, P>
     /**
      * Stream of {@link #iterable(TypifiedNode, Iterator)}
      */
-    default Stream<R> stream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    default Stream<R> stream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), -1, 0), false);
     }
@@ -130,7 +119,7 @@ public interface AlkemyNodeHandler<R, P>
     /**
      * Parallel stream of {@link #iterable(TypifiedNode, Iterable)}
      */
-    default Stream<R> parallelStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    default Stream<R> parallelStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), Long.MAX_VALUE, 0), true);
     }
@@ -138,7 +127,7 @@ public interface AlkemyNodeHandler<R, P>
     /**
      * Parallel stream of {@link #iterable(TypifiedNode, Iterator)}
      */
-    default Stream<R> parallelStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    default Stream<R> parallelStream(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(node, items).iterator(), Long.MAX_VALUE, 0), true);
     }
@@ -176,7 +165,7 @@ public interface AlkemyNodeHandler<R, P>
      * <p>
      * Items are lazily fetched.
      */
-    default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
     {
         return new FluentIterable<R, P>(this, node, items.iterator());
     }
@@ -184,7 +173,7 @@ public interface AlkemyNodeHandler<R, P>
     /**
      * Syntax sugar. See {@link #iterable(Node, Iterable)}
      */
-    default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    default Iterable<R> iterable(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
     {
         return new FluentIterable<R, P>(this, node, items);
     }
@@ -290,10 +279,10 @@ public interface AlkemyNodeHandler<R, P>
 
     static class FluentIterable<R, P> extends AbstractIter<R, P> implements Iterable<R>
     {
-        private final Iterator<P> items;
+        private final Iterator<R> items;
 
         FluentIterable(AlkemyNodeHandler<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
-                Iterator<P> items)
+                Iterator<R> items)
         {
             super(visitor, node);
             this.items = items;
@@ -368,10 +357,10 @@ public interface AlkemyNodeHandler<R, P>
 
     static class FluentIterator<R, P> extends AbstractIter<R, P> implements Iterator<R>
     {
-        private final Iterator<P> items;
+        private final Iterator<R> items;
 
         FluentIterator(AlkemyNodeHandler<R, P> visitor, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
-                Iterator<P> items)
+                Iterator<R> items)
         {
             super(visitor, node);
             this.items = items;
@@ -386,7 +375,7 @@ public interface AlkemyNodeHandler<R, P>
         @Override
         public R next()
         {
-            return visitor.create(node, items.next());
+            return visitor.handle(node, items.next());
         }
     }
 

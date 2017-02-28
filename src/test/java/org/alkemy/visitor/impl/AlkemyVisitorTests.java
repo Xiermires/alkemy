@@ -38,8 +38,6 @@ import org.alkemy.util.Measure;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyValueProvider;
-import org.alkemy.visitor.impl.AlkemyPostorderReader.FluentAlkemyPostorderReader;
-import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
 import org.alkemy.visitor.impl.AlkemyVisitorTests.ObjectReader.Bar;
 import org.alkemy.visitor.impl.TestReader.NestedA;
 import org.junit.Test;
@@ -49,7 +47,7 @@ public class AlkemyVisitorTests
     @Test
     public void testReadAnObject()
     {
-        final ObjectReader<TestReader> or = new ObjectReader<>(new Stack<Integer>());
+        final ObjectReader or = new ObjectReader(new Stack<Integer>());
         Alkemy.mature(new TestReader(), or);
         assertThat(or.stack.size(), is(8));
     }
@@ -59,7 +57,7 @@ public class AlkemyVisitorTests
     {
         final AlkemyPreorderReader<TestWriter, Object> aew = new AlkemyPreorderReader<>(INCLUDE_NULL_BRANCHES | INSTANTIATE_NODES);
         final TypifiedNode<TestWriter, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestWriter.class);
-        final ObjectWriter<Object> ow = new ObjectWriter<>(new Constant<>(55));
+        final ObjectWriter ow = new ObjectWriter(new Constant<>(55));
         final TestWriter tw = TestWriter.class.cast(aew.create(ow, node)); 
 
         assertThat(tw.a, is(55));
@@ -76,7 +74,7 @@ public class AlkemyVisitorTests
     public void performanceWriteAnObjectUsingCustomWriter() throws Throwable
     {
         final AlkemyElementWriter<TestClass, Object> aew = new AlkemyElementWriter<>();
-        final ObjectWriter<Object> ow = new ObjectWriter<>(new Constant<AlkemyElement>(55));
+        final ObjectWriter ow = new ObjectWriter(new Constant<AlkemyElement>(55));
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
 
         System.out.println("Create 1e6 objects (custom): " + Measure.measure(() ->
@@ -92,7 +90,7 @@ public class AlkemyVisitorTests
     public void performanceWriteAnObjUsingPreorderVisitor() throws Throwable
     {
         final TypifiedNode<TestClass, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestClass.class);
-        final ObjectWriter<Object> ow = new ObjectWriter<Object>(new Constant<AlkemyElement>(55));
+        final ObjectWriter ow = new ObjectWriter(new Constant<AlkemyElement>(55));
         final AlkemyPreorderReader<TestClass, Object> apr = new AlkemyPreorderReader<TestClass, Object>(INSTANTIATE_NODES);
 
         System.out.println("Create 1e6 objects (preorder): " + Measure.measure(() ->
@@ -113,7 +111,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPreorderReader<TestReader>(VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new AlkemyPreorderReader<TestReader, Object>(VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -135,7 +133,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPostorderReader<TestReader>(VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new AlkemyPostorderReader<TestReader, Object>(VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -157,7 +155,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPreorderReader<TestReader>(INCLUDE_NULL_BRANCHES | VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new AlkemyPreorderReader<TestReader, Object>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -185,7 +183,7 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new FluentAlkemyPostorderReader<TestReader>(INCLUDE_NULL_BRANCHES | VISIT_NODES).create(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new AlkemyPostorderReader<TestReader, Object>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
@@ -211,14 +209,14 @@ public class AlkemyVisitorTests
         final AlkemyTypeCounter<TestVisitorController>countBs = new AlkemyTypeCounter<>(B.class);
         final AlkemyVisitorController<TestVisitorController> avc = new AlkemyVisitorController<>(Arrays.asList(countAs, countBs));
         
-        Alkemy.reader(TestVisitorController.class).preorder(0).create(avc, new TestVisitorController());
+        Alkemy.reader(TestVisitorController.class).preorder(0).accept(avc, new TestVisitorController());
         
         assertThat(countAs.counter, is(5));
         assertThat(countBs.counter, is(5));
     }
     
     // Implements both supplier & consumer
-    static class ObjectReader<P> implements AlkemyElementVisitor<P, AlkemyElement>
+    static class ObjectReader implements AlkemyElementVisitor<Object, AlkemyElement>
     {
         private Stack<Integer> stack;
 
@@ -253,11 +251,11 @@ public class AlkemyVisitorTests
         }
     }
 
-    static class ObjectWriter<P> implements AlkemyElementVisitor<P, AlkemyElement>
+    static class ObjectWriter implements AlkemyElementVisitor<Object, AlkemyElement>
     {
-        private AlkemyValueProvider<AlkemyElement, P> avp;
+        private AlkemyValueProvider<AlkemyElement, ?> avp;
 
-        ObjectWriter(AlkemyValueProvider<AlkemyElement, P> avp)
+        ObjectWriter(AlkemyValueProvider<AlkemyElement, ?> avp)
         {
             this.avp = avp;
         }

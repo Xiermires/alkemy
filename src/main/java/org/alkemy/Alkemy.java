@@ -25,13 +25,11 @@ import org.alkemy.parse.impl.AlkemizerCTF;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
-import org.alkemy.visitor.AlkemyNodeReader;
 import org.alkemy.visitor.AlkemyNodeHandler;
+import org.alkemy.visitor.AlkemyNodeReader;
 import org.alkemy.visitor.impl.AlkemyPostorderReader;
 import org.alkemy.visitor.impl.AlkemyPreorderReader;
-import org.alkemy.visitor.impl.AlkemyPreorderReader.FluentAlkemyPreorderReader;
 import org.alkemy.visitor.impl.SingleTypeReader;
-import org.alkemy.visitor.impl.SingleTypeReader.FluentSingleTypeReader;
 
 /**
  * The Alkemy library allows applying user specific {@link AlkemyNodeReader},
@@ -83,7 +81,7 @@ public class Alkemy
         nodes = nodes();
     }
 
-    /**
+    /** 
      * As {@link #nodes(AlkemyParser)} but using the {@link AlkemyParsers#typeParser()} by default.
      */
     public static NodeFactory nodes()
@@ -168,9 +166,9 @@ public class Alkemy
         return new AlkemyPreorderReader<R, P>(0).accept(aev, nodes.get((Class<R>) r.getClass()), r, p);
     }
 
-    public static <R> FluentReaderFactory<R> reader(Class<R> retType)
+    public static <R> ReaderFactory<R, R> reader(Class<R> retType)
     {
-        return new FluentReaderFactory<R>(nodes.get(retType));
+        return new ReaderFactory<R, R>(nodes.get(retType));
     }
 
     public static <R, P> ReaderFactory<R, P> reader(Class<R> retType, Class<P> paramType)
@@ -181,26 +179,6 @@ public class Alkemy
     public static interface NodeFactory
     {
         <R> TypifiedNode<R, ? extends AbstractAlkemyElement<?>> get(Class<R> type);
-    }
-
-    public static class FluentReaderFactory<R>
-    {
-        private final TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root;
-
-        private FluentReaderFactory(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root)
-        {
-            this.root = root;
-        }
-
-        public FluentSingleTypeReader<R> preorder(int conf)
-        {
-            return new FluentSingleTypeReader<R>(root, new FluentAlkemyPreorderReader<R>(conf));
-        }
-
-        public FluentSingleTypeReader<R> postorder(int conf)
-        {
-            return new FluentSingleTypeReader<R>(root, new FluentAlkemyPreorderReader<R>(conf));
-        }
     }
 
     public static class ReaderFactory<R, P>

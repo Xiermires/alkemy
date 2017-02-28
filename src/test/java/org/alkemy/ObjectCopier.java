@@ -18,16 +18,16 @@ package org.alkemy;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
-import org.alkemy.visitor.AlkemyNodeHandler.FluentAlkemyNodeVisitor;
+import org.alkemy.visitor.AlkemyNodeHandler;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-public class ObjectCopier<T> implements FluentAlkemyNodeVisitor<T>
+public class ObjectCopier<T> implements AlkemyNodeHandler<T, Object>
 {
     private Objenesis objenesis = new ObjenesisStd();
     
     @Override
-    public T create(TypifiedNode<T, ? extends AbstractAlkemyElement<?>> root, T orig)
+    public T handle(TypifiedNode<T, ? extends AbstractAlkemyElement<?>> root, T orig)
     {
         @SuppressWarnings("unchecked")
         final T dest = (T) objenesis.newInstance(orig.getClass());

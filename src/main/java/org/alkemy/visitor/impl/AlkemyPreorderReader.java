@@ -17,9 +17,7 @@ package org.alkemy.visitor.impl;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.util.AlkemyUtils;
-import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
-import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 
 /**
@@ -76,30 +74,6 @@ public class AlkemyPreorderReader<R, P> extends AbstractTraverser<R, P>
         else
         {
             e.data().accept(aev, parent);
-        }
-    }
-
-    /**
-     * Fluent version. See {@link FluentAlkemyNodeReader}.
-     */
-    public static class FluentAlkemyPreorderReader<R> extends AlkemyPreorderReader<R, R> implements FluentAlkemyNodeReader<R>
-    {
-        public FluentAlkemyPreorderReader(int conf)
-        {
-            super(conf);
-        }
-
-        @Override
-        public R create(AlkemyElementVisitor<R, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, R parameter)
-        {
-            Assertions.nonNull(root);
-
-            if (visitNodes)
-            {
-                root.data().accept(aev, parameter);
-            }
-            root.children().forEach(c -> processBranch(aev, c, parameter));
-            return parameter;
         }
     }
 }

@@ -73,23 +73,12 @@ public interface AlkemyNodeReader<R, P>
         throw new UnsupportedOperationException("Not implemented.");
     }
     
-    /**
-     * Syntax sugar. Fluent version of the {@link AlkemyNodeReader}.
-     * <p>
-     * An {@link AlkemyNodeReader} where both parameter and return are from the same type. Usually represents a fluent operation
-     * where the parameter object is worked on and returned just after.
-     */
-    public interface FluentAlkemyNodeReader<R> extends AlkemyNodeReader<R, R>
-    {   
-    }
-
-    
     /* * STREAM SUPPORT * */
 
     /**
      * Stream of {@link #iterable(TypifiedNode, Iterable)}
      */
-    default Stream<R> stream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    default Stream<R> stream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), -1, 0), false);
     }
@@ -97,7 +86,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * Stream of {@link #iterable(TypifiedNode, Iterator)}
      */
-    default Stream<R> stream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    default Stream<R> stream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), -1, 0), false);
     }
@@ -131,7 +120,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * Parallel stream of {@link #iterable(TypifiedNode, Iterable)} 
      */
-    default Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<P> items)
+    default Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterable<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), Long.MAX_VALUE, 0), false);
     }
@@ -139,7 +128,7 @@ public interface AlkemyNodeReader<R, P>
     /**
      * Parallel stream of {@link #iterable(TypifiedNode, Iterator)} 
      */
-    default Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<P> items)
+    default Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node, Iterator<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, node, items).iterator(), Long.MAX_VALUE, 0), false);
     }
@@ -175,7 +164,7 @@ public interface AlkemyNodeReader<R, P>
      * See {@link AlkemyNodeHandler#iterable(Node, Iterable)}
      */
     default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
-            Iterable<P> items)
+            Iterable<R> items)
     {
         return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items);
     }
@@ -184,7 +173,7 @@ public interface AlkemyNodeReader<R, P>
      * See {@link AlkemyNodeHandler#iterable(Node, Iterator)}
      */
     default Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, TypifiedNode<R, ? extends AbstractAlkemyElement<?>> node,
-            Iterator<P> items)
+            Iterator<R> items)
     {
         return new NodeReaderToVisitorAdapter<R, P>(this, aev).iterable(node, items);
     }

@@ -78,22 +78,13 @@ public class SingleTypeReader<R, P>
     {
         return anv.accept(aev, root, param1, param2);
     }
-
-    // fluent version.
-    public static class FluentSingleTypeReader<R> extends SingleTypeReader<R, R>
-    {
-        public FluentSingleTypeReader(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, AlkemyNodeReader<R, R> anv)
-        {
-            super(root, anv);
-        }   
-    }
     
     /* * STREAM SUPPORT * */
 
     /**
      * Stream of {@link #iterable(TypifiedNode, Iterable)}
      */
-    public Stream<R> stream(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
+    public Stream<R> stream(AlkemyElementVisitor<P, ?> aev, Iterable<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), -1, 0), false);
     }
@@ -101,7 +92,7 @@ public class SingleTypeReader<R, P>
     /**
      * Stream of {@link #iterable(TypifiedNode, Iterator)}
      */
-    public Stream<R> stream(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
+    public Stream<R> stream(AlkemyElementVisitor<P, ?> aev, Iterator<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), -1, 0), false);
     }
@@ -135,7 +126,7 @@ public class SingleTypeReader<R, P>
     /**
      * Parallel stream of {@link #iterable(TypifiedNode, Iterable)}
      */
-    public Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
+    public Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, Iterable<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), Long.MAX_VALUE, 0), false);
     }
@@ -143,7 +134,7 @@ public class SingleTypeReader<R, P>
     /**
      * Parallel stream of {@link #iterable(TypifiedNode, Iterator)}
      */
-    public Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
+    public Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, Iterator<R> items)
     {
         return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), Long.MAX_VALUE, 0), false);
     }
@@ -177,7 +168,7 @@ public class SingleTypeReader<R, P>
     /**
      * See {@link AlkemyNodeHandler#iterable(Node, Iterable)}
      */
-    public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
+    public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterable<R> items)
     {
         return new NodeReaderToVisitorAdapter<R, P>(anv, aev).iterable(root, items);
     }
@@ -185,7 +176,7 @@ public class SingleTypeReader<R, P>
     /**
      * See {@link AlkemyNodeHandler#iterable(Node, Iterator)}
      */
-    public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
+    public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterator<R> items)
     {
         return new NodeReaderToVisitorAdapter<R, P>(anv, aev).iterable(root, items);
     }
