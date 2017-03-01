@@ -160,7 +160,7 @@ public class Foo
 ```
 
 -------
-INSIDES
+Insides
 -------
 
 The library instruments the classes and wrap the generated code using lambdas. 

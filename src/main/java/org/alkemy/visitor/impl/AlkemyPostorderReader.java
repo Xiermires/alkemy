@@ -52,9 +52,9 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
             {
                 e.children().forEach(c ->
                 {
-                    processBranch(aev, c, c.data().get(node), parameter);
+                    processBranch(aev, c, node, parameter);
                 });
-                if (visitNodes) e.data().accept(aev, e.data().get(parent), parameter);
+                if (visitNodes) e.data().accept(aev, parent, parameter);
             }
         }
         else
@@ -76,14 +76,17 @@ public class AlkemyPostorderReader<R, P> extends AbstractTraverser<R, P>
             {
                 e.children().forEach(c ->
                 {
-                    processBranch(aev, c, c.data().get(node));
+                    processBranch(aev, c, node);
                 });
-                if (visitNodes) e.data().accept(aev, e.data().get(parent));
+                if (visitNodes) e.data().accept(aev, parent);
             }
         }
         else
         {
-            e.data().accept(aev, parent);
+            if (includeLeafs)
+            {
+                e.data().accept(aev, parent);
+            }
         }
     }
 }

@@ -135,6 +135,7 @@ public class AlkemyVisitorTests
 
         new AlkemyPostorderReader<TestReader, Object>(VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
 
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -142,7 +143,6 @@ public class AlkemyVisitorTests
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
-        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertTrue(ns.names.isEmpty());
     }
 
@@ -185,6 +185,7 @@ public class AlkemyVisitorTests
 
         new AlkemyPostorderReader<TestReader, Object>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
 
+        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -198,7 +199,6 @@ public class AlkemyVisitorTests
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.c"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.a"));
-        assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertTrue(ns.names.isEmpty());
     }
 

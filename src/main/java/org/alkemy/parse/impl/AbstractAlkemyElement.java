@@ -37,7 +37,7 @@ import com.google.common.collect.Table;
 
 public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
 {
-    private final AnnotatedElement desc;
+    private final AnnotatedMember desc;
     private final ValueAccessor valueAccessor;
     private final NodeConstructor nodeConstructor;
     private final Map<String, MethodInvoker> methodInvokers;
@@ -45,7 +45,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     private final boolean node;
     private final TypedTable context;
 
-    AbstractAlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+    AbstractAlkemyElement(AnnotatedMember desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
     {
         this.desc = desc;
@@ -71,7 +71,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         this.context = other.context;
     }
 
-    static AlkemyElement create(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+    static AlkemyElement create(AnnotatedMember desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
     {
         return new AlkemyElement(desc, nodeConstructor, valueAccessor, methodInvokers, alkemyType, node, context);
@@ -349,7 +349,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
             super(other);
         }
 
-        AlkemyElement(AnnotatedElement desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+        AlkemyElement(AnnotatedMember desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
                 List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
         {
             super(desc, nodeConstructor, valueAccessor, methodInvokers, alkemyType, node, context);

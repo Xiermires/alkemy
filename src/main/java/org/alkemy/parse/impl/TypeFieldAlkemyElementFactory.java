@@ -15,33 +15,32 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.lang.reflect.AnnotatedElement;
 import java.util.Collections;
 import java.util.List;
 
 import org.alkemy.util.AnnotationUtils;
 import org.alkemy.util.TypedTable;
 
-public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AnnotatedElement>
+public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AnnotatedMember>
 {
     private TypeFieldAlkemyElementFactory()
     {
     }
 
-    public static AlkemyElementFactory<AnnotatedElement> create()
+    public static AlkemyElementFactory<AnnotatedMember> create()
     {
         return new TypeFieldAlkemyElementFactory();
     }
 
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor, TypedTable context)
     {
         return AbstractAlkemyElement.create(desc, AccessorFactory.notSupported(), valueAccessor, Collections.emptyList(),
                 AnnotationUtils.findAlkemyTypes(desc), false, context);
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(AnnotatedElement desc, NodeConstructor valueConstructor,
+    public AbstractAlkemyElement<?> createNode(AnnotatedMember desc, NodeConstructor valueConstructor,
             ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
         return AbstractAlkemyElement.create(desc, valueConstructor, valueAccessor, methodInvokers,

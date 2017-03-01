@@ -61,11 +61,8 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
         final R instance = root.data().safeNewInstance(root.type());
         if (instance != null)
         {
-            if (visitNodes)
-            {
-                root.data().accept(aev, instance);
-            }
-            root.children().forEach(c -> processBranch(aev, c, instance));
+            root.data().set(instance, null);
+            processBranch(aev, root, instance);
         }
         return instance;
     }
@@ -78,11 +75,8 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
         final R instance = root.data().safeNewInstance(root.type());
         if (instance != null)
         {
-            if (visitNodes)
-            {
-                root.data().accept(aev, instance, parameter);
-            }
-            root.children().forEach(c -> processBranch(aev, c, instance, parameter));
+            root.data().set(instance, null);
+            processBranch(aev, root, instance, parameter);
         }
         return instance;
     }
@@ -92,11 +86,8 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     {
         Assertions.nonNull(root);
 
-        if (visitNodes)
-        {
-            root.data().accept(aev, parameter);
-        }
-        root.children().forEach(c -> processBranch(aev, c, parameter));
+        root.data().set(parameter, null);
+        processBranch(aev, root, parameter);
         return parameter;
     }
 
@@ -105,11 +96,8 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     {
         Assertions.nonNull(root);
 
-        if (visitNodes)
-        {
-            root.data().accept(aev, param1, param2);
-        }
-        root.children().forEach(c -> processBranch(aev, c, param1, param2));
+        root.data().set(param1, null);
+        processBranch(aev, root, param1, param2);
         return param1;
     }
     

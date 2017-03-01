@@ -15,49 +15,48 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.util.AnnotationUtils;
 import org.alkemy.util.TypedTable;
 
-class TypeLexer implements AlkemyLexer<Class<?>, AnnotatedElement>
+class TypeLexer implements AlkemyLexer<AnnotatedMember, AnnotatedMember>
 {
-    private AlkemyElementFactory<AnnotatedElement> factory;
+    private AlkemyElementFactory<AnnotatedMember> factory;
 
-    private TypeLexer(AlkemyElementFactory<AnnotatedElement> factory)
+    private TypeLexer(AlkemyElementFactory<AnnotatedMember> factory)
     {
         this.factory = factory;
     }
 
-    static AlkemyLexer<Class<?>, AnnotatedElement> create(AlkemyElementFactory<AnnotatedElement> factory)
+    static AlkemyLexer<AnnotatedMember, AnnotatedMember> create(AlkemyElementFactory<AnnotatedMember> factory)
     {
         return new TypeLexer(factory);
     }
 
     @Override
-    public boolean isNode(Class<?> desc)
+    public boolean isNode(AnnotatedMember desc)
     {
         final TypeLeafFinder leafFinder = new TypeLeafFinder();
-        leafFinder.parse(desc);
+        leafFinder.parse(desc.getType());
         return leafFinder.get();
     }
 
     @Override
-    public boolean isLeaf(AnnotatedElement desc)
+    public boolean isLeaf(AnnotatedMember desc)
     {
         return AnnotationUtils.findAlkemyTypes(desc) != null;
     }
 
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
+    public AbstractAlkemyElement<?> createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor, TypedTable context)
     {
         return factory.createLeaf(desc, valueAccessor, context);
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(Class<?> desc, NodeConstructor valueConstructor,
+    public AbstractAlkemyElement<?> createNode(AnnotatedMember desc, NodeConstructor valueConstructor,
             ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
         return factory.createNode(desc, valueConstructor, valueAccessor, methodInvokers, nodeType, context);

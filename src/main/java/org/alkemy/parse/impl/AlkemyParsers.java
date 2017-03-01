@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.lang.reflect.AnnotatedElement;
-
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 
@@ -29,9 +27,9 @@ public class AlkemyParsers
     {
     }
 
-    public static AlkemyLexer<Class<?>, AnnotatedElement> fieldLexer()
+    public static AlkemyLexer<AnnotatedMember, AnnotatedMember> fieldLexer()
     {
-        final AlkemyElementFactory<AnnotatedElement> elementFactory = TypeFieldAlkemyElementFactory.create();
+        final AlkemyElementFactory<AnnotatedMember> elementFactory = TypeFieldAlkemyElementFactory.create();
         return TypeLexer.create(elementFactory);
     }
 
@@ -43,7 +41,7 @@ public class AlkemyParsers
         return TypeParser.create(fieldLexer());
     }
 
-    public static AlkemyParser typeParser(AlkemyLexer<Class<?>, AnnotatedElement> lexer)
+    public static AlkemyParser typeParser(AlkemyLexer<AnnotatedMember, AnnotatedMember> lexer)
     {
         return TypeParser.create(lexer);
     }
