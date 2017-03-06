@@ -104,7 +104,7 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
     @Override
     public String targetName()
     {
-        return f.getName();
+        return f.getDeclaringClass().getName() + "." + f.getName();
     }
 
     @Override

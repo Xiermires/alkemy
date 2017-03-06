@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Stack;
 
 import org.alkemy.Alkemy;
+import org.alkemy.Alkemy.SingleTypeReader;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
@@ -58,7 +59,7 @@ public class AlkemyVisitorTests
         final AlkemyPreorderReader<TestWriter, Object> aew = new AlkemyPreorderReader<>(INCLUDE_NULL_BRANCHES | INSTANTIATE_NODES);
         final TypifiedNode<TestWriter, ? extends AbstractAlkemyElement<?>> node = Alkemy.nodes().get(TestWriter.class);
         final ObjectWriter ow = new ObjectWriter(new Constant<>(55));
-        final TestWriter tw = TestWriter.class.cast(aew.create(ow, node)); 
+        final TestWriter tw = TestWriter.class.cast(aew.create(ow, node));
 
         assertThat(tw.a, is(55));
         assertThat(tw.b, is(55));
@@ -82,6 +83,22 @@ public class AlkemyVisitorTests
             for (int i = 0; i < 1000000; i++)
             {
                 aew.create(ow, node);
+            }
+        }) / 1000000 + " ms");
+    }
+
+    @Test
+    public void performanceWriteAnObjectUsingBulkReader() throws Throwable
+    {
+        final AlkemyFlatNodeReader<TestClass, Object, AlkemyElement> anr = new AlkemyFlatNodeReader<>(Alkemy.nodes().get(
+                TestClass.class), f -> f);
+
+        final ObjectWriter ow = new ObjectWriter(new Constant<AlkemyElement>(55));
+        System.out.println("Create 1e6 objects (bulkreader): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                anr.create(ow);
             }
         }) / 1000000 + " ms");
     }
@@ -155,7 +172,8 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new AlkemyPreorderReader<TestReader, Object>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new AlkemyPreorderReader<TestReader, Object>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns,
+                Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.b"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader$NestedA.a"));
@@ -183,7 +201,8 @@ public class AlkemyVisitorTests
         tr.na2 = null;
         tr.nb = null;
 
-        new AlkemyPostorderReader<TestReader, Object>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns, Alkemy.nodes().get(TestReader.class), tr);
+        new AlkemyPostorderReader<TestReader, Object>(INCLUDE_NULL_BRANCHES | VISIT_NODES).accept(ns,
+                Alkemy.nodes().get(TestReader.class), tr);
 
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader"));
         assertThat(ns.names.pop(), is("org.alkemy.visitor.impl.TestReader.na2"));
@@ -206,15 +225,78 @@ public class AlkemyVisitorTests
     public void testVisitorController()
     {
         final AlkemyTypeCounter<TestVisitorController> countAs = new AlkemyTypeCounter<>(A.class);
-        final AlkemyTypeCounter<TestVisitorController>countBs = new AlkemyTypeCounter<>(B.class);
+        final AlkemyTypeCounter<TestVisitorController> countBs = new AlkemyTypeCounter<>(B.class);
         final AlkemyVisitorController<TestVisitorController> avc = new AlkemyVisitorController<>(Arrays.asList(countAs, countBs));
-        
+
         Alkemy.reader(TestVisitorController.class).preorder(0).accept(avc, new TestVisitorController());
-        
+
         assertThat(countAs.counter, is(5));
         assertThat(countBs.counter, is(5));
     }
-    
+
+    @Test
+    public void testBulkVisitor()
+    {
+        final AlkemyFlatNodeReader<TestVisitorController, Object, AlkemyElement> bulkVisitor = new AlkemyFlatNodeReader<>(Alkemy
+                .nodes().get(TestVisitorController.class), f -> f);
+
+        final AlkemyTypeCounter<TestVisitorController> countAs = new AlkemyTypeCounter<>(A.class);
+        for (int i = 0; i < 100; i++)
+        {
+            bulkVisitor.accept(countAs, new TestVisitorController());
+        }
+        // AlkemyFlatNodeReader doesn't do any accept, we expect to count both A's and B's.
+        assertThat(countAs.counter, is(1000));
+    }
+
+    @Test
+    public void performanceBulkReader() throws Throwable
+    {
+        final AlkemyFlatNodeReader<TestVisitorController, Object, AlkemyElement> anr = new AlkemyFlatNodeReader<>(Alkemy.nodes()
+                .get(TestVisitorController.class), f -> f);
+
+        final AlkemyTypeCounter<TestVisitorController> countAs = new AlkemyTypeCounter<>(A.class);
+        System.out.println("Measure traverser (bulk) 1e6 objects: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                anr.accept(countAs, new TestVisitorController());
+            }
+        }) / 1000000 + " ms");
+    }
+
+    @Test
+    public void performancePreorderTraverser() throws Throwable
+    {
+        final SingleTypeReader<TestVisitorController, TestVisitorController> anr = Alkemy.reader(TestVisitorController.class)
+                .preorder(0);
+
+        final AlkemyTypeCounter<TestVisitorController> countAs = new AlkemyTypeCounter<>(A.class);
+        System.out.println("Measure traverser (preorder) 1e6 objects: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                anr.accept(countAs, new TestVisitorController());
+            }
+        }) / 1000000 + " ms");
+    }
+
+    @Test
+    public void performancePostorderTraverser() throws Throwable
+    {
+        final SingleTypeReader<TestVisitorController, TestVisitorController> anr = Alkemy.reader(TestVisitorController.class)
+                .postorder(0);
+
+        final AlkemyTypeCounter<TestVisitorController> countAs = new AlkemyTypeCounter<>(A.class);
+        System.out.println("Measure traverser (postorder) 1e6 objects: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < 1000000; i++)
+            {
+                anr.accept(countAs, new TestVisitorController());
+            }
+        }) / 1000000 + " ms");
+    }
+
     // Implements both supplier & consumer
     static class ObjectReader implements AlkemyElementVisitor<Object, AlkemyElement>
     {
@@ -261,7 +343,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public Object generate(AlkemyElement e)
+        public Object create(AlkemyElement e)
         {
             return avp.getValue(e, null);
         }
@@ -303,7 +385,7 @@ public class AlkemyVisitorTests
         }
 
         @Override
-        public Integer getInteger(E key, Object p)
+        public Object getValue(E e, Object p)
         {
             return c;
         }
@@ -331,12 +413,12 @@ public class AlkemyVisitorTests
             return Bar.class == type;
         }
     }
-    
+
     static class AlkemyTypeCounter<P> implements AlkemyElementVisitor<P, AlkemyElement>
     {
         int counter = 0;
         Class<?> type;
-        
+
         AlkemyTypeCounter(Class<?> type)
         {
             this.type = type;
@@ -347,33 +429,33 @@ public class AlkemyVisitorTests
         {
             counter++;
         }
-        
+
         @Override
         public AlkemyElement map(AlkemyElement e)
         {
             return e;
         }
-        
+
         @Override
         public boolean accepts(Class<?> type)
         {
             return this.type == type;
         }
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
     @AlkemyLeaf
     static @interface A
     {
-        
+
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })
     @AlkemyLeaf
     static @interface B
     {
-        
+
     }
 }

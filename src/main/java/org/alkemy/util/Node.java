@@ -18,7 +18,6 @@ package org.alkemy.util;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface Node<E>
@@ -117,12 +116,6 @@ public interface Node<E>
      *            process subnodes of a node failing p (see {@link #traverse(Consumer, Predicate, boolean)} for additional info)
      */
     void drainTo(Collection<? super E> c, Predicate<? super E> p, boolean keepProcessingOnFailure);
-
-    static <E, T> Builder<T> copy(Node<E> orig, Builder<T> dest, Function<E, T> f)
-    {
-        orig.children().forEach(e -> copy(e, dest.addChild(f.apply(e.data())), f));
-        return dest;
-    }
 
     interface Builder<E>
     {

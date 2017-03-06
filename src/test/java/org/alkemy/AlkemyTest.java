@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.alkemy.Alkemy.SingleTypeReader;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
@@ -45,7 +46,6 @@ import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.util.PassThrough;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeHandler;
-import org.alkemy.visitor.impl.SingleTypeReader;
 import org.junit.Test;
 
 // Alkemy general usage examples.

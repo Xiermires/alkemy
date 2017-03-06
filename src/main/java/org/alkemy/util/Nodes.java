@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,38 @@ public class Nodes
     public static <E> Node.Builder<E> arborescence(E root)
     {
         return new ArborescenceBuilder<>(null, root);
+    }
+
+    public static <E, T> Builder<T> copy(Node<E> orig, Builder<T> dest, Predicate<? super E> p, Function<Node<E>, T> f)
+    {
+        orig.children().stream().filter(filter -> p.test(filter.data())).forEach(e -> copy(e, dest.addChild(f.apply(e)), p, f));
+        return dest;
+    }
+
+    public static <E> Node<E> makeUnchecked(Node<E> orig)
+    {
+        return makeUnchecked(
+                orig,
+                new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new UncheckedList<Node<E>>(orig.children()), orig
+                        .branchDepth()));
+    }
+
+    private static <E> Node<E> makeUnchecked(Node<E> orig, ArborescenceNodeImpl<E> dest)
+    {
+        if (orig.hasChildren())
+        {
+            orig.children().forEach(
+            c ->
+            {
+                if (c.hasChildren())
+                {
+                    makeUnchecked(c,
+                            new ArborescenceNodeImpl<E>(orig.data(), dest, new UncheckedList<Node<E>>(orig.children()),
+                                    orig.branchDepth()));
+                }
+            });
+        }
+        return dest;
     }
 
     static class ArborescenceBuilder<E> implements Node.Builder<E>
@@ -95,7 +128,8 @@ public class Nodes
         }
 
         // TODO: Probably bring this inside the calculateDepths.
-        // We need new IntRefs for each element in the for each and access them after every iteration.
+        // We need new IntRefs for each element in the for each and access them after every
+        // iteration.
         private Node<E> drainTo(ArborescenceNodeImpl<E> parent, boolean isRoot)
         {
             parent.data = data;
@@ -126,6 +160,18 @@ public class Nodes
         private Node<E> parent;
         private List<Node<E>> children;
         private int depth;
+
+        ArborescenceNodeImpl()
+        {
+        }
+
+        ArborescenceNodeImpl(E data, Node<E> parent, List<Node<E>> children, int depth)
+        {
+            this.data = data;
+            this.parent = parent;
+            this.children = children;
+            this.depth = depth;
+        }
 
         @Override
         public Node<E> parent()
@@ -166,7 +212,8 @@ public class Nodes
         /**
          * Consumption order is children first, in order of appearance.
          * <p>
-         * Example: children = { c1 = { c1.c1, c1.c2, c1.c3 }, c2, c3 = { c3.c1 } }, test(c1.c2) & test(c3) fail, rest succeed.
+         * Example: children = { c1 = { c1.c1, c1.c2, c1.c3 }, c2, c3 = { c3.c1 } }, test(c1.c2) &
+         * test(c3) fail, rest succeed.
          * <p>
          * <code>keepProcessingOnFailure = true</code>
          * <ol>
@@ -317,7 +364,7 @@ public class Nodes
         @Override
         public void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure)
         {
-            root.traverse(c, p, keepProcessingOnFailure); 
+            root.traverse(c, p, keepProcessingOnFailure);
         }
 
         @Override

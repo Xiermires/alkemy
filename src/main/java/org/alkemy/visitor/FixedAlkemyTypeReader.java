@@ -16,34 +16,29 @@
 package org.alkemy.visitor;
 
 import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
 
-public interface AlkemyElementVisitor<P, E extends AbstractAlkemyElement<E>>
+/**
+ * A simplified {@link AlkemyNodeReader} which works on a single node.
+ */
+public interface FixedAlkemyTypeReader<R, P, E extends AbstractAlkemyElement<E>>
 {
-    default Object create(E e)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default Object create(E e, P parameter)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E e, Object parent)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E e, Object parent, P parameter)
+    default R create(AlkemyElementVisitor<?, E> aev)
     {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
-    E map(AlkemyElement e);
-
-    default boolean accepts(Class<?> type)
+    default R create(AlkemyElementVisitor<P, E> aev, P parameter)
     {
-        return true;
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+
+    default R accept(AlkemyElementVisitor<?, E> aev, R parameter)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+
+    default R accept(AlkemyElementVisitor<P, E> aev, R param1, P param2)
+    {
+        throw new UnsupportedOperationException("Not implemented.");
     }
 }

@@ -17,19 +17,27 @@ package org.alkemy;
 
 import static org.alkemy.visitor.impl.AbstractTraverser.INSTANTIATE_NODES;
 
+import java.util.Iterator;
+import java.util.Spliterators;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.agenttools.AgentTools;
 import org.alkemy.annotations.AlkemyLeaf;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AbstractAlkemyElement;
 import org.alkemy.parse.impl.AlkemizerCTF;
 import org.alkemy.parse.impl.AlkemyParsers;
+import org.alkemy.util.Node;
 import org.alkemy.util.Nodes.TypifiedNode;
 import org.alkemy.visitor.AlkemyElementVisitor;
 import org.alkemy.visitor.AlkemyNodeHandler;
+import org.alkemy.visitor.AlkemyNodeHandler.Entry;
 import org.alkemy.visitor.AlkemyNodeReader;
 import org.alkemy.visitor.impl.AlkemyPostorderReader;
 import org.alkemy.visitor.impl.AlkemyPreorderReader;
-import org.alkemy.visitor.impl.SingleTypeReader;
+import org.alkemy.visitor.impl.NodeReaderToVisitorAdapter;
 
 /**
  * The Alkemy library allows applying user specific {@link AlkemyNodeReader},
@@ -198,6 +206,182 @@ public class Alkemy
         public SingleTypeReader<R, P> postorder(int conf)
         {
             return new SingleTypeReader<R, P>(root, new AlkemyPostorderReader<R, P>(conf));
+        }
+    }
+    
+    /**
+     * Part of the simple Alkemy syntax sugar. See {@link Alkemy}.
+     * <p>
+     * This class reproduces all Alkemy operations removing the Node parameter from the signature.
+     */
+    public static class SingleTypeReader<R, P>
+    {
+        private final TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root;
+        private final AlkemyNodeReader<R, P> anv;
+
+        SingleTypeReader(TypifiedNode<R, ? extends AbstractAlkemyElement<?>> root, AlkemyNodeReader<R, P> anv)
+        {
+            this.root = root;
+            this.anv = anv;
+        }
+
+        /**
+         * Generates an element of type R.
+         */
+        public R create(AlkemyElementVisitor<?, ?> aev)
+        {
+            return anv.create(aev, root);
+        }
+
+        /**
+         * Generates an element of type R using a parameter P.
+         */
+        public R create(AlkemyElementVisitor<P, ?> aev, P parameter)
+        {
+            return anv.create(aev, root, parameter);
+        }
+
+        /**
+         * Generates an element of type R, or modifies and returns the received param1 of type R.
+         */
+        public R accept(AlkemyElementVisitor<?, ?> aev, R parameter)
+        {
+            return anv.accept(aev, root, parameter);
+        }
+        
+        /**
+         * Generates an element of type R, or modifies and returns the received param1 of type R, using
+         * the param2 of type P.
+         */
+        public R accept(AlkemyElementVisitor<P, ?> aev, R param1, P param2)
+        {
+            return anv.accept(aev, root, param1, param2);
+        }
+        
+        /* * STREAM SUPPORT * */
+
+        /**
+         * Stream of {@link #iterable(TypifiedNode, Iterable)}
+         */
+        public Stream<R> stream(AlkemyElementVisitor<P, ?> aev, Iterable<R> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), -1, 0), false);
+        }
+
+        /**
+         * Stream of {@link #iterable(TypifiedNode, Iterator)}
+         */
+        public Stream<R> stream(AlkemyElementVisitor<P, ?> aev, Iterator<R> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), -1, 0), false);
+        }
+
+        /**
+         * Stream of {@link #peekIterable(TypifiedNode, Iterable)}
+         */
+        public Stream<Entry<R, P>> peekStream(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, items).iterator(), -1, 0), false);
+        }
+
+        /**
+         * Stream of {@link #iterable(TypifiedNode, Iterator)}
+         */
+        public Stream<Entry<R, P>> peekStream(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, items).iterator(), -1, 0), false);
+        }
+
+        /**
+         * Stream of {@link #iterable(TypifiedNode, Supplier)}
+         */
+        public Stream<R> stream(AlkemyElementVisitor<P, ?> aev, Supplier<Boolean> hasNext)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(iterable(aev, hasNext).iterator(), -1, 0), false);
+        }
+
+        /* * PARALLEL STREAM SUPPORT * */
+
+        /**
+         * Parallel stream of {@link #iterable(TypifiedNode, Iterable)}
+         */
+        public Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, Iterable<R> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), Long.MAX_VALUE, 0), false);
+        }
+
+        /**
+         * Parallel stream of {@link #iterable(TypifiedNode, Iterator)}
+         */
+        public Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, Iterator<R> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(iterable(aev, items).iterator(), Long.MAX_VALUE, 0), false);
+        }
+
+        /**
+         * Parallel stream of {@link #peekIterable(TypifiedNode, Iterable)}
+         */
+        public Stream<Entry<R, P>> parallelPeekStream(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, items).iterator(), Long.MAX_VALUE, 0), false);
+        }
+
+        /**
+         * Parallel stream of {@link #peekIterable(TypifiedNode, Iterator)}
+         */
+        public Stream<Entry<R, P>> parallelPeekStream(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(peekIterable(aev, items).iterator(), Long.MAX_VALUE, 0), false);
+        }
+
+        /**
+         * Parallel stream of {@link #iterable(TypifiedNode, Supplier)}
+         */
+        public Stream<R> parallelStream(AlkemyElementVisitor<P, ?> aev, Supplier<Boolean> hasNext)
+        {
+            return StreamSupport.stream(Spliterators.spliterator(iterable(aev, hasNext).iterator(), Long.MAX_VALUE, 0), false);
+        }
+
+        /* * ITERABLE SUPPORT * */
+
+        /**
+         * See {@link AlkemyNodeHandler#iterable(Node, Iterable)}
+         */
+        public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterable<R> items)
+        {
+            return new NodeReaderToVisitorAdapter<R, P>(anv, aev).iterable(root, items);
+        }
+
+        /**
+         * See {@link AlkemyNodeHandler#iterable(Node, Iterator)}
+         */
+        public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Iterator<R> items)
+        {
+            return new NodeReaderToVisitorAdapter<R, P>(anv, aev).iterable(root, items);
+        }
+
+        /**
+         * See {@link AlkemyNodeHandler#peekIterable(Node, Iterable)}
+         */
+        public Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, Iterable<P> items)
+        {
+            return new NodeReaderToVisitorAdapter<R, P>(anv, aev).peekIterable(root, items);
+        }
+
+        /**
+         * See {@link AlkemyNodeHandler#peekIterable(Node, Iterator)}
+         */
+        public Iterable<Entry<R, P>> peekIterable(AlkemyElementVisitor<P, ?> aev, Iterator<P> items)
+        {
+            return new NodeReaderToVisitorAdapter<R, P>(anv, aev).peekIterable(root, items);
+        }
+
+        /**
+         * See {@link AlkemyNodeHandler#iterable(Node, Supplier, Class)}
+         */
+        public Iterable<R> iterable(AlkemyElementVisitor<P, ?> aev, Supplier<Boolean> hasNext)
+        {
+            return new NodeReaderToVisitorAdapter<R, P>(anv, aev).iterable(root, hasNext);
         }
     }
 }

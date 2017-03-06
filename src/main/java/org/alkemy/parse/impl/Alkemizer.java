@@ -17,7 +17,6 @@ package org.alkemy.parse.impl;
 
 import static org.objectweb.asm.Opcodes.AALOAD;
 import static org.objectweb.asm.Opcodes.ACC_ENUM;
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -51,7 +50,6 @@ import static org.objectweb.asm.Opcodes.SIPUSH;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,12 +85,7 @@ import org.slf4j.LoggerFactory;
  * can allow enabling / disabling the instr. version on runtime).
  * <li>Creates an {@link Order} annotation with the declaration order of the fields, or leave it
  * untouched if present.
- * <li>Creates a public default constructor if it accomplishes all of the following:
- * <ul>
- * <li>None is found and class doesn't extend other.
- * <li>Extends from a class with a public default constructor.
- * <li>Doesn't contain any final fields which are not alkemy elements.
- * </ul>
+ * <li>Makes the default constructor public if it isn't already.
  * <li>Creates a public static factory for the type : 'public static TypeClass
  * create$$instance(Object[] args) { ... }', where the args follow the order established in the
  * {@link Order} annotation.
@@ -120,9 +113,7 @@ public class Alkemizer extends ClassVisitor
 
     private final String className;
     private boolean isOrdered; // contains Order annotation
-    private List<String> finalFields = new ArrayList<>();
     private boolean hasDefaultCtor;
-    private String superClass;
     private Map<String, Integer> orderedFieldNames = new HashMap<>(); // the values
                                                                       // inside
                                                                       // @Order if
@@ -162,40 +153,6 @@ public class Alkemizer extends ClassVisitor
     static String getSetterName(String fieldName)
     {
         return "set$$" + fieldName;
-    }
-
-    @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)
-    {
-        if (!"java/lang/Object".equals(superName))
-        {
-            try
-            {
-                final ClassReader cr = new ClassReader(toQualifiedName(superName));
-                final FindDefaultCtor cv = new FindDefaultCtor();
-                cr.accept(cv, ClassReader.SKIP_CODE);
-                if (cv.defaultCtor)
-                {
-                    superClass = superName;
-                }
-                else
-                {
-                    log.debug(String
-                            .format("Trying to alkemize the class '%s' which extends from the super class '%s' without an accessible default ctor",
-                                    className, toQualifiedName(superName)));
-                    throw new Stop();
-                }
-            }
-            catch (IOException e)
-            {
-                throw new Stop();
-            }
-        }
-        else
-        {
-            superClass = superName;
-        }
-        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
@@ -241,11 +198,6 @@ public class Alkemizer extends ClassVisitor
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
     {
-        if ((access & ACC_FINAL) != 0) // keep track of final fields
-        {
-            finalFields.add(name);
-        }
-
         boolean isStatic = (access & ACC_STATIC) != 0;
         // If field is an object, check if it is an enum.
         boolean isEnum = false;
@@ -272,36 +224,21 @@ public class Alkemizer extends ClassVisitor
     @Override
     public void visitEnd()
     {
+        if (!hasDefaultCtor)
+        {
+            log.debug("Alkemization failed. Trying to alkemize type : '%s' without default constructor.", className);
+            throw new Stop();
+        }
+
         if (!alkemizableFields.isEmpty())
         {
-            checkNonFinalRemaining(finalFields, alkemizableFields);
-
             appendOrder();
-            appendDefaultConstructor();
             appendNodeConstructor();
             appendIsInstrumented();
             appendGetters();
             appendSetters();
         }
         super.visitEnd();
-    }
-
-    // Do not continue if there are any non alkemizable final field and no defaultCtor (no code
-    // would be able to access them).
-    private void checkNonFinalRemaining(List<String> finalFields, List<AlkemizableField> alkemizableFields)
-    {
-        for (AlkemizableField af : alkemizableFields)
-        {
-            finalFields.remove(af.name);
-        }
-
-        if (!finalFields.isEmpty() && !hasDefaultCtor)
-        {
-            log.debug(String
-                    .format("Trying to alkemize the class '%s' which contains non alkemizable final fields '%s' which will remain unacessible.",
-                            className, Arrays.asList(finalFields)));
-            throw new Stop();
-        }
     }
 
     // forces field declaration order if none specified.
@@ -326,29 +263,6 @@ public class Alkemizer extends ClassVisitor
         mv.visitInsn(IRETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
-    }
-
-    private void appendDefaultConstructor()
-    {
-        if (!hasDefaultCtor)
-        {
-            final MethodVisitor mv = super.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
-            mv.visitCode();
-
-            final Label l0 = new Label();
-            mv.visitLabel(l0);
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, superClass, "<init>", "()V", false);
-
-            mv.visitLabel(new Label());
-            mv.visitInsn(RETURN);
-
-            final Label ln = new Label();
-            mv.visitLabel(ln);
-            mv.visitLocalVariable("this", toDescFromClassName(className), null, l0, ln, 0);
-            mv.visitMaxs(0, 0);
-            mv.visitEnd();
-        }
     }
 
     private void appendNodeConstructor()
@@ -655,7 +569,7 @@ public class Alkemizer extends ClassVisitor
                     // Avoid cycles
                     final Set<String> visited = new HashSet<String>();
                     visited.add(type);
-                    
+
                     final ClassReader cr = new ClassReader(qualifiedName);
                     final LeafFound leafFound = new LeafFound();
                     final FindLeaf cv = new FindLeaf(visited, alkemizableAnnotations, nonAlkemizableAnnotations, leafFound);
@@ -720,28 +634,6 @@ public class Alkemizer extends ClassVisitor
         }
     }
 
-    static class FindDefaultCtor extends ClassVisitor
-    {
-        private boolean defaultCtor = false;
-
-        FindDefaultCtor()
-        {
-            super(ASM5);
-        }
-
-        @Override
-        public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions)
-        {
-            defaultCtor = defaultCtor || (isDefaultCtor(name, desc) && isAccessible(access));
-            return super.visitMethod(access, name, desc, signature, exceptions);
-        }
-
-        private boolean isAccessible(int access)
-        {
-            return (access & ACC_PUBLIC) != 0 || (access & ACC_PROTECTED) != 0;
-        }
-    }
-
     static class FindAnnotation extends ClassVisitor
     {
         private final Class<? extends Annotation> annotation;
@@ -778,11 +670,12 @@ public class Alkemizer extends ClassVisitor
         private final Set<String> alkemizableAnnotations;
         private final Set<String> nonAlkemizableAnnotations;
         private final LeafFound leafFound;
-        
-        public FindLeaf(Set<String> visited, Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations, LeafFound leafFound)
+
+        public FindLeaf(Set<String> visited, Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations,
+                LeafFound leafFound)
         {
             super(ASM5);
-            
+
             this.visited = visited;
             this.alkemizableAnnotations = alkemizableAnnotations;
             this.nonAlkemizableAnnotations = nonAlkemizableAnnotations;
@@ -804,8 +697,9 @@ public class Alkemizer extends ClassVisitor
         private final Set<String> alkemizableAnnotations;
         private final Set<String> nonAlkemizableAnnotations;
         private final LeafFound leafFound;
-        
-        FieldLeafVisitor(Set<String> visited, String name, String type, Set<String> alkemizableAnnotations, Set<String> nonAlkemizableAnnotations, LeafFound leafFound)
+
+        FieldLeafVisitor(Set<String> visited, String name, String type, Set<String> alkemizableAnnotations,
+                Set<String> nonAlkemizableAnnotations, LeafFound leafFound)
         {
             super(ASM5);
 
@@ -874,7 +768,7 @@ public class Alkemizer extends ClassVisitor
             return false;
         }
     };
-    
+
     static class OrderValueReader extends AnnotationVisitor
     {
         private int i = 0;
@@ -899,11 +793,11 @@ public class Alkemizer extends ClassVisitor
             super.visit(name, value);
         }
     }
-    
+
     static class LeafFound implements Supplier<Boolean>
     {
         boolean found;
-        
+
         @Override
         public Boolean get()
         {

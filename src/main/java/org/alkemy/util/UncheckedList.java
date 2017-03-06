@@ -13,37 +13,53 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.visitor;
+package org.alkemy.util;
 
-import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
+import java.util.AbstractList;
+import java.util.List;
+import java.util.function.Consumer;
 
-public interface AlkemyElementVisitor<P, E extends AbstractAlkemyElement<E>>
+/**
+ * A list w/o any range check / concurrent mod. constraints.
+ */
+public class UncheckedList<E> extends AbstractList<E>
 {
-    default Object create(E e)
+    private final int size;
+    private final E[] buffer;
+
+    @SuppressWarnings("unchecked")
+    public UncheckedList(List<E> list)
     {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default Object create(E e, P parameter)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E e, Object parent)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-    
-    default void visit(E e, Object parent, P parameter)
-    {
-        throw new UnsupportedOperationException("Not implemented.");
+        size = list.size();
+        buffer = (E[]) list.toArray();
     }
 
-    E map(AlkemyElement e);
-
-    default boolean accepts(Class<?> type)
+    @Override
+    public E get(int index)
     {
-        return true;
+        return buffer[index];
+    }
+
+    @Override
+    public E set(int index, E element)
+    {
+        final E old = buffer[index];
+        buffer[index] = element;
+        return old;
+    }
+
+    @Override
+    public int size()
+    {
+        return size;
+    }
+
+    @Override
+    public void forEach(Consumer<? super E> action)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            action.accept(buffer[i]);
+        }
     }
 }

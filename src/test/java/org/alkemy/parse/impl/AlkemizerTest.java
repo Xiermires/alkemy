@@ -189,16 +189,10 @@ public class AlkemizerTest
         assertThat(ta.ipsum, is(Lorem.ipsum));
     }
 
-    @Test
-    public void testCreatedDefaultCtor()
+    @Test(expected = AlkemyException.class)
+    public void testNoDefaultCtor()
     {
-        final TestCreatedDefaultCtor tc = Alkemy.mature(TestCreatedDefaultCtor.class,
-                new AssignConstant<TestCreatedDefaultCtor, Integer>(1));
-        assertThat(tc.bar, is(1));
-
-        final TestCreatedDefaultCtor tc2 = Alkemy.nodes().get(TestCreatedDefaultCtor.class).data()
-                .safeNewInstance(TestCreatedDefaultCtor.class, 1);
-        assertThat(tc2.bar, is(1));
+        Alkemy.mature(TestCreatedDefaultCtor.class, new AssignConstant<TestCreatedDefaultCtor, Integer>(1));
     }
 
     @Test

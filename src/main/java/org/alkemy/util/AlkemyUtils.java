@@ -82,7 +82,7 @@ public class AlkemyUtils
         final Object[] args = new Object[mapped.size()];
         for (int i = 0; i < args.length; i++)
         {
-            args[i] = aev.generate(mapped.get(i));
+            args[i] = aev.create(mapped.get(i));
         }
         return e.data().safeNewInstance(retType, args);
     }
@@ -99,7 +99,7 @@ public class AlkemyUtils
         final Object[] args = new Object[mapped.size()];
         for (int i = 0; i < args.length; i++)
         {
-            args[i] = aev.generate(mapped.get(i), parameter);
+            args[i] = aev.create(mapped.get(i), parameter);
         }
         return e.data().safeNewInstance(retType, args);
     }

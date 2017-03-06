@@ -26,6 +26,8 @@
  * {@link AlkemyLeaf} within the type hierarchy and groups them under a directed rooted tree
  * starting from the parsed type. The resulting tree contains all 'alkemizations' of the type.
  * <p>
+ * Alkemized types must include a no-args constructor of any visibility.
+ * <p>
  * Alkemized types can contain sub-types which also contain alkemizations and so on. Each of this
  * types is represented as a starting branch in the tree.
  * <p>

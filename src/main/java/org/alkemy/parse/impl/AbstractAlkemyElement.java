@@ -149,7 +149,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return valueAccessor.targetName();
     }
 
-    // Maintain a view of the element for disable cacheAcceptedRef() scenarios.
+    // Maintain a view of the element for disabled cacheAcceptedRef() scenarios.
     private AlkemyElement view;
 
     private AlkemyElement view()
@@ -193,10 +193,10 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         if (useMappedRefCaching())
         {
             final T t = mapFromCache(v);
-            return t != null ? v.generate(t) : null;
+            return t != null ? v.create(t) : null;
         }
-        else if (node) return v.generate(v.map(view()));
-        else if (v.accepts(alkemyType)) return v.generate(v.map(view()));
+        else if (node) return v.create(v.map(view()));
+        else if (v.accepts(alkemyType)) return v.create(v.map(view()));
         else return null;
     }
 
@@ -208,10 +208,10 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         if (useMappedRefCaching())
         {
             final T t = mapFromCache(v);
-            return t != null ? v.generate(t) : null;
+            return t != null ? v.create(t) : null;
         }
-        else if (node) return v.generate(v.map(view()), parameter);
-        else if (v.accepts(alkemyType)) return v.generate(v.map(view()));
+        else if (node) return v.create(v.map(view()), parameter);
+        else if (v.accepts(alkemyType)) return v.create(v.map(view()));
         else return null;
     }
 
