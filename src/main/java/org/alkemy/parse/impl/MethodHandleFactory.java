@@ -56,10 +56,10 @@ public class MethodHandleFactory
         final Class<?> useObjIfEnum = f.getType().isEnum() ? Object.class : f.getType();
         if (Modifier.isStatic(f.getModifiers()))
         {
-            final Supplier<?> getter = ref2StaticGetter(methodHandle(clazz, Alkemizer.getGetterName(f.getName())), clazz,
+            final Supplier<?> getter = ref2StaticGetter(methodHandle(clazz, FieldAccessorWriter.getGetterName(f.getName())), clazz,
                     f.getType());
             final Consumer<Object> setter = (Consumer<Object>) ref2StaticSetter(
-                    methodHandle(clazz, Alkemizer.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
+                    methodHandle(clazz, FieldAccessorWriter.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
             mha = new StaticFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(),
                     getter, setter);
@@ -67,9 +67,9 @@ public class MethodHandleFactory
         else
         {
             final Function<Object, ?> getter = (Function<Object, ?>) ref2MemberGetter(
-                    methodHandle(clazz, Alkemizer.getGetterName(f.getName())), clazz, f.getType());
+                    methodHandle(clazz, FieldAccessorWriter.getGetterName(f.getName())), clazz, f.getType());
             final BiConsumer<Object, Object> setter = (BiConsumer<Object, Object>) ref2MemberSetter(
-                    methodHandle(clazz, Alkemizer.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
+                    methodHandle(clazz, FieldAccessorWriter.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
             mha = new MemberFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(),
                     getter, setter);
@@ -80,7 +80,7 @@ public class MethodHandleFactory
     static NodeConstructor createNodeConstructor(Class<?> clazz) throws IllegalAccessException, SecurityException
     {
         final List<Method> l = Arrays.asList(clazz.getMethods()).stream()
-                .filter(p -> Alkemizer.CREATE_INSTANCE.equals(p.getName())).collect(Collectors.toList());
+                .filter(p -> FieldOrderWriter.CREATE_INSTANCE.equals(p.getName())).collect(Collectors.toList());
 
         // If an alkemizable class extends another alkemizable class, it receives two static
         // methods. Get the explicit one of this type.
@@ -94,7 +94,7 @@ public class MethodHandleFactory
         }
 
         Assertions.nonNull(factory);
-        final MethodHandle mh = methodHandle(clazz, Alkemizer.CREATE_INSTANCE, factory.getParameterTypes());
+        final MethodHandle mh = methodHandle(clazz, FieldOrderWriter.CREATE_INSTANCE, factory.getParameterTypes());
 
         try
         {

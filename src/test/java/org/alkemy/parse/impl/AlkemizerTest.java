@@ -64,7 +64,7 @@ public class AlkemizerTest
     @Test
     public void alkemizeNodeConstructorMethod() throws IOException, NoSuchMethodException, SecurityException
     {
-        final Method m = clazz.getMethod(Alkemizer.CREATE_INSTANCE, Object[].class);
+        final Method m = clazz.getMethod(FieldOrderWriter.CREATE_INSTANCE, Object[].class);
         assertThat(Modifier.isStatic(m.getModifiers()), is(true));
     }
 
