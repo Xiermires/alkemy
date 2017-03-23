@@ -136,7 +136,7 @@ public class FieldOrderWriter extends FieldAccessorWriter
                 mv.visitLdcInsn(Type.getType(props.desc));
             }
             mv.visitVarInsn(ALOAD, 0);
-            visitArgsPosToLoad(i, mv);
+            visitInStack(i, mv);
             mv.visitInsn(AALOAD);
 
             final ClassCaster classCaster = getCastClassForDesc(props.desc);
@@ -225,7 +225,7 @@ public class FieldOrderWriter extends FieldAccessorWriter
         }
     }
 
-    private void visitArgsPosToLoad(int i, MethodVisitor mv)
+    private void visitInStack(int i, MethodVisitor mv)
     {
         if (i == 0)
         {

@@ -16,7 +16,7 @@
 package org.alkemy.parse.impl;
 
 /**
- * Lambda wrapper for the {@link Alkemizer#CREATE_INSTANCE} method.
+ * Lambda wrapper for the {@link FieldOrderWriter#CREATE_INSTANCE} method.
  */
 @FunctionalInterface
 public interface NodeConstructorFunction
