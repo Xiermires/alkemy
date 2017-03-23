@@ -40,7 +40,7 @@ Some Examples
 public class TestClass
 {
     @Random(min = 5, max = 10)
-    int i;
+	int i;
     
     @Random(min = 9.25, max = 11.5)
     double d;
@@ -109,7 +109,7 @@ public class TestClass
 public void testCsvReader() throws IOException
 {
 	final String NEW_LINE = System.getProperty("line.separator");
-	final String EXAMPLE = "0,1.2,2.3,12345678902,4" + NEW_LINE + "9,1.65,7f,12345678901,5";
+    final String EXAMPLE = "0,1.2,2.3,12345678902,4" + NEW_LINE + "9,1.65,7f,12345678901,5";
 
 	// Simulate the whole csv is a file process (although we only need an Iterator<String>)
 	final BufferedReader reader = new BufferedReader(new InputStreamReader(
