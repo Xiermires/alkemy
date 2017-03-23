@@ -5,6 +5,7 @@
 	<groupId>org.alkemy</groupId>
 	<artifactId>alkemy</artifactId>
 	<packaging>jar</packaging>
+	<version>1.0</version>
 
 	<name>alkemy</name>
 	<url>http://maven.apache.org</url>
@@ -89,5 +90,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<version>1.0</version>
 </project>

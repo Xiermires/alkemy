@@ -1,8 +1,6 @@
 # alkemy
 From Al"ch"emy. "Purify, mature and perfect certain objects."
 
-v0.7 (still dev.)
-
 --------
 Overview
 --------
