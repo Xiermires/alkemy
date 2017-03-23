@@ -40,7 +40,7 @@ Some Examples
 public class TestClass
 {
     @Random(min = 5, max = 10)
-	int i;
+    int i;
     
     @Random(min = 9.25, max = 11.5)
     double d;
@@ -51,28 +51,28 @@ public class TestClass
 @Test
 public void generateRandoms()
 {
-	// Reads TestClass, identifies the @Random elements and applies XorRandomGenerator on them.
-	final TestClass tc = Alkemy.mature(TestClass.class, new XorRandomGenerator());
+    // Reads TestClass, identifies the @Random elements and applies XorRandomGenerator on them.
+    final TestClass tc = Alkemy.mature(TestClass.class, new XorRandomGenerator());
 	
-	... // asserts
+    ... // asserts
 }
 
 // The visitor that works on the AlkemyElements.
 static class XorRandomGenerator implements AlkemyElementVisitor<Void, RandomElement>
 {
-	@Override
-	public void visit(RandomElement e, Object parent)
-	{
-		e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
-	}
+    @Override
+    public void visit(RandomElement e, Object parent)
+    {
+        e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
+    }
 
-	@Override
-	public RandomElement map(AlkemyElement e)
-	{
-		return new RandomElement(e);
-	}
+    @Override
+    public RandomElement map(AlkemyElement e)
+    {
+        return new RandomElement(e);
+    }
 	
-	... // PRNG code 
+    ... // PRNG code 
 }
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -80,9 +80,9 @@ static class XorRandomGenerator implements AlkemyElementVisitor<Void, RandomElem
 @AlkemyLeaf
 @interface Random
 {
-	double min();
+    double min();
 
-	double max();
+    double max();
 }
 ```
 
@@ -108,23 +108,24 @@ public class TestClass
 @Test
 public void testCsvReader() throws IOException
 {
-	final String NEW_LINE = System.getProperty("line.separator");
+    final String NEW_LINE = System.getProperty("line.separator");
     final String EXAMPLE = "0,1.2,2.3,12345678902,4" + NEW_LINE + "9,1.65,7f,12345678901,5";
 
-	// Simulate the whole csv is a file process (although we only need an Iterator<String>)
-	final BufferedReader reader = new BufferedReader(new InputStreamReader(
-			new ByteArrayInputStream(EXAMPLE.getBytes("UTF-8"))));
+    // Simulate the whole csv is a file process (although we only need an Iterator<String>)
+    final BufferedReader reader = new BufferedReader(new InputStreamReader(
+            new ByteArrayInputStream(EXAMPLE.getBytes("UTF-8"))));
 
-	final CsvReader mapper = new CsvReader();
+    final CsvReader mapper = new CsvReader();
 
-	final List<TestClass> tcs = reader.lines().map(l -> l.split(",")).map(l -> Alkemy.mature(TestClass.class, mapper, l))
-			.collect(Collectors.toList());
+    final List<TestClass> tcs = reader.lines().map(l -> l.split(",")).map(l -> Alkemy.mature(TestClass.class, mapper, l))
+            .collect(Collectors.toList());
 			
-	// asserts ...
+    // asserts ...
 }
 
 public class CsvReader extends IndexedElementVisitor<String[]>
 {
+    // From string to requested type value
     final TypedValueFromStringArray tvfs = new TypedValueFromStringArray();
 
     @Override
@@ -142,18 +143,17 @@ Resultsets and other typical stream sources follow similar fashion. Reverse mapp
 ```java
 public class Foo
 {
-	@Property
-	int foo;
+    @Property
+    int foo;
 	
-	@Property
-	int bar;
+    @Property
+    int bar;
 	
-	@Use("foo", "bar")
-	@Schedule(every = 5000, unit = TimeUnit.MILLISECONDS)
-	public void method(int foo, int bar)
-	{
-		...
-	}
+    @Schedule(every = 5000, unit = TimeUnit.MILLISECONDS)
+    public void method(@Use("foo") int foo, @Use("bar") int bar)
+    {
+	    ...
+    }
 }
 ```
 
