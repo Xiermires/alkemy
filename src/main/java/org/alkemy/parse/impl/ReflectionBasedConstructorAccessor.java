@@ -24,38 +24,39 @@ import org.alkemy.exception.AlkemyException;
 
 public class ReflectionBasedConstructorAccessor implements NodeConstructor
 {
-    private final Constructor<?> ctor;
+    private final Constructor<?> typeCtor;
+    private final Constructor<?> componentTypeCtor;
 
-    ReflectionBasedConstructorAccessor(Constructor<?> ctor)
+    ReflectionBasedConstructorAccessor(Class<?> type, Class<?> componentType) throws NoSuchMethodException, SecurityException
     {
-        this.ctor = ctor;
+        this.typeCtor = type.getDeclaredConstructor();
+        this.componentTypeCtor = componentType.getDeclaredConstructor();
     }
 
     @Override
     public Object newInstance(Object... args) throws AlkemyException
     {
-        if (args.length > 0)
-        {
-            throw new AccessException("Reflection based constructor of type '%s' expect no parameters, but received '%s'.",
-                    type(), Arrays.asList(args));
-        }
+        if (args.length > 0) { throw new AccessException(
+                "Reflection based constructor of type '%s' expect no parameters, but received '%s'.", type(), Arrays.asList(args)); }
         try
         {
-            ctor.setAccessible(true);
-            return ctor.newInstance();
+            typeCtor.setAccessible(true);
+            return typeCtor.newInstance();
         }
         catch (final InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
-            throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, ctor.getName(), Arrays.asList(args));
+            throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, typeCtor.getName(),
+                    Arrays.asList(args));
         }
         finally
         {
-            ctor.setAccessible(false);
+            typeCtor.setAccessible(false);
         }
     }
-    
+
     @Override
-    @SuppressWarnings("unchecked") // safe
+    @SuppressWarnings("unchecked")
+    // safe
     public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
     {
         final Object v = newInstance(args);
@@ -65,6 +66,42 @@ public class ReflectionBasedConstructorAccessor implements NodeConstructor
     @Override
     public Class<?> type() throws AlkemyException
     {
-        return ctor.getDeclaringClass();
+        return typeCtor.getDeclaringClass();
+    }
+
+    @Override
+    public Class<?> componentType() throws AlkemyException
+    {
+        return componentType();
+    }
+
+    @Override
+    public Object newComponentInstance(Object... args) throws AlkemyException
+    {
+        if (args.length > 0) { throw new AccessException(
+                "Reflection based constructor of type '%s' expect no parameters, but received '%s'.", type(), Arrays.asList(args)); }
+        try
+        {
+            componentTypeCtor.setAccessible(true);
+            return componentTypeCtor.newInstance();
+        }
+        catch (final InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+        {
+            throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, componentTypeCtor
+                    .getName(), Arrays.asList(args));
+        }
+        finally
+        {
+            componentTypeCtor.setAccessible(false);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        final Object v = newComponentInstance(args);
+        return v == null || type == v.getClass() ? (T) v : null;
     }
 }

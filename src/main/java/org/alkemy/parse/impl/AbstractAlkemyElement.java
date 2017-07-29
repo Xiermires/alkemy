@@ -16,7 +16,6 @@
 package org.alkemy.parse.impl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +34,7 @@ import org.alkemy.visitor.impl.AlkemyPreorderReader;
 
 import com.google.common.collect.Table;
 
-public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
+public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implements ValueAccessor, NodeConstructor
 {
     private final AnnotatedMember desc;
     private final ValueAccessor valueAccessor;
@@ -77,7 +76,7 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
         return new AlkemyElement(desc, nodeConstructor, valueAccessor, methodInvokers, alkemyType, node, context);
     }
 
-    public AnnotatedElement desc()
+    public AnnotatedMember desc()
     {
         return desc;
     }
@@ -116,21 +115,33 @@ public abstract class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> 
     }
 
     @Override
-    public <T> T safeGet(Object parent, Class<T> type) throws AccessException
+    public <T> T get(Object parent, Class<T> type) throws AccessException
     {
-        return valueAccessor.safeGet(parent, type);
-    }
-
-    @Override
-    public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
-    {
-        return valueAccessor.getIfAssignable(parent, type);
+        return valueAccessor.get(parent, type);
     }
 
     @Override
     public void set(Object value, Object parent) throws AccessException
     {
         valueAccessor.set(value, parent);
+    }
+    
+    @Override
+    public Class<?> componentType() throws AlkemyException
+    {
+        return nodeConstructor.componentType();
+    }
+
+    @Override
+    public Object newComponentInstance(Object... args) throws AlkemyException
+    {
+        return nodeConstructor.newComponentInstance(args);
+    }
+
+    @Override
+    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        return nodeConstructor.safeNewComponentInstance(type, args);
     }
 
     public Collection<MethodInvoker> getMethodInvokers()

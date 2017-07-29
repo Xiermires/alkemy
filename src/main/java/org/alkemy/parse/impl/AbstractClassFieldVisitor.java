@@ -26,7 +26,7 @@ import org.alkemy.util.AlkemyUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 
-public abstract class AbstractClassFieldVisitor extends ClassVisitor
+public abstract class AbstractClassFieldVisitor extends Alkemizer
 {
     protected final String className;
     protected final Map<String, FieldProperties> fieldMap = new LinkedHashMap<>();
@@ -43,7 +43,7 @@ public abstract class AbstractClassFieldVisitor extends ClassVisitor
         boolean isStatic = (access & ACC_STATIC) != 0;
         boolean isEnum = AlkemizerUtils.isType(desc) ? AlkemizerUtils.isEnum(desc) : false;
         
-        fieldMap.put(name, new FieldProperties(desc, isEnum, isStatic));
+        fieldMap.put(name, new FieldProperties(desc, signature, isEnum, isStatic));
         return super.visitField(access, name, desc, signature, value);
     }
     

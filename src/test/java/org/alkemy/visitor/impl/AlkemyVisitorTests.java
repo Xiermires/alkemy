@@ -310,7 +310,7 @@ public class AlkemyVisitorTests
         @Override
         public void visit(AlkemyElement e, Object parent)
         {
-            stack.push(e.safeGet(parent, Integer.class));
+            stack.push(e.get(parent, Integer.class));
         }
 
         @Override

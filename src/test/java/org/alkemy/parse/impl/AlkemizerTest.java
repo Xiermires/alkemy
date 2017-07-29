@@ -79,14 +79,14 @@ public class AlkemizerTest
     @Test
     public void nodeConstructorArgsPreserveOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsOrder.class);
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsOrder.class, null);
         ctor.newInstance(1, "a");
     }
 
     @Test
     public void nodeConstructorArgsInDeclarationOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsDeclaration.class);
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsDeclaration.class, null);
         ctor.newInstance("a", 1);
     }
 
@@ -113,7 +113,7 @@ public class AlkemizerTest
     @Test(expected = AlkemyException.class)
     public void testNodeConstructorWithArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class, null);
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance(1, "foo");
 
         assertThat(1, is(tc.foo));
@@ -125,7 +125,7 @@ public class AlkemizerTest
 
     public void testNodeConstructorNoArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
+        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class, null);
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance();
 
         assertThat(tc, is(not(nullValue())));
@@ -208,8 +208,8 @@ public class AlkemizerTest
         final ValueAccessor fooAccessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("foo"));
         final ValueAccessor ipsumAccessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("ipsum"));
         final ValueAccessor dolorAccessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("dolor"));
-        final NodeConstructor ctortc = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class);
-        final NodeConstructor ctortmf = MethodHandleFactory.createNodeConstructor(TestManyFields.class);
+        final NodeConstructor ctortc = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class, null);
+        final NodeConstructor ctortmf = MethodHandleFactory.createNodeConstructor(TestManyFields.class, null);
 
         final TestAlkemizer tc = new TestAlkemizer();
 

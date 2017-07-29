@@ -20,18 +20,24 @@ import java.util.function.Supplier;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.util.Assertions;
 
 public class StaticMethodLambdaBasedConstructor implements NodeConstructor
 {
     private final Class<?> type;
+    private final Class<?> componentType;
     private final Supplier<?> noargsCtor;
-    private final NodeConstructorFunction argsCtor;
+    private final Supplier<?> noargsComponentCtor;
+    private final NodeConstructorFunction staticFactory;
 
-    StaticMethodLambdaBasedConstructor(Class<?> type, Supplier<?> noargsCtor, NodeConstructorFunction argsCtor)
+    StaticMethodLambdaBasedConstructor(Class<?> type, Class<?> componentType, Supplier<?> noargsCtor,
+            Supplier<?> noargsComponentCtor, NodeConstructorFunction staticFactory)
     {
         this.type = type;
+        this.componentType = componentType;
         this.noargsCtor = noargsCtor;
-        this.argsCtor = argsCtor;
+        this.noargsComponentCtor = noargsComponentCtor;
+        this.staticFactory = staticFactory;
     }
 
     @Override
@@ -51,21 +57,60 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
             }
             else
             {
-                return argsCtor.newInstance(args);
+                return staticFactory.newInstance(args);
             }
         }
         catch (Throwable e)
         {
-            throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e,
-                    Arrays.asList(args), type);
+            throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays
+                    .asList(args), type);
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked") // safe
+    @SuppressWarnings("unchecked")
+    // safe
     public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
     {
         final Object v = newInstance(args);
+        return v == null || type == v.getClass() ? (T) v : null;
+    }
+
+    @Override
+    public Class<?> componentType() throws AlkemyException
+    {
+        return componentType;
+    }
+
+    @Override
+    public Object newComponentInstance(Object... args) throws AlkemyException
+    {
+        Assertions.nonNull(componentType);
+        
+        try
+        {
+            if (args.length == 0)
+            {
+                return noargsComponentCtor.get();
+            }
+            else
+            {
+                return staticFactory.newInstance(args);
+            }
+        }
+        catch (Throwable e)
+        {
+            throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays
+                    .asList(args), type);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        final Object v = newComponentInstance(args);
         return v == null || type == v.getClass() ? (T) v : null;
     }
 }

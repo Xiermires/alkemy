@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.alkemy.annotations.Order;
-import org.alkemy.parse.impl.Alkemizer.Stop;
+import org.alkemy.parse.impl.FieldAlkemizer.Stop;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
@@ -78,9 +78,12 @@ public class FieldOrderWriter extends FieldAccessorWriter
     @Override
     public void visitEnd()
     {
-        appendOrder();
-        appendNodeConstructor();
         super.visitEnd();
+        if (isAlkemized())
+        {
+            appendOrder();
+            appendNodeConstructor();
+        }
     }
 
     // forces field declaration order if none specified.
@@ -90,8 +93,8 @@ public class FieldOrderWriter extends FieldAccessorWriter
         {
             final AnnotationVisitor av = super.visitAnnotation("Lorg/alkemy/annotations/Order;", true);
             final AnnotationVisitor aav = av.visitArray("value");
-            fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).map(entry -> entry.getKey())
-                    .forEach(name -> aav.visit(null, name));
+            fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).map(entry -> entry.getKey()).forEach(
+                    name -> aav.visit(null, name));
             aav.visitEnd();
             av.visitEnd();
         }
@@ -116,8 +119,8 @@ public class FieldOrderWriter extends FieldAccessorWriter
         final Label l2 = new Label();
         mv.visitLabel(l2);
 
-        final List<String> fields = fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable)
-                .map(entry -> entry.getKey()).collect(Collectors.toList());
+        final List<String> fields = fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).map(
+                entry -> entry.getKey()).collect(Collectors.toList());
 
         if (ordered)
         {
@@ -169,8 +172,10 @@ public class FieldOrderWriter extends FieldAccessorWriter
 
     private void checkFieldNames(Collection<String> fields, List<String> orderedFields)
     {
-        if (fields.size() != orderedFields.size()) throw new Stop(); // invalid definition
-        if (!fields.containsAll(orderedFields)) throw new Stop(); // invalid definition
+        if (fields.size() != orderedFields.size())
+            throw new Stop(); // invalid definition
+        if (!fields.containsAll(orderedFields))
+            throw new Stop(); // invalid definition
     }
 
     private void sortByOrder(List<String> fields, List<String> orderedFields)

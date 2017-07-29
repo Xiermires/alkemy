@@ -39,9 +39,14 @@ public class LambdaRefHelper
     {
     }
 
-    static boolean isInstrumented(Class<?> clazz) throws IllegalAccessException, SecurityException
+    static boolean isInstrumented(Class<?> clazz, Class<?> componentTypeClass) throws IllegalAccessException, SecurityException
     {
-        final Supplier<Boolean> ref = ref2StaticGetter(methodHandle(clazz, Alkemizer.IS_INSTRUMENTED), clazz, boolean.class);
+        final Supplier<Boolean> ref;
+        if (componentTypeClass != null)
+            ref = ref2StaticGetter(methodHandle(componentTypeClass, FieldAlkemizer.IS_INSTRUMENTED), componentTypeClass, boolean.class);
+        else
+            ref = ref2StaticGetter(methodHandle(clazz, FieldAlkemizer.IS_INSTRUMENTED), clazz, boolean.class);
+        
         return Objects.nonNull(ref) && ref.get();
     }
 

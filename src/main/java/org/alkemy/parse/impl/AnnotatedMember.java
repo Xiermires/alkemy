@@ -17,7 +17,10 @@ package org.alkemy.parse.impl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Type;
+import java.util.Collection;
 
+import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
 
 /**
@@ -26,26 +29,39 @@ import org.alkemy.util.Assertions;
 public class AnnotatedMember implements AnnotatedElement
 {
     private final AnnotatedElement annotatedElement;
+    private final String name;
     private final Class<?> type;
     private final Class<?> declaringClass;
+    private final Class<?> componentType;
 
-    public AnnotatedMember(AnnotatedElement annotatedElement, Class<?> type, Class<?> declaringClass)
+    public AnnotatedMember(String name, AnnotatedElement annotatedElement, Class<?> type, Class<?> declaringClass,
+            Type... componentTypes)
     {
         Assertions.noneNull(annotatedElement);
-        
+
+        this.name = name;
         this.annotatedElement = annotatedElement;
         this.type = type;
         this.declaringClass = declaringClass;
-    }
-    
-    public AnnotatedMember(AnnotatedElement annotatedElement, Class<?> type)
-    {
-        this(annotatedElement, type, null);
-    }
-    
-    public AnnotatedMember(AnnotatedElement annotatedElement)
-    {
-        this(annotatedElement, null, null);
+
+        // TODO Which other types apart from collection might make sense.
+        if (componentTypes.length == 1 && Collection.class.isAssignableFrom(type))
+        {
+            try
+            {
+                this.componentType = Class.forName(componentTypes[0].getTypeName());
+            }
+            catch (ClassNotFoundException e)
+            {
+                // why would this happen ?
+                throw new AlkemyException("Invalid type parameter defined in class %s and leaf/node %s of type %s", e,
+                        declaringClass.getSimpleName(), name, type.getSimpleName());
+            }
+        }
+        else
+        {
+            this.componentType = type;
+        }
     }
 
     @Override
@@ -66,6 +82,11 @@ public class AnnotatedMember implements AnnotatedElement
         return annotatedElement.getDeclaredAnnotations();
     }
 
+    public String getName()
+    {
+        return name;
+    }
+
     public Class<?> getDeclaringClass()
     {
         return declaringClass;
@@ -74,5 +95,10 @@ public class AnnotatedMember implements AnnotatedElement
     public Class<?> getType()
     {
         return type;
+    }
+
+    public Class<?> getComponentType()
+    {
+        return componentType;
     }
 }

@@ -41,10 +41,8 @@ public class Nodes
 
     public static <E> Node<E> makeUnchecked(Node<E> orig)
     {
-        return makeUnchecked(
-                orig,
-                new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new UncheckedList<Node<E>>(orig.children()), orig
-                        .branchDepth()));
+        return makeUnchecked(orig, new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new UncheckedList<Node<E>>(orig
+                .children()), orig.branchDepth()));
     }
 
     private static <E> Node<E> makeUnchecked(Node<E> orig, ArborescenceNodeImpl<E> dest)
@@ -52,15 +50,14 @@ public class Nodes
         if (orig.hasChildren())
         {
             orig.children().forEach(
-            c ->
-            {
-                if (c.hasChildren())
-                {
-                    makeUnchecked(c,
-                            new ArborescenceNodeImpl<E>(orig.data(), dest, new UncheckedList<Node<E>>(orig.children()),
-                                    orig.branchDepth()));
-                }
-            });
+                    c ->
+                    {
+                        if (c.hasChildren())
+                        {
+                            makeUnchecked(c, new ArborescenceNodeImpl<E>(orig.data(), dest, new UncheckedList<Node<E>>(orig
+                                    .children()), orig.branchDepth()));
+                        }
+                    });
         }
         return dest;
     }
@@ -98,8 +95,22 @@ public class Nodes
             {
                 node = node.parent;
             }
-            return (calculateDepths(node)).drainTo(new ArborescenceNodeImpl<>(), true);
+            return calculateDepths(node).drainTo(new ArborescenceNodeImpl<>(), true);
         }
+
+        // private Node<E> sortByDepth(Node<E> node)
+        // {
+        // if (node.hasChildren())
+        // {
+        // Collections.sort(node.children(), (lhs, rhs) ->
+        // {
+        // return Integer.compare(lhs.branchDepth(), rhs.branchDepth());
+        // });
+        // Collections.reverse(node.children());
+        // node.children().forEach(c -> sortByDepth(c));
+        // }
+        // return node;
+        // }
 
         private ArborescenceBuilder<E> calculateDepths(ArborescenceBuilder<E> e)
         {
@@ -136,8 +147,8 @@ public class Nodes
             parent.parent = isRoot ? null : parent;
             if (children != null)
             {
-                parent.children = children.stream().map(b -> b.drainTo(new ArborescenceNodeImpl<E>(), false))
-                        .collect(Collectors.toList());
+                parent.children = children.stream().map(b -> b.drainTo(new ArborescenceNodeImpl<E>(), false)).collect(
+                        Collectors.toList());
                 parent.depth = depth;
             }
             else

@@ -49,27 +49,27 @@ public class MethodHandleFactory
     static ValueAccessor createAccessor(Field f) throws IllegalAccessException, SecurityException
     {
         final ValueAccessor mha;
-        final Class<?> clazz = f.getDeclaringClass(); 
+        final Class<?> clazz = f.getDeclaringClass();
 
         // Enum setters are instrumented set$$enum_name(Object o) { ... } (the instrumented code
         // allows String->Enum conversion).
         final Class<?> useObjIfEnum = f.getType().isEnum() ? Object.class : f.getType();
         if (Modifier.isStatic(f.getModifiers()))
         {
-            final Supplier<?> getter = ref2StaticGetter(methodHandle(clazz, FieldAccessorWriter.getGetterName(f.getName())), clazz,
-                    f.getType());
-            final Consumer<Object> setter = (Consumer<Object>) ref2StaticSetter(
-                    methodHandle(clazz, FieldAccessorWriter.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
+            final Supplier<?> getter = ref2StaticGetter(methodHandle(clazz, FieldAccessorWriter.getGetterName(f.getName())),
+                    clazz, f.getType());
+            final Consumer<Object> setter = (Consumer<Object>) ref2StaticSetter(methodHandle(clazz, FieldAccessorWriter
+                    .getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
             mha = new StaticFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(),
                     getter, setter);
         }
         else
         {
-            final Function<Object, ?> getter = (Function<Object, ?>) ref2MemberGetter(
-                    methodHandle(clazz, FieldAccessorWriter.getGetterName(f.getName())), clazz, f.getType());
-            final BiConsumer<Object, Object> setter = (BiConsumer<Object, Object>) ref2MemberSetter(
-                    methodHandle(clazz, FieldAccessorWriter.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
+            final Function<Object, ?> getter = (Function<Object, ?>) ref2MemberGetter(methodHandle(clazz, FieldAccessorWriter
+                    .getGetterName(f.getName())), clazz, f.getType());
+            final BiConsumer<Object, Object> setter = (BiConsumer<Object, Object>) ref2MemberSetter(methodHandle(clazz,
+                    FieldAccessorWriter.getSetterName(f.getName()), useObjIfEnum), clazz, useObjIfEnum);
 
             mha = new MemberFieldLambdaBasedAccessor(f.getDeclaringClass().getTypeName() + "." + f.getName(), f.getType(),
                     getter, setter);
@@ -77,35 +77,52 @@ public class MethodHandleFactory
         return mha;
     }
 
-    static NodeConstructor createNodeConstructor(Class<?> clazz) throws IllegalAccessException, SecurityException
+    static NodeConstructor createNodeConstructor(Class<?> clazz, Class<?> componentTypeClass) throws IllegalAccessException,
+            SecurityException
     {
-        final List<Method> l = Arrays.asList(clazz.getMethods()).stream()
-                .filter(p -> FieldOrderWriter.CREATE_INSTANCE.equals(p.getName())).collect(Collectors.toList());
+        final Class<?> instrumentedClass;
+        if (componentTypeClass == null)
+            instrumentedClass = clazz;
+        else instrumentedClass = componentTypeClass;
+
+        final List<Method> l = Arrays.asList(instrumentedClass.getMethods()).stream().filter(
+                p -> FieldOrderWriter.CREATE_INSTANCE.equals(p.getName())).collect(Collectors.toList());
 
         // If an alkemizable class extends another alkemizable class, it receives two static
         // methods. Get the explicit one of this type.
         Method factory = null;
         for (Method m : l)
         {
-            if (m.getReturnType().equals(clazz))
+            if (m.getReturnType().equals(instrumentedClass))
             {
                 factory = m;
             }
         }
 
         Assertions.nonNull(factory);
-        final MethodHandle mh = methodHandle(clazz, FieldOrderWriter.CREATE_INSTANCE, factory.getParameterTypes());
+        final MethodHandle mh = methodHandle(instrumentedClass, FieldOrderWriter.CREATE_INSTANCE, factory.getParameterTypes());
 
         try
         {
-            final MethodHandle dh = MethodHandles.lookup().unreflectConstructor(clazz.getConstructor()); // default
-                                                                                                         // ctor
-            final Method m = NodeConstructorFunction.class.getMethod("newInstance", Object[].class); // static
-                                                                                                     // factory
-                                                                                                     // method
+            if (componentTypeClass != null)
+            {
+                final MethodHandle ctorClass = MethodHandles.lookup().unreflectConstructor(clazz.getConstructor());
+                final MethodHandle ctorComponentClass = MethodHandles.lookup().unreflectConstructor(
+                        componentTypeClass.getConstructor());
+                final Method staticFactory = NodeConstructorFunction.class.getMethod("newInstance", Object[].class);
 
-            return new StaticMethodLambdaBasedConstructor(clazz, ref2StaticGetter(dh, clazz, clazz), createLambdaRef(
-                    NodeConstructorFunction.class, m, mh));
+                return new StaticMethodLambdaBasedConstructor(clazz, componentTypeClass,
+                        ref2StaticGetter(ctorClass, clazz, clazz), ref2StaticGetter(ctorComponentClass, componentTypeClass,
+                                componentTypeClass), createLambdaRef(NodeConstructorFunction.class, staticFactory, mh));
+            }
+            else
+            {
+                final MethodHandle ctorClass = MethodHandles.lookup().unreflectConstructor(clazz.getConstructor());
+                final Method staticFactory = NodeConstructorFunction.class.getMethod("newInstance", Object[].class);
+
+                return new StaticMethodLambdaBasedConstructor(clazz, null, ref2StaticGetter(ctorClass, clazz, clazz), null,
+                        createLambdaRef(NodeConstructorFunction.class, staticFactory, mh));
+            }
         }
         catch (NoSuchMethodException e)
         {

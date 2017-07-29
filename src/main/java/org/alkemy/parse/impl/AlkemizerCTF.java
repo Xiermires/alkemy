@@ -28,6 +28,6 @@ public class AlkemizerCTF implements ClassFileTransformer
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer)
             throws IllegalClassFormatException
     {
-        return Alkemizer.alkemize(className, classfileBuffer);
+        return FieldAlkemizer.alkemize(className, classfileBuffer);
     }
 }

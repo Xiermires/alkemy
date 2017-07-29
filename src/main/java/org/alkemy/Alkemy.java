@@ -16,6 +16,7 @@
 package org.alkemy;
 
 import static org.alkemy.visitor.impl.AbstractTraverser.INSTANTIATE_NODES;
+import static org.alkemy.visitor.impl.AbstractTraverser.VISIT_NODES;
 
 import java.util.Iterator;
 import java.util.Spliterators;
@@ -67,7 +68,7 @@ public class Alkemy
      * <p>
      * Only alkemized classes are instrumented, others are left untouched.
      */
-    public static void startAlkemizer()
+    public static void start()
     {
         if (!instrumenting)
         {
@@ -138,7 +139,7 @@ public class Alkemy
      */
     public static <R, P> R mature(Class<R> r, AlkemyElementVisitor<P, ?> aev, P p)
     {
-        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES).create(aev, nodes.get(r), p);
+        return new AlkemyPreorderReader<R, P>(INSTANTIATE_NODES | VISIT_NODES).create(aev, nodes.get(r), p);
     }
 
     /**

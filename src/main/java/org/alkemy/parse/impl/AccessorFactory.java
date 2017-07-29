@@ -46,7 +46,7 @@ class AccessorFactory
     {
         try
         {
-            if (LambdaRefHelper.isInstrumented(f.getDeclaringClass()))
+            if (LambdaRefHelper.isInstrumented(f.getDeclaringClass(), null))
             {
                 return MethodHandleFactory.createAccessor(f);
             }
@@ -63,17 +63,20 @@ class AccessorFactory
         }
     }
 
-    static NodeConstructor createConstructor(Class<?> type)
+    static NodeConstructor createConstructor(Class<?> type, Class<?> componentType)
     {
+        type = InterfaceDefaultInstance.get(type);
+        componentType = InterfaceDefaultInstance.get(componentType);
+
         try
         {
-            if (LambdaRefHelper.isInstrumented(type))
+            if (LambdaRefHelper.isInstrumented(type, componentType))
             {
-                return MethodHandleFactory.createNodeConstructor(type);
+                return MethodHandleFactory.createNodeConstructor(type, componentType);
             }
             else
             {
-                return new ReflectionBasedConstructorAccessor(type.getDeclaredConstructor());
+                return new ReflectionBasedConstructorAccessor(type, componentType);
             }
         }
         catch (IllegalAccessException | SecurityException | NoSuchMethodException e)
@@ -123,21 +126,6 @@ class AccessorFactory
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        // safe
-        public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
-        {
-            return ref == null || type == ref.getClass() ? (T) ref : null;
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
-        {
-            return ref == null || ref.getClass().isAssignableFrom(type) ? (T) ref : null;
-        }
-
-        @Override
         public void set(Object value, Object unused) throws AccessException
         {
             ref = value;
@@ -167,6 +155,24 @@ class AccessorFactory
 
         @Override
         public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public Class<?> componentType() throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public Object newComponentInstance(Object... args) throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
         {
             throw new UnsupportedOperationException("Not supported for this type of element.");
         }

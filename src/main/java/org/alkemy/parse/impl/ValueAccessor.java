@@ -34,22 +34,18 @@ public interface ValueAccessor
     Object get(Object parent) throws AlkemyException;
 
     /**
-     * Returns the value if is exactly of type T (not assignable!), null otherwise.
+     * Returns the value if is assignable to type T, null otherwise.
      * 
      * @throws AlkemyException
      *             If an error occurs while recovering the value.
      */
-    <T> T safeGet(Object parent, Class<T> type) throws AlkemyException;
-
-    /**
-     * Returns the value if is a assignable to type T, null otherwise.
-     * <p>
-     * This method performs worse than {@link #safeGet(Object, Class)}.
-     * 
-     * @throws AlkemyException
-     *             If an error occurs while recovering the value.
-     */
-    <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException;
+    @SuppressWarnings("unchecked")
+    // safe
+    default <T> T get(Object parent, Class<T> type) throws AlkemyException
+    {
+        final Object v = get(parent);
+        return v == null || type.isInstance(v) ? (T) v : null;
+    }
 
     /**
      * Sets a value.

@@ -50,22 +50,6 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
     }
     
     @Override
-    @SuppressWarnings("unchecked") // safe
-    public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
-    {
-        final Object v = get(parent);
-        return v == null || type == v.getClass() ? (T) v : null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked") // safe
-    public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
-    {
-        final Object v = get(parent);
-        return v == null || v.getClass().isAssignableFrom(type) ? (T) v : null;
-    }
-    
-    @Override
     public void set(Object value, Object parent) throws AccessException
     {
         if (Objects.nonNull(parent))

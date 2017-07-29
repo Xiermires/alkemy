@@ -19,10 +19,11 @@ import static org.objectweb.asm.Opcodes.ACC_ENUM;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alkemy.parse.impl.Alkemizer.Stop;
+import org.alkemy.parse.impl.FieldAlkemizer.Stop;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 
@@ -34,7 +35,7 @@ public class AlkemizerUtils
     {
         return "<init>".equals(name) && "()V".equals(desc);
     }
-    
+
     public static String toQualifiedName(String className)
     {
         return className.replace('/', '.');
@@ -50,7 +51,8 @@ public class AlkemizerUtils
     public static String toClassNameFromDesc(String desc)
     {
         final Matcher matcher = DESC.matcher(desc);
-        if (matcher.matches()) return matcher.group(1);
+        if (matcher.matches())
+            return matcher.group(1);
         return null;
     }
 
@@ -58,12 +60,27 @@ public class AlkemizerUtils
     {
         return "L" + className + ";";
     }
-    
+
     public static boolean isType(String desc)
     {
         return desc.startsWith("L");
     }
-    
+
+    public static boolean isCollection(String desc)
+    {
+        try
+        {
+            final ClassReader cr = new ClassReader(toQualifiedNameFromDesc(desc));
+            final CheckImplements cv = new CheckImplements("java/util/Collection");
+            cr.accept(cv, ClassReader.SKIP_CODE);
+            return cv.isImplemented;
+        }
+        catch (IOException e)
+        {
+            throw new Stop();
+        }
+    }
+
     public static boolean isEnum(String desc)
     {
         try
@@ -78,7 +95,22 @@ public class AlkemizerUtils
             throw new Stop();
         }
     }
-    
+
+    // FIXME : This pattern is invalid (nested generics fail).
+    private static final Pattern nestedGeneric = Pattern.compile("L.+<(.*<.*)>;");
+    private static final Pattern plainGeneric = Pattern.compile("L.+<(L.+;)>;");
+
+    public static String toGenericType(String signature, String fallback)
+    {
+        final Matcher nested = nestedGeneric.matcher(signature);
+        if (!nested.matches())
+        {
+            final Matcher plain = plainGeneric.matcher(signature);
+            if (plain.matches()) { return plain.group(1); }
+        }
+        return fallback;
+    }
+
     static class CheckFieldIsEnum extends ClassVisitor
     {
         private boolean isEnum = false;
@@ -92,6 +124,25 @@ public class AlkemizerUtils
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)
         {
             isEnum = (access & ACC_ENUM) != 0;
+            super.visit(version, access, name, signature, superName, interfaces);
+        }
+    }
+
+    static class CheckImplements extends ClassVisitor
+    {
+        private final String desc;
+        private boolean isImplemented = false;
+
+        CheckImplements(String desc)
+        {
+            super(ASM5);
+            this.desc = desc;
+        }
+
+        @Override
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)
+        {
+            isImplemented = Arrays.asList(interfaces).contains(desc);
             super.visit(version, access, name, signature, superName, interfaces);
         }
     }

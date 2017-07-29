@@ -29,6 +29,14 @@ public interface NodeConstructor
     Class<?> type() throws AlkemyException;
     
     /**
+     * If the type is a collection or an array it returns the type of the element's contained. It returns null otherwise.
+     * 
+     * @throws AccessException
+     *             If an error occurs while recovering the class type.
+     */
+    Class<?> componentType() throws AlkemyException;
+    
+    /**
      * Returns a new instance of the class.
      * 
      * @throws AlkemyException
@@ -37,10 +45,26 @@ public interface NodeConstructor
     Object newInstance(Object... args) throws AlkemyException;
     
     /**
+     * Returns a new instance of the component class, or null if not a component type.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while creating the class instance.
+     */
+    Object newComponentInstance(Object... args) throws AlkemyException;
+    
+    /**
      * Returns a new instance of the class if is exactly of type T (not assignable!), null otherwise.
      * 
      * @throws AlkemyException
      *             If an error occurs while creating the class instance.
      */
     public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException;
+    
+    /**
+     * Returns a new instance of the component class if is exactly of type T (not assignable!), null otherwise.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while creating the class instance.
+     */
+    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException;
 }

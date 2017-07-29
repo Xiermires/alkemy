@@ -17,6 +17,8 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -75,19 +77,23 @@ class TypeParser implements AlkemyParser
     public Node<AbstractAlkemyElement<?>> parse(Class<?> type)
     {
         final TypedTable context = new TypedTable();
+
+        final AnnotatedMember am = new AnnotatedMember(type.getName(), type, type, type);
+
         return _parse(
-                type,
-                Nodes.arborescence(lexer.createNode(new AnnotatedMember(type, type), AccessorFactory.createConstructor(type),
-                        AccessorFactory.createSelfAccessor(type), AccessorFactory.createInvokers(getLeafMethods(type)), type,
-                        context)), context).build();
+                am,
+                Nodes.arborescence(lexer.createNode(new AnnotatedMember(type.getName(), type, type, type), AccessorFactory
+                        .createConstructor(type, type), AccessorFactory.createSelfAccessor(type), AccessorFactory
+                        .createInvokers(getLeafMethods(type)), type, context)), context).build();
     }
 
-    private Node.Builder<AbstractAlkemyElement<?>> _parse(Class<?> type, Node.Builder<AbstractAlkemyElement<?>> parent,
+    private Node.Builder<AbstractAlkemyElement<?>> _parse(AnnotatedMember type, Node.Builder<AbstractAlkemyElement<?>> parent,
             TypedTable context)
     {
-        for (final Field f : sortIfRequired(type.getDeclaredFields(), type.getAnnotation(Order.class), type))
+        for (final Field f : sortIfRequired(type.getComponentType().getDeclaredFields(), type.getComponentType().getAnnotation(
+                Order.class), type.getComponentType()))
         {
-            final AnnotatedMember am = new AnnotatedMember(f, f.getType(), f.getDeclaringClass());
+            final AnnotatedMember am = new AnnotatedMember(f.getName(), f, f.getType(), f.getDeclaringClass(), getGenericTypes(f));
 
             if (lexer.isLeaf(am))
             {
@@ -95,13 +101,27 @@ class TypeParser implements AlkemyParser
             }
             else if (lexer.isNode(am))
             {
-                _parse(f.getType(),
-                        parent.addChild(lexer.createNode(am, AccessorFactory.createConstructor(f.getType()),
-                                AccessorFactory.createAccessor(f), AccessorFactory.createInvokers(getLeafMethods(f.getType())),
-                                f.getType(), context)), context);
+                _parse(am, parent.addChild(lexer.createNode(am, AccessorFactory.createConstructor(am.getType(), am.getComponentType()), AccessorFactory
+                        .createAccessor(f), AccessorFactory.createInvokers(getLeafMethods(am.getComponentType())), am.getType(),
+                        context)), context);
             }
         }
         return parent;
+    }
+
+    private Type[] getGenericTypes(Field f)
+    {
+        final Type[] genericTypes;
+        final Type genericType = f.getGenericType();
+        if (genericType instanceof ParameterizedType)
+        {
+            genericTypes = ((ParameterizedType) genericType).getActualTypeArguments();
+        }
+        else
+        {
+            genericTypes = new Type[] { genericType };
+        }
+        return genericTypes;
     }
 
     private List<Method> getLeafMethods(Class<?> type)
@@ -109,7 +129,7 @@ class TypeParser implements AlkemyParser
         final List<Method> ms = new ArrayList<Method>();
         for (Method m : type.getDeclaredMethods())
         {
-            if (lexer.isLeaf(new AnnotatedMember(m)))
+            if (lexer.isLeaf(new AnnotatedMember(m.getName(), m, null, m.getDeclaringClass())))
             {
                 ms.add(m);
             }
@@ -122,58 +142,51 @@ class TypeParser implements AlkemyParser
         if (order != null)
         {
             final String[] names = order.value();
-            if (names.length != fields.length)
-            {
-                throw new InvalidOrder(
-                        "Missing fields within the FieldOrder annotation inside the type : '%s'. It must contain all mapped fields.",
-                        type.getSimpleName());
-            }
+            if (names.length != fields.length) { throw new InvalidOrder(
+                    "Missing fields within the FieldOrder annotation inside the type : '%s'. It must contain all mapped fields.",
+                    type.getSimpleName()); }
 
             final Map<String, Integer> nameOrder = new HashMap<String, Integer>();
             for (int i = 0; i < names.length; i++)
             {
                 nameOrder.put(names[i], i);
             }
-            Arrays.sort(
-                    fields,
-                    (o1, o2) ->
+            Arrays.sort(fields, (o1, o2) ->
+            {
+                final AnnotatedMember am1 = new AnnotatedMember(o1.getName(), o1, o1.getType(), o1.getDeclaringClass(),
+                        getGenericTypes(o1));
+                final AnnotatedMember am2 = new AnnotatedMember(o2.getName(), o2, o2.getType(), o2.getDeclaringClass(),
+                        getGenericTypes(o2));
+                if (lexer.isLeaf(am1) || lexer.isNode(am1) && lexer.isLeaf(am2) || lexer.isNode(am2))
+                {
+
+                    final Integer lhs = nameOrder.get(o1.getName());
+                    final Integer rhs = nameOrder.get(o2.getName());
+
+                    if (lhs == null)
                     {
-                        final AnnotatedMember am1 = new AnnotatedMember(o1, o1.getType());
-                        final AnnotatedMember am2 = new AnnotatedMember(o2, o2.getType());
-                        if (lexer.isLeaf(am1) || lexer.isNode(am1) && lexer.isLeaf(am2) || lexer.isNode(am2))
-                        {
+                        throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type
+                                .getSimpleName());
+                    }
+                    else if (rhs == null) { throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1
+                            .getName(), type.getSimpleName()); }
 
-                            final Integer lhs = nameOrder.get(o1.getName());
-                            final Integer rhs = nameOrder.get(o2.getName());
-
-                            if (lhs == null)
-                            {
-                                throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type
-                                        .getSimpleName());
-                            }
-                            else if (rhs == null)
-                            {
-                                throw new InvalidOrder("Field name '%s' not found within the type '%s'.", o1.getName(), type
-                                        .getSimpleName());
-                            }
-
-                            return lhs < rhs ? -1 : rhs == lhs ? 0 : 1;
-                        }
-                        else if (lexer.isLeaf(am1) || lexer.isNode(am1)) // Keep non
-                                                                         // mappings to the
-                                                                         // right
-                        {
-                            return 1;
-                        }
-                        else if (lexer.isLeaf(am2) || lexer.isNode(am2))
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    });
+                    return lhs < rhs ? -1 : rhs == lhs ? 0 : 1;
+                }
+                // keep non mappings to the right.
+                    else if (lexer.isLeaf(am1) || lexer.isNode(am1))
+                    {
+                        return 1;
+                    }
+                    else if (lexer.isLeaf(am2) || lexer.isNode(am2))
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                });
         }
         return fields;
     }

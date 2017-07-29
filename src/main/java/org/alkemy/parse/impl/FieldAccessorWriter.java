@@ -47,13 +47,12 @@ import org.slf4j.LoggerFactory;
 
 public class FieldAccessorWriter extends AbstractClassFieldVisitor
 {
-    private static final Logger log = LoggerFactory.getLogger(Alkemizer.class); // TODO why is
-                                                                                // LogBack not
-                                                                                // formatting
+    private static final Logger log = LoggerFactory.getLogger(FieldAlkemizer.class);
 
-    // maintain both identified && non-identified leafs to speed up the process.
+    // maintain both identified && non-identified leafs markers to speed up the process.
     private final Set<String> leafMarkers = new HashSet<>();
     private final Set<String> nonLeafMarkers = new HashSet<>();
+    private boolean changed = false;
 
     public FieldAccessorWriter(ClassVisitor cv, String className)
     {
@@ -87,18 +86,14 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
 
     private void appendGetters()
     {
-        fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable)
-                .forEach(entry -> appendGetter(entry.getKey(), entry.getValue().desc, entry.getValue().isStatic));
+        fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).forEach(
+                entry -> appendGetter(entry.getKey(), entry.getValue().desc, entry.getValue().isStatic));
     }
 
     private void appendSetters()
     {
-        fieldMap.entrySet()
-                .stream()
-                .filter(entry -> entry.getValue().alkemizable)
-                .forEach(
-                        entry -> appendSetter(entry.getKey(), entry.getValue().desc, entry.getValue().isEnum,
-                                entry.getValue().isStatic));
+        fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).forEach(
+                entry -> appendSetter(entry.getKey(), entry.getValue().desc, entry.getValue().isEnum, entry.getValue().isStatic));
     }
 
     private void appendGetter(String name, String desc, boolean isStatic)
@@ -112,6 +107,8 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         mv.visitInsn(Type.getType(desc).getOpcode(IRETURN));
         mv.visitMaxs(0, 0);
         mv.visitEnd();
+
+        changed = true;
     }
 
     private void appendSetter(String name, String desc, boolean isEnum, boolean isStatic)
@@ -123,7 +120,7 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         mv.visitVarInsn(ALOAD, 0);
         if (isEnum)
         {
-            mv.visitLdcInsn(Type.getType("Lorg/alkemy/parse/impl/TestAlkemizer$Lorem;"));
+            mv.visitLdcInsn(Type.getType(desc));
         }
         mv.visitVarInsn(Type.getType(desc).getOpcode(ILOAD), 1);
         if (isEnum)
@@ -136,6 +133,8 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
+
+        changed = true;
     }
 
     static class FieldProperties
@@ -143,14 +142,16 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         final boolean isEnum;
         final boolean isStatic;
         final String desc;
+        final String signature;
 
         boolean alkemizable;
 
-        public FieldProperties(String desc, boolean isEnum, boolean isStatic)
+        public FieldProperties(String desc, String signature, boolean isEnum, boolean isStatic)
         {
             this.isEnum = isEnum;
             this.isStatic = isStatic;
             this.desc = desc;
+            this.signature = signature;
         }
     }
 
@@ -192,11 +193,11 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
             // Nodes are not annotated themselves, but contain leaves at some depth.
             // If a non-annotated type is found, deep search for leaves to identify it as a node.
             final FieldProperties props = fields.get(name);
-            if (!props.alkemizable && !visited.contains(props.desc) && AlkemizerUtils.isType(props.desc))
+            if (!props.alkemizable && !visited.contains(props.desc) && AlkemizerUtils.isType(props.desc) && !AlkemizerUtils.isEnum(props.desc))
             {
                 try
                 {
-                    if (isNode(props.desc))
+                    if (isNode(props))
                     {
                         props.alkemizable = true;
                     }
@@ -209,8 +210,13 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
             super.visitEnd();
         }
 
-        private boolean isNode(String desc) throws IOException
+        private boolean isNode(FieldProperties props) throws IOException
         {
+            final String desc;
+            if (AlkemizerUtils.isCollection(props.desc))
+                desc = AlkemizerUtils.toGenericType(props.signature, props.desc);
+            else desc = props.desc;
+
             // Avoid cycles
             visited.add(desc);
 
@@ -248,6 +254,12 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         }
     }
 
+    @Override
+    public boolean isAlkemized()
+    {
+        return changed;
+    }
+
     static class SearchForLeafMarker extends ClassVisitor
     {
         private final Set<String> nonLeafMarkers;
@@ -276,7 +288,7 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
 
     static class TypeDeepLeafSearch extends AbstractClassFieldVisitor
     {
-        private final Set<String> visited;
+        private static final Set<String> visited = new HashSet<>();
         private final Set<String> leafMarkers;
         private final Set<String> nonLeafMarkers;
         private final HasLeaves hasLeaves;
@@ -286,7 +298,7 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         {
             super(null, null);
 
-            this.visited = visited;
+            // this.visited = visited;
             this.leafMarkers = alkemizableAnnotations;
             this.nonLeafMarkers = nonAlkemizableAnnotations;
             this.hasLeaves = hasLeaves;
@@ -295,8 +307,17 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         @Override
         public FieldVisitor visitField(int access, String name, String desc, String signature, Object value)
         {
-            super.visitField(access, name, desc, signature, value);
+            final FieldVisitor fv = super.visitField(access, name, desc, signature, value);
+            if (visited.contains(desc))
+                return fv;
+
             return new FieldLeafVisitor(visited, name, fieldMap, leafMarkers, nonLeafMarkers, hasLeaves);
+        }
+
+        @Override
+        public boolean isAlkemized()
+        {
+            return hasLeaves.get();
         }
     }
 

@@ -16,7 +16,6 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
@@ -38,6 +37,8 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
         this.f = f;
         this.isEnum = f.getType().isEnum();
         this.rank = NumberConversion.getRank(f.getType());
+
+        f.setAccessible(true);
     }
 
     @Override
@@ -45,7 +46,6 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
     {
         try
         {
-            f.setAccessible(true);
             return f.get(parent);
         }
         catch (final IllegalArgumentException | IllegalAccessException e)
@@ -53,34 +53,13 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
             throw new TypeMismatch("Can't get value from parent type '%s' for target '%s' of type '%s'", e,
                     parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
-        finally
-        {
-            f.setAccessible(false);
-        }
     }
 
-    @Override
-    @SuppressWarnings("unchecked") // safe
-    public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
-    {
-        final Object v = get(parent);
-        return v == null || type == v.getClass() ? (T) v : null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked") // safe
-    public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
-    {
-        final Object v = get(parent);
-        return v == null || v.getClass().isAssignableFrom(type) ? (T) v : null;
-    }
-    
     @Override
     public void set(Object value, Object parent) throws AccessException
     {
         try
         {
-            f.setAccessible(true);
             if (isEnum)
             {
                 AlkemyUtils.setEnum(f, value, parent);
@@ -94,10 +73,6 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
         {
             throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
                     .getName(), f.getName(), value, value != null ? value.getClass().getName() : "null");
-        }
-        finally
-        {
-            f.setAccessible(false);
         }
     }
 
@@ -123,37 +98,19 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
         @Override
         public Object get(Object parent)
         {
-            if (Objects.nonNull(parent))
-            {
-                return super.get(parent);
-            }
-            else return null;
+            return parent != null ? super.get(parent) : null;
         }
 
         @Override
-        public <T> T safeGet(Object parent, Class<T> type) throws AlkemyException
+        public <T> T get(Object parent, Class<T> type) throws AlkemyException
         {
-            if (Objects.nonNull(parent))
-            {
-                return super.safeGet(parent, type);
-            }
-            else return null;
+            return parent != null ? super.get(parent, type) : null;
         }
-        
-        @Override
-        public <T> T getIfAssignable(Object parent, Class<T> type) throws AlkemyException
-        {
-            if (Objects.nonNull(parent))
-            {
-                return super.getIfAssignable(parent, type);
-            }
-            return null;
-        }
-        
+
         @Override
         public void set(Object value, Object parent) throws AccessException
         {
-            if (Objects.nonNull(parent))
+            if (parent != null)
             {
                 super.set(value, parent);
             }
