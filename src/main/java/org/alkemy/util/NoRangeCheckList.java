@@ -22,13 +22,13 @@ import java.util.function.Consumer;
 /**
  * A list w/o any range check / concurrent mod. constraints.
  */
-public class UncheckedList<E> extends AbstractList<E>
+public class NoRangeCheckList<E> extends AbstractList<E>
 {
     private final int size;
     private final E[] buffer;
 
     @SuppressWarnings("unchecked")
-    public UncheckedList(List<E> list)
+    public NoRangeCheckList(List<E> list)
     {
         size = list.size();
         buffer = (E[]) list.toArray();

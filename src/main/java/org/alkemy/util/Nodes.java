@@ -39,13 +39,13 @@ public class Nodes
         return dest;
     }
 
-    public static <E> Node<E> makeUnchecked(Node<E> orig)
+    public static <E> Node<E> toNoRangeCheckLists(Node<E> orig)
     {
-        return makeUnchecked(orig, new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new UncheckedList<Node<E>>(orig
+        return toNoRangeCheckLists(orig, new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new NoRangeCheckList<Node<E>>(orig
                 .children()), orig.branchDepth()));
     }
 
-    private static <E> Node<E> makeUnchecked(Node<E> orig, ArborescenceNodeImpl<E> dest)
+    private static <E> Node<E> toNoRangeCheckLists(Node<E> orig, ArborescenceNodeImpl<E> dest)
     {
         if (orig.hasChildren())
         {
@@ -54,7 +54,7 @@ public class Nodes
                     {
                         if (c.hasChildren())
                         {
-                            makeUnchecked(c, new ArborescenceNodeImpl<E>(orig.data(), dest, new UncheckedList<Node<E>>(orig
+                            toNoRangeCheckLists(c, new ArborescenceNodeImpl<E>(orig.data(), dest, new NoRangeCheckList<Node<E>>(orig
                                     .children()), orig.branchDepth()));
                         }
                     });
