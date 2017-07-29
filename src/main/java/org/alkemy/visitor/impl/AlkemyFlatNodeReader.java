@@ -72,7 +72,7 @@ public class AlkemyFlatNodeReader<R, P, E extends AbstractAlkemyElement<E>> impl
         {
             args[i] = aev.create(leafs[i]);
         }
-        return root.data().safeNewInstance(root.type(), args);
+        return root.data().newInstance(root.type(), args);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class AlkemyFlatNodeReader<R, P, E extends AbstractAlkemyElement<E>> impl
         {
             args[i] = aev.create(leafs[i], parameter);
         }
-        return root.data().safeNewInstance(root.type(), args);
+        return root.data().newInstance(root.type(), args);
     }
 
     @Override

@@ -27,15 +27,16 @@ public interface NodeConstructor
      *             If an error occurs while recovering the class type.
      */
     Class<?> type() throws AlkemyException;
-    
+
     /**
-     * If the type is a collection or an array it returns the type of the element's contained. It returns null otherwise.
+     * If the type is a collection or an array it returns the type of the element's contained. It
+     * returns null otherwise.
      * 
      * @throws AccessException
      *             If an error occurs while recovering the class type.
      */
     Class<?> componentType() throws AlkemyException;
-    
+
     /**
      * Returns a new instance of the class.
      * 
@@ -43,7 +44,7 @@ public interface NodeConstructor
      *             If an error occurs while creating the class instance.
      */
     Object newInstance(Object... args) throws AlkemyException;
-    
+
     /**
      * Returns a new instance of the component class, or null if not a component type.
      * 
@@ -51,20 +52,32 @@ public interface NodeConstructor
      *             If an error occurs while creating the class instance.
      */
     Object newComponentInstance(Object... args) throws AlkemyException;
-    
+
     /**
-     * Returns a new instance of the class if is exactly of type T (not assignable!), null otherwise.
+     * Returns a new instance of the component class if is assignable to T, null otherwise.
      * 
      * @throws AlkemyException
      *             If an error occurs while creating the class instance.
      */
-    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException;
-    
+    @SuppressWarnings("unchecked")
+    // safe
+    default <T> T newInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        final Object v = newInstance(args);
+        return v != null && type.isInstance(v) ? (T) v : null;
+    }
+
     /**
-     * Returns a new instance of the component class if is exactly of type T (not assignable!), null otherwise.
+     * Returns a new instance of the component class if is assignable to T, null otherwise.
      * 
      * @throws AlkemyException
      *             If an error occurs while creating the class instance.
      */
-    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException;
+    @SuppressWarnings("unchecked")
+    // safe
+    default <T> T newComponentInstance(Class<T> type, Object... args) throws AlkemyException
+    {
+        final Object v = newComponentInstance(args);
+        return v != null && type.isInstance(v) ? (T) v : null;
+    }
 }

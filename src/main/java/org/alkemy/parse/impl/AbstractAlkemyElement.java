@@ -106,9 +106,9 @@ public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implement
     }
 
     @Override
-    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
+    public <T> T newInstance(Class<T> type, Object... args) throws AlkemyException
     {
-        return nodeConstructor.safeNewInstance(type, args);
+        return nodeConstructor.newInstance(type, args);
     }
 
     @Override
@@ -142,9 +142,9 @@ public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implement
     }
 
     @Override
-    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
+    public <T> T newComponentInstance(Class<T> type, Object... args) throws AlkemyException
     {
-        return nodeConstructor.safeNewComponentInstance(type, args);
+        return nodeConstructor.newComponentInstance(type, args);
     }
 
     public Collection<MethodInvoker> getMethodInvokers()

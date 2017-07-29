@@ -149,7 +149,6 @@ class AccessorFactory
 
     static class UnsupportedConstructor implements NodeConstructor
     {
-
         @Override
         public Class<?> type() throws AlkemyException
         {
@@ -163,7 +162,7 @@ class AccessorFactory
         }
 
         @Override
-        public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
+        public <T> T newInstance(Class<T> type, Object... args) throws AlkemyException
         {
             throw new UnsupportedOperationException("Not supported for this type of element.");
         }
@@ -181,7 +180,7 @@ class AccessorFactory
         }
 
         @Override
-        public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
+        public <T> T newComponentInstance(Class<T> type, Object... args) throws AlkemyException
         {
             throw new UnsupportedOperationException("Not supported for this type of element.");
         }

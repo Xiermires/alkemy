@@ -44,7 +44,7 @@ public interface ValueAccessor
     default <T> T get(Object parent, Class<T> type) throws AlkemyException
     {
         final Object v = get(parent);
-        return v == null || type.isInstance(v) ? (T) v : null;
+        return v != null && type.isInstance(v) ? (T) v : null;
     }
 
     /**

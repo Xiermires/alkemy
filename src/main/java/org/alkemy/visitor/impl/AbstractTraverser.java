@@ -59,7 +59,7 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     {
         Assertions.nonNull(root);
         
-        final R instance = root.data().safeNewInstance(root.type());
+        final R instance = root.data().newInstance(root.type());
         if (instance != null)
         {
             root.data().set(instance, null);
@@ -73,7 +73,7 @@ public abstract class AbstractTraverser<R, P> implements AlkemyNodeReader<R, P>
     {
         Assertions.nonNull(root);
         
-        final R instance = root.data().safeNewInstance(root.type());
+        final R instance = root.data().newInstance(root.type());
         if (instance != null)
         {
             root.data().set(instance, null);

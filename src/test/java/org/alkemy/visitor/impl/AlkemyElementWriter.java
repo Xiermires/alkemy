@@ -30,7 +30,7 @@ public class AlkemyElementWriter<R, P> implements AlkemyNodeReader<R, P>
     {
         final Parameters<P> params = new Parameters<>(aev, root.children().size());
         root.children().forEach(c -> processNode(aev, c, params));
-        return root.data().safeNewInstance(root.type(), params.get());
+        return root.data().newInstance(root.type(), params.get());
     }
 
     private void processNode(AlkemyElementVisitor<?, ?> aev, Node<? extends AbstractAlkemyElement<?>> e, Parameters<P> params)

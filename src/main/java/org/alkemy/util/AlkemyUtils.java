@@ -84,7 +84,7 @@ public class AlkemyUtils
         {
             args[i] = aev.create(mapped.get(i));
         }
-        return e.data().safeNewInstance(retType, args);
+        return e.data().newInstance(retType, args);
     }
 
     /**
@@ -101,7 +101,7 @@ public class AlkemyUtils
         {
             args[i] = aev.create(mapped.get(i), parameter);
         }
-        return e.data().safeNewInstance(retType, args);
+        return e.data().newInstance(retType, args);
     }
 
     /**

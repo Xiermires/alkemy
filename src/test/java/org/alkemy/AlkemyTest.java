@@ -339,7 +339,7 @@ public class AlkemyTest
             {
                 args[i] = source[mapped[i].idx];
             }
-            return node.data().safeNewInstance(node.type(), args);
+            return node.data().newInstance(node.type(), args);
         }
 
         // assign

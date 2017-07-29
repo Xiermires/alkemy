@@ -33,6 +33,8 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
     StaticMethodLambdaBasedConstructor(Class<?> type, Class<?> componentType, Supplier<?> noargsCtor,
             Supplier<?> noargsComponentCtor, NodeConstructorFunction staticFactory)
     {
+        Assertions.noneNull(type, componentType, noargsCtor, noargsComponentCtor, staticFactory);
+
         this.type = type;
         this.componentType = componentType;
         this.noargsCtor = noargsCtor;
@@ -68,15 +70,6 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    // safe
-    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
-    {
-        final Object v = newInstance(args);
-        return v == null || type == v.getClass() ? (T) v : null;
-    }
-
-    @Override
     public Class<?> componentType() throws AlkemyException
     {
         return componentType;
@@ -85,8 +78,6 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
     @Override
     public Object newComponentInstance(Object... args) throws AlkemyException
     {
-        Assertions.nonNull(componentType);
-        
         try
         {
             if (args.length == 0)
@@ -103,14 +94,5 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
             throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays
                     .asList(args), type);
         }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    // safe
-    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
-    {
-        final Object v = newComponentInstance(args);
-        return v == null || type == v.getClass() ? (T) v : null;
     }
 }

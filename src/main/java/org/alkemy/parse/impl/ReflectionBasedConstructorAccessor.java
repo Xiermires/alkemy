@@ -31,36 +31,15 @@ public class ReflectionBasedConstructorAccessor implements NodeConstructor
     {
         this.typeCtor = type.getDeclaredConstructor();
         this.componentTypeCtor = componentType.getDeclaredConstructor();
+
+        typeCtor.setAccessible(true);
+        componentTypeCtor.setAccessible(true);
     }
 
     @Override
     public Object newInstance(Object... args) throws AlkemyException
     {
-        if (args.length > 0) { throw new AccessException(
-                "Reflection based constructor of type '%s' expect no parameters, but received '%s'.", type(), Arrays.asList(args)); }
-        try
-        {
-            typeCtor.setAccessible(true);
-            return typeCtor.newInstance();
-        }
-        catch (final InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-        {
-            throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, typeCtor.getName(),
-                    Arrays.asList(args));
-        }
-        finally
-        {
-            typeCtor.setAccessible(false);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    // safe
-    public <T> T safeNewInstance(Class<T> type, Object... args) throws AlkemyException
-    {
-        final Object v = newInstance(args);
-        return v == null || type == v.getClass() ? (T) v : null;
+        return newInstance(typeCtor, args);
     }
 
     @Override
@@ -78,30 +57,21 @@ public class ReflectionBasedConstructorAccessor implements NodeConstructor
     @Override
     public Object newComponentInstance(Object... args) throws AlkemyException
     {
+        return newInstance(componentTypeCtor, args);
+    }
+
+    private Object newInstance(Constructor<?> ctor, Object... args)
+    {
         if (args.length > 0) { throw new AccessException(
                 "Reflection based constructor of type '%s' expect no parameters, but received '%s'.", type(), Arrays.asList(args)); }
         try
         {
-            componentTypeCtor.setAccessible(true);
-            return componentTypeCtor.newInstance();
+            return ctor.newInstance();
         }
         catch (final InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
-            throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, componentTypeCtor
-                    .getName(), Arrays.asList(args));
+            throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, ctor.getName(),
+                    Arrays.asList(args));
         }
-        finally
-        {
-            componentTypeCtor.setAccessible(false);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    // safe
-    public <T> T safeNewComponentInstance(Class<T> type, Object... args) throws AlkemyException
-    {
-        final Object v = newComponentInstance(args);
-        return v == null || type == v.getClass() ? (T) v : null;
     }
 }
