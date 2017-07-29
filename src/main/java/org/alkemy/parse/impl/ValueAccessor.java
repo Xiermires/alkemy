@@ -56,4 +56,8 @@ public interface ValueAccessor
     void set(Object value, Object parent) throws AlkemyException;
 
     String targetName();
+    
+    boolean isCollection();
+    
+    // TODO boolean isMap();
 }

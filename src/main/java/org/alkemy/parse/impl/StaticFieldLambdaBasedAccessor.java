@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -27,6 +28,7 @@ public class StaticFieldLambdaBasedAccessor implements ValueAccessor
     private final Class<?> type;
     private final Supplier<?> getter;
     private final Consumer<Object> setter;
+    private final boolean collection;
 
     StaticFieldLambdaBasedAccessor(String name, Class<?> type, Supplier<?> getter, Consumer<Object> setter)
     {
@@ -34,6 +36,7 @@ public class StaticFieldLambdaBasedAccessor implements ValueAccessor
         this.type = type;
         this.getter = getter;
         this.setter = setter;
+        this.collection = Collection.class.isAssignableFrom(type);
     }
 
     @Override
@@ -58,5 +61,11 @@ public class StaticFieldLambdaBasedAccessor implements ValueAccessor
     public String targetName()
     {
         return name;
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        return collection;
     }
 }

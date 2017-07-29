@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -28,6 +29,7 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
     private final Class<?> type;
     private final Function<Object, ?> getter;
     private final BiConsumer<Object, Object> setter;
+    private final boolean collection;
 
     MemberFieldLambdaBasedAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
@@ -35,6 +37,7 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
         this.type = type;
         this.getter = getter;
         this.setter = setter;
+        this.collection = Collection.class.isAssignableFrom(type);
     }
 
     @Override
@@ -62,5 +65,11 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
     public String targetName()
     {
         return name;
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        return collection;
     }
 }

@@ -16,6 +16,7 @@
 package org.alkemy.parse.impl;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
@@ -31,12 +32,14 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
     protected final Field f;
     private final boolean isEnum;
     private final int rank;
+    private final boolean collection;
 
     public AbstractReflectionBasedValueAccessor(Field f)
     {
         this.f = f;
         this.isEnum = f.getType().isEnum();
         this.rank = NumberConversion.getRank(f.getType());
+        this.collection = Collection.class.isAssignableFrom(f.getType());
 
         f.setAccessible(true);
     }
@@ -86,6 +89,12 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
     public Class<?> type() throws AlkemyException
     {
         return f.getType();
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        return collection;
     }
 
     public static class MemberFieldReflectionBasedAccessor extends AbstractReflectionBasedValueAccessor

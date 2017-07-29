@@ -43,6 +43,7 @@ public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implement
     private final Class<? extends Annotation> alkemyType;
     private final boolean node;
     private final TypedTable context;
+    private final boolean collection;
 
     AbstractAlkemyElement(AnnotatedMember desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
@@ -55,6 +56,7 @@ public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implement
         this.alkemyType = alkemyType;
         this.node = node;
         this.context = context;
+        this.collection = Collection.class.isAssignableFrom(desc.getType());
     }
 
     protected AbstractAlkemyElement(AbstractAlkemyElement<?> other)
@@ -68,6 +70,7 @@ public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implement
         this.alkemyType = other.alkemyType;
         this.node = other.node;
         this.context = other.context;
+        this.collection = other.collection;                
     }
 
     static AlkemyElement create(AnnotatedMember desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
@@ -365,5 +368,12 @@ public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implement
         {
             super(desc, nodeConstructor, valueAccessor, methodInvokers, alkemyType, node, context);
         }
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

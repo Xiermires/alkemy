@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.alkemy.exception.AccessException;
@@ -107,10 +108,12 @@ class AccessorFactory
     {
         Object ref;
         Class<?> type;
+        boolean collection;
 
         SelfAccessor(Class<?> type)
         {
             this.type = type;
+            this.collection = Collections.class.isAssignableFrom(type);
         }
 
         @Override
@@ -135,6 +138,12 @@ class AccessorFactory
         public String targetName()
         {
             return type.getTypeName();
+        }
+
+        @Override
+        public boolean isCollection()
+        {
+            return collection;
         }
     }
 
