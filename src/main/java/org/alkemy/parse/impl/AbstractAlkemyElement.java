@@ -373,7 +373,6 @@ public class AbstractAlkemyElement<E extends AbstractAlkemyElement<E>> implement
     @Override
     public boolean isCollection()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return collection;
     }
 }

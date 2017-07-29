@@ -44,9 +44,8 @@ class AlkemyNodes implements NodeFactory
     {
         this.parser = parser;
 
-        cache = CacheBuilder.newBuilder().maximumWeight(MAXIMUM_BYTE_SIZE)
-                .weigher((k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue())
-                .expireAfterAccess(15, TimeUnit.MINUTES)
+        cache = CacheBuilder.newBuilder().maximumWeight(MAXIMUM_BYTE_SIZE).weigher(
+                (k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue()).expireAfterAccess(15, TimeUnit.MINUTES)
                 .build(new CacheLoader<Class<?>, Node<? extends AbstractAlkemyElement<?>>>()
                 {
                     @Override
@@ -66,9 +65,14 @@ class AlkemyNodes implements NodeFactory
     public <R> TypifiedNode<R, ? extends AbstractAlkemyElement<?>> get(Class<R> type)
     {
         Assertions.nonNull(type);
+        return new TypifiedNode<>(_get(type), type);
+    }
+
+    private <R> Node<? extends AbstractAlkemyElement<?>> _get(Class<R> type)
+    {
         try
         {
-            return new TypifiedNode<>(cache.get(type), type);
+            return cache.get(type);
         }
         catch (Exception e)
         {

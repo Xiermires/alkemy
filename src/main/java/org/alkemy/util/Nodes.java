@@ -41,8 +41,8 @@ public class Nodes
 
     public static <E> Node<E> toNoRangeCheckLists(Node<E> orig)
     {
-        return toNoRangeCheckLists(orig, new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new NoRangeCheckList<Node<E>>(orig
-                .children()), orig.branchDepth()));
+        return toNoRangeCheckLists(orig, new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new NoRangeCheckList<Node<E>>(
+                orig.children()), orig.branchDepth()));
     }
 
     private static <E> Node<E> toNoRangeCheckLists(Node<E> orig, ArborescenceNodeImpl<E> dest)
@@ -54,8 +54,8 @@ public class Nodes
                     {
                         if (c.hasChildren())
                         {
-                            toNoRangeCheckLists(c, new ArborescenceNodeImpl<E>(orig.data(), dest, new NoRangeCheckList<Node<E>>(orig
-                                    .children()), orig.branchDepth()));
+                            toNoRangeCheckLists(c, new ArborescenceNodeImpl<E>(orig.data(), dest, new NoRangeCheckList<Node<E>>(
+                                    orig.children()), orig.branchDepth()));
                         }
                     });
         }
