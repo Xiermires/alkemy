@@ -16,7 +16,6 @@
 package org.alkemy.parse.impl;
 
 import org.alkemy.annotations.Order;
-import org.alkemy.util.PassThrough.Bar;
 
 @Order({ "s2", "s1", "s3", "s4", "s7", "s6", "s5" })
 public class TestOrdered

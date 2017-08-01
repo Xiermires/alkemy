@@ -74,7 +74,7 @@ class TypeParser implements AlkemyParser
     }
 
     @Override
-    public Node<AbstractAlkemyElement<?>> parse(Class<?> type)
+    public Node<AlkemyElement> parse(Class<?> type)
     {
         final TypedTable context = new TypedTable();
 
@@ -87,7 +87,7 @@ class TypeParser implements AlkemyParser
                         .createInvokers(getLeafMethods(type)), type, context)), context).build();
     }
 
-    private Node.Builder<AbstractAlkemyElement<?>> _parse(AnnotatedMember type, Node.Builder<AbstractAlkemyElement<?>> parent,
+    private Node.Builder<AlkemyElement> _parse(AnnotatedMember type, Node.Builder<AlkemyElement> parent,
             TypedTable context)
     {
         for (final Field f : sortIfRequired(type.getComponentType().getDeclaredFields(), type.getComponentType().getAnnotation(

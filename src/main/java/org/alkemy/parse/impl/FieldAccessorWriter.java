@@ -288,7 +288,7 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
 
     static class TypeDeepLeafSearch extends AbstractClassFieldVisitor
     {
-        private static final Set<String> visited = new HashSet<>();
+        private final Set<String> visited = new HashSet<>();
         private final Set<String> leafMarkers;
         private final Set<String> nonLeafMarkers;
         private final HasLeaves hasLeaves;

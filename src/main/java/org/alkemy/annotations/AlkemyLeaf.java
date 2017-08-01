@@ -22,8 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
 
-import org.alkemy.parse.impl.AbstractAlkemyElement;
-import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
+import org.alkemy.parse.impl.AlkemyElement;
 
 /**
  * A marker which indicates the annotated annotation annotates itself an alkemy element.
@@ -51,7 +50,7 @@ import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
  * </code>
  * 
  * Only one annotation annotated as {@link AlkemyElement} is allowed per element. That identifies
- * the type of the alkemization {@link AbstractAlkemyElement#alkemyType()}. This type can be used
+ * the type of the alkemization {@link AlkemyElement#alkemyType()}. This type can be used
  * by the visitors to filter out alkemy types. There is no restriction on how many visitors can
  * support alkemy types, or how many alkemy types can be supported by a visitor.
  * <p>
@@ -69,7 +68,7 @@ import org.alkemy.parse.impl.AbstractAlkemyElement.AlkemyElement;
     <br>    int bar;
     <br>}
  * </code>
- * The visitors can access the extra information via {@link AbstractAlkemyElement#desc()} which
+ * The visitors can access the extra information via {@link AlkemyElement#desc()} which
  * returns an {@link AnnotatedElement}, representing a field / method, that can itself be queried 
  * for additional non-marker annotations.
  */

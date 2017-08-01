@@ -17,7 +17,7 @@ package org.alkemy.parse;
 
 import java.util.List;
 
-import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.parse.impl.MethodInvoker;
 import org.alkemy.parse.impl.NodeConstructor;
 import org.alkemy.parse.impl.ValueAccessor;
@@ -36,13 +36,13 @@ public interface AlkemyLexer<N, L>
     boolean isLeaf(L desc);
 
     /**
-     * Creates an unbound {@link AbstractAlkemyElement} for this leaf.
+     * Creates an unbound {@link AlkemyElement} for this leaf.
      */
-    AbstractAlkemyElement<?> createLeaf(L desc, ValueAccessor valueAccessor, TypedTable context);
+    AlkemyElement createLeaf(L desc, ValueAccessor valueAccessor, TypedTable context);
 
     /**
-     * Creates an unbound {@link AbstractAlkemyElement} for this node.
+     * Creates an unbound {@link AlkemyElement} for this node.
      */
-    AbstractAlkemyElement<?> createNode(N desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    AlkemyElement createNode(N desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
 }

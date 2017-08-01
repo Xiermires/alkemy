@@ -31,7 +31,7 @@ public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, Annot
     private boolean leafFound;
     
     @Override
-    public Node<AbstractAlkemyElement<?>> parse(Class<?> type)
+    public Node<AlkemyElement> parse(Class<?> type)
     {
         for (final Field f : type.getDeclaredFields())
         {
@@ -64,13 +64,13 @@ public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, Annot
     }
 
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
+    public AlkemyElement createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
     {
         return null;
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(Class<?> desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    public AlkemyElement createNode(Class<?> desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
         return null;

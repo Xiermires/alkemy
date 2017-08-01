@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.util.Collection;
+
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
@@ -24,6 +26,11 @@ public interface ValueAccessor
      * Returns the value type.
      */
     Class<?> type();
+
+    /**
+     * If {@link #isCollection()} returns the type of the collection, null otherwise.
+     */
+    Class<? extends Collection<Object>> collectionType();
 
     /**
      * Returns the value.
@@ -55,9 +62,21 @@ public interface ValueAccessor
      */
     void set(Object value, Object parent) throws AlkemyException;
 
+    /**
+     * Returns an identifier of the target value.
+     */
     String targetName();
-    
+
+    /**
+     * True if the target type can be assignable to a collection.
+     */
     boolean isCollection();
-    
-    // TODO boolean isMap();
+
+    /**
+     * if {@link #isCollection()}, then adds a value to it.
+     * 
+     * @throws AccessException
+     *             If an error occurs while adding the value.
+     */
+    void add(Object value, Object parent) throws AlkemyException;
 }

@@ -18,6 +18,8 @@ package org.alkemy.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import org.alkemy.util.Node;
+import org.alkemy.util.Nodes;
 import org.alkemy.util.Node.Builder;
 import org.junit.Test;
 

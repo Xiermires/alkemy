@@ -85,13 +85,13 @@ public class MethodHandleBasedInvoker implements MethodInvoker
     @Override
     @SuppressWarnings("unchecked")
     // safe
-    public <R> R safeInvoke(Object parent, Class<R> retType, Object... args) throws AlkemyException
+    public <R> R invoke(Object parent, Class<R> retType, Object... args) throws AlkemyException
     {
         final Optional<Object> o = invoke(parent, args);
         if (o.isPresent())
         {
             final Object v = o.get();
-            return retType == v.getClass() ? (R) v : null;
+            return v != null && retType.isInstance(v) ? (R) v : null;
         }
         return null;
     }

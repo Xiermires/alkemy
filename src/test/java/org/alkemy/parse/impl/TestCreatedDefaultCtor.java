@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import org.alkemy.AssignConstant.Bar;
-
-
 public class TestCreatedDefaultCtor extends TestAlkemizer
 {
     @Bar

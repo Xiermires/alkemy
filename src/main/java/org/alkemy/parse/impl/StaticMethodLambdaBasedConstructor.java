@@ -33,7 +33,7 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
     StaticMethodLambdaBasedConstructor(Class<?> type, Class<?> componentType, Supplier<?> noargsCtor,
             Supplier<?> noargsComponentCtor, NodeConstructorFunction staticFactory)
     {
-        Assertions.noneNull(type, componentType, noargsCtor, noargsComponentCtor, staticFactory);
+        Assertions.noneNull(type, noargsCtor, staticFactory);
 
         this.type = type;
         this.componentType = componentType;

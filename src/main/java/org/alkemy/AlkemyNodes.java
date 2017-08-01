@@ -18,57 +18,49 @@ package org.alkemy;
 import java.util.concurrent.TimeUnit;
 
 import org.agenttools.AgentTools;
-import org.alkemy.Alkemy.NodeFactory;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AlkemyParser;
-import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AlkemyElement;
+import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
-import org.alkemy.util.Nodes.TypifiedNode;
+import org.alkemy.util.Nodes.RootNode;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-class AlkemyNodes implements NodeFactory
+public class AlkemyNodes
 {
     // TODO: Allow external configuration
     private static final int MAXIMUM_BYTE_SIZE = 2 * 1024 * 1024;
 
-    private final AlkemyParser parser;
-
-    // Keep a cached version of created AlkemyTypeVisitor to enhance performance.
-    private final LoadingCache<Class<?>, Node<? extends AbstractAlkemyElement<?>>> cache;
-
-    AlkemyNodes(AlkemyParser parser)
-    {
-        this.parser = parser;
-
-        cache = CacheBuilder.newBuilder().maximumWeight(MAXIMUM_BYTE_SIZE).weigher(
-                (k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue()).expireAfterAccess(15, TimeUnit.MINUTES)
-                .build(new CacheLoader<Class<?>, Node<? extends AbstractAlkemyElement<?>>>()
+    private static final AlkemyParser parser = AlkemyParsers.typeParser();
+    private static final LoadingCache<Class<?>, Node<AlkemyElement>> cache = CacheBuilder.newBuilder()//
+            .maximumWeight(MAXIMUM_BYTE_SIZE)//
+            .weigher((k, v) -> Number.class.cast(AgentTools.getObjectSize(k)).intValue())//
+            .expireAfterAccess(60, TimeUnit.MINUTES)//
+            .build(new CacheLoader<Class<?>, Node<AlkemyElement>>()
+            {
+                @Override
+                public Node<AlkemyElement> load(Class<?> key) throws AlkemyException
                 {
-                    @Override
-                    public Node<? extends AbstractAlkemyElement<?>> load(Class<?> key) throws AlkemyException
-                    {
-                        return _create(key);
-                    }
-                });
-    }
+                    return _create(key);
+                }
+            });
 
-    private final Node<? extends AbstractAlkemyElement<?>> _create(Class<?> type)
+    private static final Node<AlkemyElement> _create(Class<?> type)
     {
         return parser.parse(type);
     }
 
-    @Override
-    public <R> TypifiedNode<R, ? extends AbstractAlkemyElement<?>> get(Class<R> type)
+    public static Node<AlkemyElement> get(Class<?> type)
     {
         Assertions.nonNull(type);
-        return new TypifiedNode<>(_get(type), type);
+        return new RootNode<>(_get(type), type);
     }
 
-    private <R> Node<? extends AbstractAlkemyElement<?>> _get(Class<R> type)
+    private static Node<AlkemyElement> _get(Class<?> type)
     {
         try
         {

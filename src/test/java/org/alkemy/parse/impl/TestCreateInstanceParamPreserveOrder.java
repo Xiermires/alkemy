@@ -16,7 +16,6 @@
 package org.alkemy.parse.impl;
 
 import org.alkemy.annotations.Order;
-import org.alkemy.util.PassThrough.Foo;
 
 public class TestCreateInstanceParamPreserveOrder
 {

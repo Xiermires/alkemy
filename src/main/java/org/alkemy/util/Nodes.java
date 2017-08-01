@@ -24,6 +24,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.alkemy.AlkemyNodes;
+import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.util.Node.Builder;
 
 public class Nodes
@@ -33,32 +35,10 @@ public class Nodes
         return new ArborescenceBuilder<>(null, root);
     }
 
-    public static <E, T> Builder<T> copy(Node<E> orig, Builder<T> dest, Predicate<? super E> p, Function<Node<E>, T> f)
+    public static <E, T> Builder<T> copy(Node<E> orig, Builder<T> dest, Predicate<? super E> p, Function<E, T> f)
     {
-        orig.children().stream().filter(filter -> p.test(filter.data())).forEach(e -> copy(e, dest.addChild(f.apply(e)), p, f));
-        return dest;
-    }
-
-    public static <E> Node<E> toNoRangeCheckLists(Node<E> orig)
-    {
-        return toNoRangeCheckLists(orig, new ArborescenceNodeImpl<E>(orig.data(), orig.parent(), new NoRangeCheckList<Node<E>>(
-                orig.children()), orig.branchDepth()));
-    }
-
-    private static <E> Node<E> toNoRangeCheckLists(Node<E> orig, ArborescenceNodeImpl<E> dest)
-    {
-        if (orig.hasChildren())
-        {
-            orig.children().forEach(
-                    c ->
-                    {
-                        if (c.hasChildren())
-                        {
-                            toNoRangeCheckLists(c, new ArborescenceNodeImpl<E>(orig.data(), dest, new NoRangeCheckList<Node<E>>(
-                                    orig.children()), orig.branchDepth()));
-                        }
-                    });
-        }
+        orig.children().stream() //
+                .filter(filter -> p.test(filter.data())).forEach(e -> copy(e, dest.addChild(f.apply(e.data())), p, f));
         return dest;
     }
 
@@ -97,20 +77,6 @@ public class Nodes
             }
             return calculateDepths(node).drainTo(new ArborescenceNodeImpl<>(), true);
         }
-
-        // private Node<E> sortByDepth(Node<E> node)
-        // {
-        // if (node.hasChildren())
-        // {
-        // Collections.sort(node.children(), (lhs, rhs) ->
-        // {
-        // return Integer.compare(lhs.branchDepth(), rhs.branchDepth());
-        // });
-        // Collections.reverse(node.children());
-        // node.children().forEach(c -> sortByDepth(c));
-        // }
-        // return node;
-        // }
 
         private ArborescenceBuilder<E> calculateDepths(ArborescenceBuilder<E> e)
         {
@@ -320,15 +286,33 @@ public class Nodes
         }
     }
 
-    public static class TypifiedNode<R, E> implements Node<E>
+    public static class RootNode<R, E> implements Node<E>
     {
         private Node<E> root;
         private Class<R> type;
 
-        public TypifiedNode(Node<E> root, Class<R> type)
+        public RootNode(Node<E> root, Class<R> type)
         {
             this.root = root;
             this.type = type;
+        }
+
+        public static <R> RootNode<R, AlkemyElement> create(Class<R> type)
+        {
+            return new RootNode<R, AlkemyElement>(AlkemyNodes.get(type), type);
+        }
+
+        public static <R, E> RootNode<R, E> create(Node<E> root, Class<R> type)
+        {
+            return new RootNode<R, E>(root, type);
+        }
+
+        public static <R, E> RootNode<R, E> create(Class<R> type, Function<AlkemyElement, E> f)
+        {
+            final Node<AlkemyElement> src = AlkemyNodes.get(type);
+            final Builder<E> dst = arborescence(f.apply(src.data()));
+            final Node<E> copy = copy(src, dst, p -> true, f).build();
+            return new RootNode<R, E>(copy, type);
         }
 
         public Class<R> type()

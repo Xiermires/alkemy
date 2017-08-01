@@ -92,9 +92,32 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public Class<? extends Collection<Object>> collectionType() throws AlkemyException
+    {
+        return collection ? (Class<? extends Collection<Object>>) f.getType() : null;
+    }
+
+    @Override
     public boolean isCollection()
     {
         return collection;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public void add(Object value, Object parent)
+    {
+        if (collection)
+        {
+            final Collection<Object> col = (Collection<Object>) get(parent);
+            if (col != null)
+            {
+                col.add(value);
+            }
+        }
     }
 
     public static class MemberFieldReflectionBasedAccessor extends AbstractReflectionBasedValueAccessor
@@ -122,6 +145,15 @@ public abstract class AbstractReflectionBasedValueAccessor implements ValueAcces
             if (parent != null)
             {
                 super.set(value, parent);
+            }
+        }
+
+        @Override
+        public void add(Object value, Object parent) throws AlkemyException
+        {
+            if (parent != null)
+            {
+                super.add(value, parent);
             }
         }
     }

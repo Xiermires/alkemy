@@ -17,7 +17,7 @@ package org.alkemy.util;
 
 import org.junit.Test;
 
-public class ConditionsTest
+public class AssertionsTest
 {
     @Test(expected = NullPointerException.class)
     public void requiresNonNull()

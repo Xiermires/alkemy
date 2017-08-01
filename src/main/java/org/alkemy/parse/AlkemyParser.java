@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse;
 
-import org.alkemy.parse.impl.AbstractAlkemyElement;
+import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.util.Node;
 
 public interface AlkemyParser
@@ -23,5 +23,5 @@ public interface AlkemyParser
     /**
      * Returns the {@link Node} root of a tree of <b>unbound</b> elements associated to the owner's type.
      */
-    Node<AbstractAlkemyElement<?>> parse(Class<?> ownerType);
+    Node<AlkemyElement> parse(Class<?> ownerType);
 }

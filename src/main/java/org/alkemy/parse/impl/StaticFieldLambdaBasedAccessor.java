@@ -44,13 +44,21 @@ public class StaticFieldLambdaBasedAccessor implements ValueAccessor
     {
         return type;
     }
-    
+
+    @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public Class<? extends Collection<Object>> collectionType() throws AlkemyException
+    {
+        return collection ? (Class<? extends Collection<Object>>) type : null;
+    }
+
     @Override
     public Object get(Object unused) throws AccessException
     {
         return getter.get();
     }
-    
+
     @Override
     public void set(Object value, Object unused) throws AccessException
     {
@@ -67,5 +75,20 @@ public class StaticFieldLambdaBasedAccessor implements ValueAccessor
     public boolean isCollection()
     {
         return collection;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public void add(Object value, Object parent) throws AlkemyException
+    {
+        if (collection)
+        {
+            final Collection<Object> col = (Collection<Object>) get(parent);
+            if (col != null)
+            {
+                col.add(value);
+            }
+        }
     }
 }

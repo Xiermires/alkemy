@@ -36,8 +36,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.alkemy.Alkemy;
-import org.alkemy.AssignConstant;
+import org.alkemy.AlkemyNodes;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.MemberFieldReflectionBasedAccessor;
@@ -192,7 +191,7 @@ public class AlkemizerTest
     @Test(expected = AlkemyException.class)
     public void testNoDefaultCtor()
     {
-        Alkemy.mature(TestCreatedDefaultCtor.class, new AssignConstant<TestCreatedDefaultCtor, Integer>(1));
+        AlkemyNodes.get(TestCreatedDefaultCtor.class);
     }
 
     @Test

@@ -50,13 +50,13 @@ class TypeLexer implements AlkemyLexer<AnnotatedMember, AnnotatedMember>
     }
 
     @Override
-    public AbstractAlkemyElement<?> createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor, TypedTable context)
+    public AlkemyElement createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor, TypedTable context)
     {
         return factory.createLeaf(desc, valueAccessor, context);
     }
 
     @Override
-    public AbstractAlkemyElement<?> createNode(AnnotatedMember desc, NodeConstructor valueConstructor,
+    public AlkemyElement createNode(AnnotatedMember desc, NodeConstructor valueConstructor,
             ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
     {
         return factory.createNode(desc, valueConstructor, valueAccessor, methodInvokers, nodeType, context);

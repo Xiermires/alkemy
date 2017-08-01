@@ -37,10 +37,10 @@ public interface MethodInvoker
     Optional<Object> invoke(Object parent, Object... args) throws AlkemyException;
     
     /**
-     * Invokes the method and returns the value if is exactly of type T (not assignable!), null otherwise.
+     * Invokes the method and returns the value if is assignable to type T, null otherwise.
      * 
      * @throws AlkemyException
      *             If an error occurs while invoking the method.
      */
-    <R> R safeInvoke(Object parent, Class<R> retType, Object... args) throws AlkemyException;
+    <R> R invoke(Object parent, Class<R> retType, Object... args) throws AlkemyException;
 }

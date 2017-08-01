@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import org.alkemy.util.PassThrough.Foo;
 
 public class TestClass
 {

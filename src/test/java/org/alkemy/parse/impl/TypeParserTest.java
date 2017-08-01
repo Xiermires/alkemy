@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.alkemy.parse.AlkemyParser;
+import org.alkemy.parse.impl.AlkemyElement;
+import org.alkemy.parse.impl.AlkemyParsers;
 import org.junit.Test;
 
 public class TypeParserTest
@@ -31,7 +33,7 @@ public class TypeParserTest
     public void parseTestClass() 
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
-        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
+        final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestClass.class).drainTo(result);
         
         assertThat(result.size(), is(5));
@@ -44,7 +46,7 @@ public class TypeParserTest
     public void parseTestNode() throws IOException, InstantiationException, IllegalAccessException
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
-        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
+        final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestNode.class).drainTo(result);
 
         assertThat(result.size(), is(6));
@@ -54,7 +56,7 @@ public class TypeParserTest
     public void testOrdered() 
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
-        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
+        final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestOrdered.class).drainTo(result);
 
         assertThat(result.size(), is(7));
@@ -73,7 +75,7 @@ public class TypeParserTest
     public void testDeepLeaves() 
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
-        final List<AbstractAlkemyElement<?>> result = new ArrayList<AbstractAlkemyElement<?>>();
+        final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestDeepLeaves.class).drainTo(result);
 
         assertThat(result.size(), is(6));

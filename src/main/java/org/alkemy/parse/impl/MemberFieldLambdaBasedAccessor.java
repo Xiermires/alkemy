@@ -47,11 +47,19 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public Class<? extends Collection<Object>> collectionType() throws AlkemyException
+    {
+        return collection ? (Class<? extends Collection<Object>>) type : null;
+    }
+    
+    @Override
     public Object get(Object parent) throws AccessException
     {
         return Objects.nonNull(parent) ? getter.apply(parent) : null;
     }
-    
+
     @Override
     public void set(Object value, Object parent) throws AccessException
     {
@@ -71,5 +79,20 @@ public class MemberFieldLambdaBasedAccessor implements ValueAccessor
     public boolean isCollection()
     {
         return collection;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    // safe
+    public void add(Object value, Object parent) throws AlkemyException
+    {
+        if (collection)
+        {
+            final Collection<Object> col = (Collection<Object>) get(parent);
+            if (col != null)
+            {
+                col.add(value);
+            }
+        }
     }
 }

@@ -16,13 +16,14 @@
 package org.alkemy.parse.impl;
 
 import org.agenttools.AgentTools;
+import org.alkemy.parse.impl.AlkemizerCTF;
 import org.junit.Test;
 
 // TODO figure out how to test log contents in LogBack 
 public class AlkemizerFailuresTest
 {
     @Test
-    public void testFinalFieldsFailure()
+    public void testNoDefaultCtor()
     {
         AgentTools.retransform(new AlkemizerCTF(), "org.alkemy.parse.impl.AlkemizerFinalFieldsFailure",
                 "org.alkemy.parse.impl.AlkemizerFailureSuperNoDefaultCtor");

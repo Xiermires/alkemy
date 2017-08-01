@@ -24,11 +24,11 @@ public interface AlkemyElementFactory<T>
     /**
      * Creates an alkemy element for this target.
      */
-    AbstractAlkemyElement<?> createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
+    AlkemyElement createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
 
     /**
      * Creates an alkemy element node for this target.
      */
-    AbstractAlkemyElement<?> createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    AlkemyElement createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
 }
