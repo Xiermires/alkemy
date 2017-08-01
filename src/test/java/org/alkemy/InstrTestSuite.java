@@ -24,13 +24,14 @@ import org.junit.runner.RunWith;
 @RunWith(InstrumentClassWithLambdas.class)
 @InstrumentableLambdaClasses(//
 testClassNames = { //
+        "org.alkemy.CoreAlkemy", //
         "org.alkemy.parse.impl.AlkemizerTest", //
         "org.alkemy.parse.impl.TypeParserTest", //
         }, //
 instrs = @Instr(classNames = { //
+        "org.alkemy.TestClass", //
         "org.alkemy.parse.impl.TestAlkemizer", //
         "org.alkemy.parse.impl.TestManyFields", //
-        "org.alkemy.parse.impl.TestClass", //
         "org.alkemy.parse.impl.TestNode", //
         "org.alkemy.parse.impl.TestOrdered", //
         "org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder$FollowsOrder", //
@@ -44,6 +45,6 @@ instrs = @Instr(classNames = { //
         "org.alkemy.parse.impl.TestDeepLeaves$Nested5", //
         }, ctf = AlkemizerCTF.class))
 
-public class AlkemyInstrTestSuite
+public class InstrTestSuite
 {
 }

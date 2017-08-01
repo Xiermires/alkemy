@@ -19,16 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy;
 
-import org.objectweb.asm.ClassVisitor;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
-public abstract class Alkemizer extends ClassVisitor
+import org.junit.Test;
+
+public class CoreAlkemy
 {
-    public Alkemizer(int api, ClassVisitor cv)
-    {
-        super(api, cv);
+    @Test
+    public void traverseSet() {
+        final TestClass tc = new TestClass();
+        AlkemyNodes.get(TestClass.class).traverse(c -> c.data().set(-1, tc));
+        
+        assertThat(tc.n1, is(-1));
+        assertThat(tc.n2, is(-1));
+        assertThat(tc.n3, is(-1));
+        assertThat(tc.n4, is(-1));
+        assertThat(tc.n5, is(-1));
     }
-
-    abstract boolean isAlkemized();
+    
+    @Test
+    public void traverseGet() {
+        final TestClass tc = new TestClass();
+        final Summation sum = new Summation();
+        AlkemyNodes.get(TestClass.class).traverse(c -> sum.add(c.data().get(tc, Integer.class)));
+        
+        assertThat(sum.sum, is(15));
+    }
+    
+    public static class Summation {
+        int sum = 0;
+        
+        void add(int i) {
+            sum += i;
+        }
+    }
 }

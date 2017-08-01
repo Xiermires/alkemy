@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alkemy.TestClass;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.parse.impl.AlkemyParsers;

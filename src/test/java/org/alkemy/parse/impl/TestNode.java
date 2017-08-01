@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import org.alkemy.TestClass;
+
 public class TestNode
 {
     TestClass testClass;
