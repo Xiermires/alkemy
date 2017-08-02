@@ -6,37 +6,46 @@ Overview
 --------
 
 1. Annotate your classes
-2. Write visitors
-3. Alkemize
-
+2. Build an alkemy tree
+3. Traverse
 
 -----------
 Description
 -----------
 
 This library allows to parse types into a directed rooted tree (this process will be referred as Alkemization) 
-which provides set / get access for fields and invoke for methods.
+which provides set / get access for fields, invoke for methods, as well as constructors.
 
 The library comes with an in-built parser which recognises annotations qualified as AlkemyLeafs in both methods / fields. 
 
-Once an Alkemization has taken place, the resulting tree can be traversed applying effects on each of the nodes / leafs.
+Once an Alkemization has taken place, the resulting tree can be traversed applying effects on each of the nodes / leafs. Nodes can be streamed, and have two in-built traversing strategies (pre-order <default>, post-order).
 
-There are three in-built ways to traverse a node:
-
-1. Using Node#traverse(Consumer c) function. 
-2. Using a AlkemyNodeReader to process the nodes in combination with AlkemyElementVisitors to process the leafs (preorder and postorder node readers are provided)
-3. Using a AlkemyNodeHandler that will handle the whole process.
+```java 
+    AlkemyNodes.get(SomeType.class).forEach(consumer);
+    AlkemyNodes.get(SomeType.class).postorder().forEach(consumer);
+    AlkemyNodes.get(SomeType.class).stream().filter(filter).forEach(consumer);    
+```
 
 There is no limit in how many different alkemy elements a type can define, or how many different alkemy types an element visitor
 can handle.
 
--------------
-Some Examples
--------------
+---------------------
+A very simple example
+---------------------
 
 1. Injection.
 
 ```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.FIELD })
+@AlkemyLeaf
+@interface Random
+{
+    double min();
+
+    double max();
+}
+
 public class TestClass
 {
     @Random(min = 5, max = 10)
@@ -51,132 +60,49 @@ public class TestClass
 @Test
 public void generateRandoms()
 {
-    // Reads TestClass, identifies the @Random elements and applies XorRandomGenerator on them.
-    final TestClass tc = Alkemy.mature(TestClass.class, new XorRandomGenerator());
-	
-    ... // asserts
-}
-
-// The visitor that works on the AlkemyElements.
-static class XorRandomGenerator implements AlkemyElementVisitor<Void, RandomElement>
-{
-    @Override
-    public void visit(RandomElement e, Object parent)
-    {
-        e.set(nextDouble(e.min, e.max), parent); // generates and sets the next random
-    }
-
-    @Override
-    public RandomElement map(AlkemyElement e)
-    {
-        return new RandomElement(e);
-    }
-	
-    ... // PRNG code 
-}
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD })
-@AlkemyLeaf
-@interface Random
-{
-    double min();
-
-    double max();
+    final TestClass tc = new TestClass();
+    AlkemyNodes.get(TestClass.class).stream() //
+                                    .filter(f -> Random.class == f.alkemyType() && !f.isNode()) //
+				    .forEach(e -> {
+		                        final Random desc = e.desc().getAnnotation(Random.class);
+				        final double min = desc.min();
+					final double max = desc.max();
+					final double rand = min + (Math.random() * ((max - min)));
+					e.set(rand, tc);
+				    });
 }
 ```
 
-In this example we map the result of generating a random into a field, but there is no 
-restriction regarding the source of the data. Sockets, db, service locators, ...
+-------------
+Insights
+-------------
 
-2. Map streams
+During the alkemization, classes are instrumented to enhance performance. If instrumentation is not available, it fallbacks to reflection. 
+
+The in-built alkemization in a nutshell.
+
+* Creates a marker method : ```java public static boolean is$$instrumented() { return true; }```. This allows enabling / disabling the instr. version on runtime. 
+* Creates an Order annotation with the declaration order of the fields, or leave it untouched if present. Alkemy trees are deterministically traversed.
+* Creates a default constructor if not present, or makes it public if present but with less visibility. 
+* Creates a public static factory for the type : ```java public static TypeClass create$$instance(Object[] args) { ... }```, where the args follow the order established in the Order annotation.
+* Creates getters and setters if not present.
+* Conversions && castings (wrapper -> primitive && String -> enum).
+
+In the in-built parser, a type is considered alkemizable if itself, or any of its member types (including Collection component types) is alkemizable. In the following example, both Outer and Inner types are alkemizable and will be instrumented. 
 
 ```java
-public class TestClass
+public class Outer 
 {
-    @Index(0)
-    int a;
+    ...
     
-    @Index(1)
-    double b;
-    
-    @Index(2)
-    float c;
+    Collection<Inner> inners;
 }
 
-
-@Test
-public void testCsvReader() throws IOException
+public class Inner
 {
-    final String NEW_LINE = System.getProperty("line.separator");
-    final String EXAMPLE = "0,1.2,2.3,12345678902,4" + NEW_LINE + "9,1.65,7f,12345678901,5";
-
-    // Simulate the whole csv is a file process (although we only need an Iterator<String>)
-    final BufferedReader reader = new BufferedReader(new InputStreamReader(
-            new ByteArrayInputStream(EXAMPLE.getBytes("UTF-8"))));
-
-    final CsvReader mapper = new CsvReader();
-
-    final List<TestClass> tcs = reader.lines().map(l -> l.split(",")).map(l -> Alkemy.mature(TestClass.class, mapper, l))
-            .collect(Collectors.toList());
-			
-    // asserts ...
-}
-
-public class CsvReader extends IndexedElementVisitor<String[]>
-{
-    // From string to requested type value
-    final TypedValueFromStringArray tvfs = new TypedValueFromStringArray();
-
-    @Override
-    public void visit(IndexedElement e, Object parent, String[] parameter)
-    {
-        e.set(tvfs.getValue(e, parameter), parent);
-    }
+    ...
+    
+    @Property
+    private int foo;    
 }
 ```
-
-Resultsets and other typical stream sources follow similar fashion. Reverse mapping from the object to the stream is also fairly simple (simply reverse the mapper logic). 
-
-3. There is no example as today, but it is possible to write visitors to support scenarios such as this...
-
-```java
-public class Foo
-{
-    @Property
-    int foo;
-	
-    @Property
-    int bar;
-	
-    @Schedule(every = 5000, unit = TimeUnit.MILLISECONDS)
-    public void method(@Use("foo") int foo, @Use("bar") int bar)
-    {
-	    ...
-    }
-}
-```
-
--------
-Insides
--------
-
-The library instruments the classes and wrap the generated code using lambdas. 
-If instrumentation is not possible, the library fallbacks to reflection (which is considerably slower).
-
-The instrumentation happens transparently to the user through the agent-tools library. 
-It is important to remark though, that due to the instrumentation restrictions,
-this library should start up before any of the alkemized classes are used !! (can't modify the stack of loaded classes).
-
-Although the library doesn't include it. An approach such as the Spring boot one is straight forward to code.
-
------------
-Performance 
------------
-
-The performance of the lambda operations is around 20 times slower than regular code (reflection is around 200 times slower). 
-This measurements might vary between different machines.
-
-The framework add significant overhead (processing 1 million of objects ranges from 200-350 ms).
-
-Performance can be significantly improved in some cases by writing specific AlkemyNodeHandler's (processing 1 million object ranges from 50-70 ms).
