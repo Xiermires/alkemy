@@ -31,16 +31,16 @@ import org.junit.Test;
 public class TypeParserTest
 {
     @Test
-    public void parseTestClass() 
+    public void parseTestClass()
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestClass.class).drainTo(result);
-        
-        assertThat(result.size(), is(5));
+
+        assertThat(result.size(), is(6));
 
         final TestClass tc = new TestClass();
-        assertThat(1 + 2 + 3 + 4 + 5, is(result.stream().mapToInt(d -> (int) d.get(tc)).sum()));
+        assertThat(1 + 2 + 3 + 4 + 5, is(result.stream().filter(d -> !d.isNode()).mapToInt(d -> (int) d.get(tc)).sum()));
     }
 
     @Test
@@ -50,35 +50,35 @@ public class TypeParserTest
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestNode.class).drainTo(result);
 
-        assertThat(result.size(), is(6));
+        assertThat(result.size(), is(7));
     }
 
     @Test
-    public void testOrdered() 
+    public void testOrdered()
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestOrdered.class).drainTo(result);
 
-        assertThat(result.size(), is(7));
+        assertThat(result.size(), is(8));
 
         final StringBuilder sb = new StringBuilder();
         final TestOrdered to = new TestOrdered();
         result.forEach(e ->
         {
-            sb.append(e.get(to)).append(" ");
+            sb.append(e.isNode() ? "" : e.get(to)).append(" ");
         });
 
-        assertThat("This is an example of ordered alkemyElements ", is(sb.toString()));
+        assertThat(" This is an example of ordered alkemyElements ", is(sb.toString()));
     }
-    
+
     @Test
-    public void testDeepLeaves() 
+    public void testDeepLeaves()
     {
         final AlkemyParser parser = AlkemyParsers.typeParser();
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestDeepLeaves.class).drainTo(result);
 
-        assertThat(result.size(), is(6));
+        assertThat(result.size(), is(7));
     }
 }

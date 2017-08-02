@@ -24,7 +24,6 @@ import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
-import org.alkemy.util.Nodes.RootNode;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -57,11 +56,6 @@ public class AlkemyNodes
     public static Node<AlkemyElement> get(Class<?> type)
     {
         Assertions.nonNull(type);
-        return new RootNode<>(_get(type), type);
-    }
-
-    private static Node<AlkemyElement> _get(Class<?> type)
-    {
         try
         {
             return cache.get(type);

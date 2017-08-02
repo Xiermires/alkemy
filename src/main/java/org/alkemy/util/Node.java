@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public interface Node<E>
+import org.alkemy.util.Traversers.Traversable;
+
+public interface Node<E> extends Traversable<E>
 {
     Node<E> parent();
 
@@ -44,60 +46,6 @@ public interface Node<E>
     int branchDepth();
 
 /**
-     * As {@link #traverse(Consumer, Predicate) consuming all branches nodes.
-     * 
-     * @param c node consumer
-     */
-    void traverse(Consumer<Node<? extends E>> c);
-
-    /**
-     * Applies c to every node in the underlying branches satisfying p.
-     * <p>
-     * Traverse order is defined by each node implementation.
-     * <p>
-     * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not.
-     * <p>
-     * <ul>
-     * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be
-     * potentially consumed.
-     * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be
-     * consumed.
-     * </ul>
-     * 
-     * @param c
-     *            node consumer
-     * @param p
-     *            consumption condition
-     * @param keepProcessingOnFailure
-     *            process subnodes of a node failing p.
-     */
-    void traverse(Consumer<Node<? extends E>> c, Predicate<? super E> p, boolean keepProcessingOnFailure);
-
-    /**
-     * Applies c to every node in the underlying branches satisfying p.
-     * <p>
-     * Traverse order is defined by each node implementation.
-     * <p>
-     * Depending on <code>keepProcessingOnFailure</code>, children nodes of a node failing p are processed or not.
-     * <p>
-     * <ul>
-     * <li>If <code>keepProcessingOnFailure</code> is <em>true</em>, the offspring of a failed node will still test p and be
-     * potentially consumed.
-     * <li>If <code>keepProcessingOnFailure</code> is <em>false</em>, the offspring of a failed node are ignored and won't be
-     * consumed.
-     * </ul>
-     * 
-     * @param c
-     *            node consumer
-     * @param p
-     *            consumption condition
-     * @param keepProcessingOnFailure
-     *            process subnodes of a node failing p.
-     */
-    void traverse(Consumer<Node<? extends E>> onNode, Consumer<Node<? extends E>> onLeaf, Predicate<? super E> p,
-            boolean keepProcessingOnFailure);
-
-/**
      * As {@link #drainTo(Consumer, Predicate) adding all branch's subnodes.
      * 
      * @param c
@@ -106,16 +54,18 @@ public interface Node<E>
     void drainTo(Collection<? super E> c);
 
     /**
-     * Adds every branch's subnodes data satisfying p to the collection.
-     * 
-     * @param c
-     *            result collection
-     * @param p
-     *            addition condition
-     * @param keepProcessingOnFailure
-     *            process subnodes of a node failing p (see {@link #traverse(Consumer, Predicate, boolean)} for additional info)
+     * Establish that any {@link #iterator()} created by this node will be pre-order iterator. This is the default behaviour.
+     * <p>
+     * Equivalent to {@link Traversers#preorder(node)}
      */
-    void drainTo(Collection<? super E> c, Predicate<? super E> p, boolean keepProcessingOnFailure);
+    Node<E> preorder();
+
+    /**
+     * Establish that any {@link #iterator()} created by this node will be post-order iterator. 
+     * <p>
+     * Equivalent to {@link Traversers#postorder(node)}
+     */
+    Node<E> postorder();
 
     interface Builder<E>
     {

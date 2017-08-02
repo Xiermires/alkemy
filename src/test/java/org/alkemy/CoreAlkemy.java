@@ -21,38 +21,110 @@
  *******************************************************************************/
 package org.alkemy;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
 public class CoreAlkemy
 {
     @Test
-    public void simpleSetting() {
+    public void set()
+    {
         final TestClass tc = new TestClass();
-        AlkemyNodes.get(TestClass.class).traverse(c -> c.data().set(-1, tc));
-        
+        AlkemyNodes.get(TestClass.class).forEach(e -> e.set(-1, tc));
+
         assertThat(tc.n1, is(-1));
         assertThat(tc.n2, is(-1));
         assertThat(tc.n3, is(-1));
         assertThat(tc.n4, is(-1));
         assertThat(tc.n5, is(-1));
     }
-    
+
     @Test
-    public void simpleGetting() {
+    public void get()
+    {
         final TestClass tc = new TestClass();
         final Summation sum = new Summation();
-        AlkemyNodes.get(TestClass.class).traverse(c -> sum.add(c.data().get(tc, Integer.class)));
-        
+        AlkemyNodes.get(TestClass.class).stream().filter(c -> !c.isNode()).forEach(c -> sum.add(c.get(tc, Integer.class)));
+
         assertThat(sum.sum, is(15));
     }
-    
-    public static class Summation {
-        int sum = 0;
+
+    @Test
+    public void preorder()
+    {
+        final List<String> elements = new ArrayList<String>();
+        AlkemyNodes.get(TestTraverse.class).forEach(e -> elements.add(e.targetName()));
         
-        void add(int i) {
+        assertThat(elements, hasSize(23));
+        assertThat(elements.get(0), is("org.alkemy.TestTraverse")); 
+        assertThat(elements.get(1), is("org.alkemy.TestTraverse.a"));
+        assertThat(elements.get(2), is("org.alkemy.TestTraverse.b"));
+        assertThat(elements.get(3), is("org.alkemy.TestTraverse.c"));
+        assertThat(elements.get(4), is("org.alkemy.TestTraverse.d"));
+        assertThat(elements.get(5), is("org.alkemy.TestTraverse.na"));
+        assertThat(elements.get(6), is("org.alkemy.TestTraverse$NestedA.a1"));
+        assertThat(elements.get(7), is("org.alkemy.TestTraverse$NestedA.nad"));
+        assertThat(elements.get(8), is("org.alkemy.TestTraverse$NestedD.d1"));
+        assertThat(elements.get(9), is("org.alkemy.TestTraverse$NestedD.d2"));
+        assertThat(elements.get(10), is("org.alkemy.TestTraverse$NestedA.a2"));
+        assertThat(elements.get(11), is("org.alkemy.TestTraverse.nb"));
+        assertThat(elements.get(12), is("org.alkemy.TestTraverse$NestedB.b1"));
+        assertThat(elements.get(13), is("org.alkemy.TestTraverse$NestedB.b2"));
+        assertThat(elements.get(14), is("org.alkemy.TestTraverse$NestedB.nbe"));        
+        assertThat(elements.get(15), is("org.alkemy.TestTraverse$NestedE.e1"));
+        assertThat(elements.get(16), is("org.alkemy.TestTraverse$NestedE.e2"));
+        assertThat(elements.get(17), is("org.alkemy.TestTraverse.nc"));
+        assertThat(elements.get(18), is("org.alkemy.TestTraverse$NestedC.ncf"));
+        assertThat(elements.get(19), is("org.alkemy.TestTraverse$NestedF.f1"));
+        assertThat(elements.get(20), is("org.alkemy.TestTraverse$NestedF.f2"));
+        assertThat(elements.get(21), is("org.alkemy.TestTraverse$NestedC.c1"));
+        assertThat(elements.get(22), is("org.alkemy.TestTraverse$NestedC.c2"));
+    }
+
+    @Test
+    public void postorder()
+    {
+        final List<String> elements = new ArrayList<String>();
+        AlkemyNodes.get(TestTraverse.class).postorder().forEach(e -> elements.add(e.targetName()));
+        
+        assertThat(elements, hasSize(23));
+        assertThat(elements.get(0), is("org.alkemy.TestTraverse.a"));
+        assertThat(elements.get(1), is("org.alkemy.TestTraverse.b"));
+        assertThat(elements.get(2), is("org.alkemy.TestTraverse.c"));
+        assertThat(elements.get(3), is("org.alkemy.TestTraverse.d"));
+        assertThat(elements.get(4), is("org.alkemy.TestTraverse$NestedA.a1"));
+        assertThat(elements.get(5), is("org.alkemy.TestTraverse$NestedD.d1"));
+        assertThat(elements.get(6), is("org.alkemy.TestTraverse$NestedD.d2"));
+        assertThat(elements.get(7), is("org.alkemy.TestTraverse$NestedA.nad"));
+        assertThat(elements.get(8), is("org.alkemy.TestTraverse$NestedA.a2"));
+        assertThat(elements.get(9), is("org.alkemy.TestTraverse.na"));
+        assertThat(elements.get(10), is("org.alkemy.TestTraverse$NestedB.b1"));
+        assertThat(elements.get(11), is("org.alkemy.TestTraverse$NestedB.b2"));
+        assertThat(elements.get(12), is("org.alkemy.TestTraverse$NestedE.e1"));
+        assertThat(elements.get(13), is("org.alkemy.TestTraverse$NestedE.e2"));
+        assertThat(elements.get(14), is("org.alkemy.TestTraverse$NestedB.nbe"));        
+        assertThat(elements.get(15), is("org.alkemy.TestTraverse.nb"));
+        assertThat(elements.get(16), is("org.alkemy.TestTraverse$NestedF.f1"));
+        assertThat(elements.get(17), is("org.alkemy.TestTraverse$NestedF.f2"));
+        assertThat(elements.get(18), is("org.alkemy.TestTraverse$NestedC.ncf"));
+        assertThat(elements.get(19), is("org.alkemy.TestTraverse$NestedC.c1"));
+        assertThat(elements.get(20), is("org.alkemy.TestTraverse$NestedC.c2"));
+        assertThat(elements.get(21), is("org.alkemy.TestTraverse.nc"));
+        assertThat(elements.get(22), is("org.alkemy.TestTraverse"));
+    }
+    
+    public static class Summation
+    {
+        int sum = 0;
+
+        void add(int i)
+        {
             sum += i;
         }
     }
