@@ -33,7 +33,7 @@ can handle.
 A very simple example
 ---------------------
 
-1. Injection.
+1. Value injection.
 
 ```java
 @Retention(RetentionPolicy.RUNTIME)
@@ -73,11 +73,11 @@ public void generateRandoms()
 }
 ```
 
--------------
+--------
 Insights
--------------
+--------
 
-During the alkemization, classes are instrumented to enhance performance. If instrumentation is not available, it fallbacks to reflection. 
+During the alkemization, classes are instrumented to enhance performance. If no instrumentation code is available during the parsing of the type, it fallbacks to reflection. 
 
 The in-built alkemization in a nutshell.
 
@@ -106,3 +106,12 @@ public class Inner
     private int foo;    
 }
 ```
+
+------
+Others
+------
+
+This library contains only the core functionality to build your own trees and traverse them. No syntax sugar, no common utilities or clients. Additionally...
+
+* alkemy-commons : some re-usable syntax sugar like visitors
+* alkemy-etc : some client examples (csv-reader, resultset-reader, settings-store, ...)
