@@ -29,7 +29,7 @@ import org.junit.Test;
 public class CoreAlkemy
 {
     @Test
-    public void traverseSet() {
+    public void simpleSetting() {
         final TestClass tc = new TestClass();
         AlkemyNodes.get(TestClass.class).traverse(c -> c.data().set(-1, tc));
         
@@ -41,7 +41,7 @@ public class CoreAlkemy
     }
     
     @Test
-    public void traverseGet() {
+    public void simpleGetting() {
         final TestClass tc = new TestClass();
         final Summation sum = new Summation();
         AlkemyNodes.get(TestClass.class).traverse(c -> sum.add(c.data().get(tc, Integer.class)));

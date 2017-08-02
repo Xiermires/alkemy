@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import org.alkemy.Foo;
 import org.alkemy.annotations.Order;
 
 public class TestCreateInstanceParamPreserveOrder

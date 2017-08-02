@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.alkemy;
 
-import org.alkemy.parse.impl.Foo;
 
 
 public class TestClass

@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.alkemy.util.AnnotationUtils;
-import org.alkemy.util.TypedTable;
 
 public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AnnotatedMember>
 {
@@ -33,17 +32,17 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Annot
     }
 
     @Override
-    public AlkemyElement createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor, TypedTable context)
+    public AlkemyElement createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor)
     {
         return new AlkemyElement(desc, AccessorFactory.notSupported(), valueAccessor, Collections.emptyList(), AnnotationUtils
-                .findAlkemyTypes(desc), false, context);
+                .findAlkemyTypes(desc), false);
     }
 
     @Override
     public AlkemyElement createNode(AnnotatedMember desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
+            List<MethodInvoker> methodInvokers, Class<?> nodeType)
     {
         return new AlkemyElement(desc, valueConstructor, valueAccessor, methodInvokers, AnnotationUtils.findAlkemyTypes(desc),
-                true, context);
+                true);
     }
 }

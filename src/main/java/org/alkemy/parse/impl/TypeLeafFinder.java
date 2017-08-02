@@ -24,12 +24,11 @@ import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.AnnotationUtils;
 import org.alkemy.util.Node;
-import org.alkemy.util.TypedTable;
 
 public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, AnnotatedElement>, Supplier<Boolean>
 {
     private boolean leafFound;
-    
+
     @Override
     public Node<AlkemyElement> parse(Class<?> type)
     {
@@ -47,7 +46,7 @@ public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, Annot
         }
         return null;
     }
-    
+
     @Override
     public boolean isNode(Class<?> desc)
     {
@@ -64,14 +63,14 @@ public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, Annot
     }
 
     @Override
-    public AlkemyElement createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor, TypedTable context)
+    public AlkemyElement createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
     {
         return null;
     }
 
     @Override
     public AlkemyElement createNode(Class<?> desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
+            List<MethodInvoker> methodInvokers, Class<?> nodeType)
     {
         return null;
     }

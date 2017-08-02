@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import org.alkemy.Bar;
 import org.alkemy.annotations.Order;
 
 @Order({ "s2", "s1", "s3", "s4", "s7", "s6", "s5" })

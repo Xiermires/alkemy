@@ -32,7 +32,6 @@ import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes;
-import org.alkemy.util.TypedTable;
 
 /**
  * The main parser. It parses fields and method alkemizations (see {@link AlkemyLeaf}, as well as
@@ -76,19 +75,16 @@ class TypeParser implements AlkemyParser
     @Override
     public Node<AlkemyElement> parse(Class<?> type)
     {
-        final TypedTable context = new TypedTable();
-
         final AnnotatedMember am = new AnnotatedMember(type.getName(), type, type, type);
 
         return _parse(
                 am,
                 Nodes.arborescence(lexer.createNode(new AnnotatedMember(type.getName(), type, type, type), AccessorFactory
                         .createConstructor(type, type), AccessorFactory.createSelfAccessor(type), AccessorFactory
-                        .createInvokers(getLeafMethods(type)), type, context)), context).build();
+                        .createInvokers(getLeafMethods(type)), type))).build();
     }
 
-    private Node.Builder<AlkemyElement> _parse(AnnotatedMember type, Node.Builder<AlkemyElement> parent,
-            TypedTable context)
+    private Node.Builder<AlkemyElement> _parse(AnnotatedMember type, Node.Builder<AlkemyElement> parent)
     {
         for (final Field f : sortIfRequired(type.getComponentType().getDeclaredFields(), type.getComponentType().getAnnotation(
                 Order.class), type.getComponentType()))
@@ -97,13 +93,13 @@ class TypeParser implements AlkemyParser
 
             if (lexer.isLeaf(am))
             {
-                parent.addChild(lexer.createLeaf(am, AccessorFactory.createAccessor(f), context));
+                parent.addChild(lexer.createLeaf(am, AccessorFactory.createAccessor(f)));
             }
             else if (lexer.isNode(am))
             {
-                _parse(am, parent.addChild(lexer.createNode(am, AccessorFactory.createConstructor(am.getType(), am.getComponentType()), AccessorFactory
-                        .createAccessor(f), AccessorFactory.createInvokers(getLeafMethods(am.getComponentType())), am.getType(),
-                        context)), context);
+                _parse(am, parent.addChild(lexer.createNode(am, AccessorFactory.createConstructor(am.getType(), am
+                        .getComponentType()), AccessorFactory.createAccessor(f), AccessorFactory.createInvokers(getLeafMethods(am
+                        .getComponentType())), am.getType())));
             }
         }
         return parent;

@@ -21,7 +21,6 @@ import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.parse.impl.MethodInvoker;
 import org.alkemy.parse.impl.NodeConstructor;
 import org.alkemy.parse.impl.ValueAccessor;
-import org.alkemy.util.TypedTable;
 
 public interface AlkemyLexer<N, L>
 {
@@ -38,11 +37,11 @@ public interface AlkemyLexer<N, L>
     /**
      * Creates an unbound {@link AlkemyElement} for this leaf.
      */
-    AlkemyElement createLeaf(L desc, ValueAccessor valueAccessor, TypedTable context);
+    AlkemyElement createLeaf(L desc, ValueAccessor valueAccessor);
 
     /**
      * Creates an unbound {@link AlkemyElement} for this node.
      */
     AlkemyElement createNode(N desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
+            List<MethodInvoker> methodInvokers, Class<?> nodeType);
 }

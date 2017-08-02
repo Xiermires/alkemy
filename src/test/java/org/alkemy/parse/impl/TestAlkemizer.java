@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import org.alkemy.Bar;
+import org.alkemy.Foo;
+
 public class TestAlkemizer
 {
     enum Lorem

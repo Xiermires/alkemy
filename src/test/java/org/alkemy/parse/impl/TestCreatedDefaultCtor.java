@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import org.alkemy.Bar;
+
 public class TestCreatedDefaultCtor extends TestAlkemizer
 {
     @Bar

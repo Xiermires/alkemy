@@ -17,18 +17,16 @@ package org.alkemy.parse.impl;
 
 import java.util.List;
 
-import org.alkemy.util.TypedTable;
-
 public interface AlkemyElementFactory<T>
 {
     /**
      * Creates an alkemy element for this target.
      */
-    AlkemyElement createLeaf(T desc, ValueAccessor valueAccessor, TypedTable context);
+    AlkemyElement createLeaf(T desc, ValueAccessor valueAccessor);
 
     /**
      * Creates an alkemy element node for this target.
      */
     AlkemyElement createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context);
+            List<MethodInvoker> methodInvokers, Class<?> nodeType);
 }

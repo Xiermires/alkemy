@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.util.AnnotationUtils;
-import org.alkemy.util.TypedTable;
 
 class TypeLexer implements AlkemyLexer<AnnotatedMember, AnnotatedMember>
 {
@@ -50,15 +49,15 @@ class TypeLexer implements AlkemyLexer<AnnotatedMember, AnnotatedMember>
     }
 
     @Override
-    public AlkemyElement createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor, TypedTable context)
+    public AlkemyElement createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor)
     {
-        return factory.createLeaf(desc, valueAccessor, context);
+        return factory.createLeaf(desc, valueAccessor);
     }
 
     @Override
     public AlkemyElement createNode(AnnotatedMember desc, NodeConstructor valueConstructor,
-            ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType, TypedTable context)
+            ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType)
     {
-        return factory.createNode(desc, valueConstructor, valueAccessor, methodInvokers, nodeType, context);
+        return factory.createNode(desc, valueConstructor, valueAccessor, methodInvokers, nodeType);
     }
 }

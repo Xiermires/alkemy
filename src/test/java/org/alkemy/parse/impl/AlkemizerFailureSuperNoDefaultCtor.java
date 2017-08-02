@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import org.alkemy.Foo;
+
 
 
 public class AlkemizerFailureSuperNoDefaultCtor extends FailureSuperClass

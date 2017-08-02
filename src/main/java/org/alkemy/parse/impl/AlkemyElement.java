@@ -24,9 +24,6 @@ import java.util.Map;
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
-import org.alkemy.util.TypedTable;
-
-import com.google.common.collect.Table;
 
 public class AlkemyElement implements ValueAccessor, NodeConstructor
 {
@@ -36,11 +33,10 @@ public class AlkemyElement implements ValueAccessor, NodeConstructor
     private final Map<String, MethodInvoker> methodInvokers;
     private final Class<? extends Annotation> alkemyType;
     private final boolean node;
-    private final TypedTable context;
     private final boolean collection;
 
     AlkemyElement(AnnotatedMember desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node, TypedTable context)
+            List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
@@ -49,7 +45,6 @@ public class AlkemyElement implements ValueAccessor, NodeConstructor
         methodInvokers.forEach(c -> this.methodInvokers.put(c.name(), c));
         this.alkemyType = alkemyType;
         this.node = node;
-        this.context = context;
         this.collection = Collection.class.isAssignableFrom(desc.getType());
     }
 
@@ -63,7 +58,6 @@ public class AlkemyElement implements ValueAccessor, NodeConstructor
         this.methodInvokers = other.methodInvokers;
         this.alkemyType = other.alkemyType;
         this.node = other.node;
-        this.context = other.context;
         this.collection = other.collection;
     }
 
@@ -151,14 +145,6 @@ public class AlkemyElement implements ValueAccessor, NodeConstructor
     public boolean isNode()
     {
         return node;
-    }
-
-    /**
-     * A shared context between all nodes in a tree.
-     */
-    public Table<String, Class<?>, Object> getContext()
-    {
-        return context;
     }
 
     @Override
