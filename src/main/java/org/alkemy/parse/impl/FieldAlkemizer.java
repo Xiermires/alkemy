@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.alkemy.annotations.Order;
+import org.alkemy.exception.FormattedException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * <li>Creates a public static factory for the type : 'public static TypeClass
  * create$$instance(Object[] args) { ... }', where the args follow the order established in the
  * {@link Order} annotation.
- * <li>Creates for each alkemized member a getter and a setter 'public fieldType get$$fieldName() {
+ * <li>Creates for each alkemized member a getter and a setter 'public fie  ldType get$$fieldName() {
  * ... }' && 'public void set$$fieldName(fieldType newValue) { ... }'
  * <li>Creates for each alkemized static member a getter and a setter 'public static fieldType
  * get$$fieldName() { ... }' && 'public static void set$$fieldName(fieldType newValue) { ... }'
@@ -167,7 +168,7 @@ public class FieldAlkemizer extends Alkemizer
         if (!hasDefaultCtor)
         {
             log.debug("Alkemization failed. Trying to alkemize type : '{}' without default constructor.", className);
-            throw new Stop();
+            throw new Stop("no ctor");
         }
         appendIsInstrumented();
         super.visitEnd();
@@ -197,8 +198,13 @@ public class FieldAlkemizer extends Alkemizer
         boolean isUpdated();
     }
 
-    static class Stop extends RuntimeException
+    static class Stop extends FormattedException
     {
         private static final long serialVersionUID = 1L;
+        
+        public Stop(String format, Object... args)
+        {
+            super(format, args);
+        }
     }
 }

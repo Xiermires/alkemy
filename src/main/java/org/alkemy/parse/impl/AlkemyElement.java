@@ -25,17 +25,17 @@ import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
 
-public class AlkemyElement implements ValueAccessor, NodeConstructor
+public class AlkemyElement implements ValueAccessor, NodeFactory
 {
     private final AnnotatedMember desc;
     private final ValueAccessor valueAccessor;
-    private final NodeConstructor nodeConstructor;
+    private final NodeFactory nodeConstructor;
     private final Map<String, MethodInvoker> methodInvokers;
     private final Class<? extends Annotation> alkemyType;
     private final boolean node;
     private final boolean collection;
 
-    AlkemyElement(AnnotatedMember desc, NodeConstructor nodeConstructor, ValueAccessor valueAccessor,
+    AlkemyElement(AnnotatedMember desc, NodeFactory nodeConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node)
     {
         this.desc = desc;
@@ -109,7 +109,13 @@ public class AlkemyElement implements ValueAccessor, NodeConstructor
     }
 
     @Override
-    public Class<?> componentType() throws AlkemyException
+    public void set(String value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public Class<?> componentType()
     {
         return nodeConstructor.componentType();
     }
@@ -137,9 +143,9 @@ public class AlkemyElement implements ValueAccessor, NodeConstructor
     }
 
     @Override
-    public String targetName()
+    public String valueName()
     {
-        return valueAccessor.targetName();
+        return valueAccessor.valueName();
     }
 
     public boolean isNode()
@@ -150,24 +156,115 @@ public class AlkemyElement implements ValueAccessor, NodeConstructor
     @Override
     public String toString()
     {
-        return valueAccessor.targetName();
+        return valueAccessor.valueName();
     }
 
     @Override
     public boolean isCollection()
     {
-        return collection;
+        return nodeConstructor.isCollection();
     }
 
     @Override
-    public void add(Object value, Object parent) throws AlkemyException
+    @SafeVarargs
+    public final <T> void addAll(Object parent, T first, T... others) throws AlkemyException
     {
-        valueAccessor.add(value, parent);
+        nodeConstructor.addAll(parent, first, others);
     }
 
     @Override
-    public Class<? extends Collection<Object>> collectionType()
+    public void set(double value, Object parent) throws AlkemyException
     {
-        return valueAccessor.collectionType();
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public double getDouble(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getDouble(parent);
+    }
+
+    @Override
+    public void set(float value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public float getFloat(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getFloat(parent);
+    }
+
+    @Override
+    public void set(long value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public long getLong(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getLong(parent);
+    }
+
+    @Override
+    public void set(int value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public int getInt(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getInt(parent);
+    }
+
+    @Override
+    public void set(short value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public short getShort(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getShort(parent);
+    }
+
+    @Override
+    public void set(char value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public char getChar(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getChar(parent);
+    }
+
+    @Override
+    public void set(byte value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public byte getByte(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getByte(parent);
+    }
+
+    @Override
+    public void set(boolean value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public boolean getBoolean(Object parent) throws AlkemyException
+    {
+        return valueAccessor.getBoolean(parent);
     }
 }

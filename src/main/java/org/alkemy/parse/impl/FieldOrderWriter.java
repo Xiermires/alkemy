@@ -173,9 +173,9 @@ public class FieldOrderWriter extends FieldAccessorWriter
     private void checkFieldNames(Collection<String> fields, List<String> orderedFields)
     {
         if (fields.size() != orderedFields.size())
-            throw new Stop(); // invalid definition
+            throw new Stop("Invalid order definition (size)."); // invalid definition
         if (!fields.containsAll(orderedFields))
-            throw new Stop(); // invalid definition
+            throw new Stop("Invalid order definition (alien)."); // invalid definition
     }
 
     private void sortByOrder(List<String> fields, List<String> orderedFields)

@@ -27,7 +27,13 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.alkemy.parse.impl.AlkemyElement;
+import org.alkemy.parse.impl.AutoCastValueAccessor;
+import org.alkemy.parse.impl.ValueAccessor;
+import org.alkemy.util.Measure;
+import org.alkemy.util.Node;
 import org.junit.Test;
 
 public class CoreAlkemy
@@ -59,10 +65,10 @@ public class CoreAlkemy
     public void preorder()
     {
         final List<String> elements = new ArrayList<String>();
-        AlkemyNodes.get(TestTraverse.class).forEach(e -> elements.add(e.targetName()));
-        
+        AlkemyNodes.get(TestTraverse.class).forEach(e -> elements.add(e.valueName()));
+
         assertThat(elements, hasSize(23));
-        assertThat(elements.get(0), is("org.alkemy.TestTraverse")); 
+        assertThat(elements.get(0), is("org.alkemy.TestTraverse"));
         assertThat(elements.get(1), is("org.alkemy.TestTraverse.a"));
         assertThat(elements.get(2), is("org.alkemy.TestTraverse.b"));
         assertThat(elements.get(3), is("org.alkemy.TestTraverse.c"));
@@ -76,7 +82,7 @@ public class CoreAlkemy
         assertThat(elements.get(11), is("org.alkemy.TestTraverse.nb"));
         assertThat(elements.get(12), is("org.alkemy.TestTraverse$NestedB.b1"));
         assertThat(elements.get(13), is("org.alkemy.TestTraverse$NestedB.b2"));
-        assertThat(elements.get(14), is("org.alkemy.TestTraverse$NestedB.nbe"));        
+        assertThat(elements.get(14), is("org.alkemy.TestTraverse$NestedB.nbe"));
         assertThat(elements.get(15), is("org.alkemy.TestTraverse$NestedE.e1"));
         assertThat(elements.get(16), is("org.alkemy.TestTraverse$NestedE.e2"));
         assertThat(elements.get(17), is("org.alkemy.TestTraverse.nc"));
@@ -91,8 +97,8 @@ public class CoreAlkemy
     public void postorder()
     {
         final List<String> elements = new ArrayList<String>();
-        AlkemyNodes.get(TestTraverse.class).postorder().forEach(e -> elements.add(e.targetName()));
-        
+        AlkemyNodes.get(TestTraverse.class).postorder().forEach(e -> elements.add(e.valueName()));
+
         assertThat(elements, hasSize(23));
         assertThat(elements.get(0), is("org.alkemy.TestTraverse.a"));
         assertThat(elements.get(1), is("org.alkemy.TestTraverse.b"));
@@ -108,7 +114,7 @@ public class CoreAlkemy
         assertThat(elements.get(11), is("org.alkemy.TestTraverse$NestedB.b2"));
         assertThat(elements.get(12), is("org.alkemy.TestTraverse$NestedE.e1"));
         assertThat(elements.get(13), is("org.alkemy.TestTraverse$NestedE.e2"));
-        assertThat(elements.get(14), is("org.alkemy.TestTraverse$NestedB.nbe"));        
+        assertThat(elements.get(14), is("org.alkemy.TestTraverse$NestedB.nbe"));
         assertThat(elements.get(15), is("org.alkemy.TestTraverse.nb"));
         assertThat(elements.get(16), is("org.alkemy.TestTraverse$NestedF.f1"));
         assertThat(elements.get(17), is("org.alkemy.TestTraverse$NestedF.f2"));
@@ -118,7 +124,32 @@ public class CoreAlkemy
         assertThat(elements.get(21), is("org.alkemy.TestTraverse.nc"));
         assertThat(elements.get(22), is("org.alkemy.TestTraverse"));
     }
-    
+
+    @Test
+    public void testPrimitiveVsAutoCast() throws Throwable
+    {
+        final int ITER = 10000000;
+
+        final TestClass tc = new TestClass();
+        final Node<AlkemyElement> root = AlkemyNodes.get(TestClass.class);
+        final List<ValueAccessor> primitives = root.stream().filter(e -> !e.isNode()).collect(Collectors.toList());
+        final List<AutoCastValueAccessor> autoCast = root.stream().filter(e -> !e.isNode()).collect(Collectors.toList());
+
+        System.out.println("Primitive: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+                for (ValueAccessor e : primitives)
+                    e.set(i, tc);
+        }) / 1000000 + " ms");
+
+        System.out.println("Auto-cast: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+                for (AutoCastValueAccessor e : autoCast)
+                    e.set(i, tc);
+        }) / 1000000 + " ms");
+    }
+
     public static class Summation
     {
         int sum = 0;

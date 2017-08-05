@@ -15,10 +15,13 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public interface NodeConstructor
+public interface NodeFactory extends AutoCastValueAccessor
 {
     /**
      * Returns the class type.
@@ -26,17 +29,42 @@ public interface NodeConstructor
      * @throws AccessException
      *             If an error occurs while recovering the class type.
      */
+    @Override
     Class<?> type() throws AlkemyException;
 
     /**
-     * If the type is a collection or an array it returns the type of the element's contained. It
-     * returns null otherwise.
-     * 
-     * @throws AccessException
-     *             If an error occurs while recovering the class type.
+     * True if the target type can be assignable to a collection.
+     */
+    boolean isCollection();
+    
+    /**
+     * <ul>
+     * <li>If the type is an array. Equivalent to {@link Class#getComponentType()}
+     * <li>If the type is a collection, returns the collection's defined generic type.
+     * <li>Otherwise returns null.
+     * </ul>
      */
     Class<?> componentType() throws AlkemyException;
 
+    /**
+     * if {@link #isCollection()}, then adds the values to it.
+     * 
+     * @throws AccessException
+     *             If an error occurs while adding the values.
+     */
+    @SuppressWarnings("unchecked")
+    default <T> void addAll(Object parent, T first, T... others) throws AlkemyException {
+        if (isCollection() && componentType().isInstance(first))
+        {
+            final Collection<T> c = get(parent, Collection.class);
+            if (c != null)
+            {
+                Collections.addAll(c, first);
+                Collections.addAll(c, others);
+            }
+        }
+    }
+    
     /**
      * Returns a new instance of the class.
      * 

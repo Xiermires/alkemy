@@ -30,6 +30,13 @@ testClassNames = { //
         }, //
 instrs = @Instr(classNames = { //
         "org.alkemy.TestClass", //
+        "org.alkemy.TestTraverse", //
+        "org.alkemy.TestTraverse$NestedA", //
+        "org.alkemy.TestTraverse$NestedB", //
+        "org.alkemy.TestTraverse$NestedC", //
+        "org.alkemy.TestTraverse$NestedD", //
+        "org.alkemy.TestTraverse$NestedE", //
+        "org.alkemy.TestTraverse$NestedF", //
         "org.alkemy.parse.impl.TestAlkemizer", //
         "org.alkemy.parse.impl.TestManyFields", //
         "org.alkemy.parse.impl.TestNode", //
@@ -43,6 +50,7 @@ instrs = @Instr(classNames = { //
         "org.alkemy.parse.impl.TestDeepLeaves$Nested3", //
         "org.alkemy.parse.impl.TestDeepLeaves$Nested4", //
         "org.alkemy.parse.impl.TestDeepLeaves$Nested5", //
+        "org.alkemy.parse.impl.TestWithGetterSetter" //
         }, ctf = AlkemizerCTF.class))
 
 public class InstrTestSuite

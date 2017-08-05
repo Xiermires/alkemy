@@ -27,6 +27,6 @@ public interface AlkemyElementFactory<T>
     /**
      * Creates an alkemy element node for this target.
      */
-    AlkemyElement createNode(T desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    AlkemyElement createNode(T desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType);
 }

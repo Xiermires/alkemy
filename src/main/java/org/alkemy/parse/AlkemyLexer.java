@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.parse.impl.MethodInvoker;
-import org.alkemy.parse.impl.NodeConstructor;
+import org.alkemy.parse.impl.NodeFactory;
 import org.alkemy.parse.impl.ValueAccessor;
 
 public interface AlkemyLexer<N, L>
@@ -42,6 +42,6 @@ public interface AlkemyLexer<N, L>
     /**
      * Creates an unbound {@link AlkemyElement} for this node.
      */
-    AlkemyElement createNode(N desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    AlkemyElement createNode(N desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType);
 }

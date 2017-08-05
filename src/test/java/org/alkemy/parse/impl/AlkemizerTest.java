@@ -34,12 +34,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.alkemy.AlkemyNodes;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.MemberFieldReflectionBasedAccessor;
+import org.alkemy.parse.impl.AccessorFactory.SelfAccessor;
 import org.alkemy.parse.impl.TestAlkemizer.Lorem;
 import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsDeclaration;
 import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsOrder;
@@ -78,23 +77,21 @@ public class AlkemizerTest
     @Test
     public void nodeConstructorArgsPreserveOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsOrder.class, null);
+        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(FollowsOrder.class, null, new SelfAccessor(FollowsOrder.class));
         ctor.newInstance(1, "a");
     }
 
     @Test
     public void nodeConstructorArgsInDeclarationOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(FollowsDeclaration.class, null);
+        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(FollowsDeclaration.class, null, new SelfAccessor(FollowsDeclaration.class));
         ctor.newInstance("a", 1);
     }
 
     @Test
     public void alkemizeIsInstrumented() throws IllegalAccessException, NoSuchMethodException, SecurityException, Throwable
     {
-        final Supplier<Boolean> s = LambdaRefHelper.ref2StaticGetter(methodHandle(clazz, "is$$instrumented"), clazz,
-                boolean.class);
-        assertThat(s.get(), is(true));
+        assertThat(AlkemizerUtils.isInstrumented(clazz), is(true));
     }
 
     @Test
@@ -105,14 +102,13 @@ public class AlkemizerTest
         {
             methodNames.add(m.getName());
         }
-        assertThat(methodNames,
-                hasItems("get$$foo", "get$$bar", "set$$foo", "set$$bar", "get$$ipsum", "set$$ipsum", "get$$dolor", "set$$dolor"));
+        assertThat(methodNames, hasItems("getFoo", "getBar", "setFoo", "setBar", "getIpsum", "setIpsum", "getDolor", "setDolor"));
     }
 
     @Test(expected = AlkemyException.class)
     public void testNodeConstructorWithArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class, null);
+        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance(1, "foo");
 
         assertThat(1, is(tc.foo));
@@ -124,7 +120,7 @@ public class AlkemizerTest
 
     public void testNodeConstructorNoArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeConstructor ctor = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class, null);
+        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance();
 
         assertThat(tc, is(not(nullValue())));
@@ -133,20 +129,20 @@ public class AlkemizerTest
     }
 
     @Test
-    public void testAccessorGetter() throws NoSuchFieldException, SecurityException, IllegalAccessException
+    public void testAccessorGetter() throws NoSuchFieldException, SecurityException, IllegalAccessException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final ValueAccessor accessor = MethodHandleFactory.createAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
 
         final TestAlkemizer tc = new TestAlkemizer();
         assertThat(-1, is(accessor.get(tc)));
     }
 
     @Test
-    public void testAccessorSetter() throws NoSuchFieldException, SecurityException, IllegalAccessException
+    public void testAccessorSetter() throws NoSuchFieldException, SecurityException, IllegalAccessException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final ValueAccessor accessor = MethodHandleFactory.createAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
 
         final TestAlkemizer tc = new TestAlkemizer();
         accessor.set(1, tc);
@@ -154,37 +150,37 @@ public class AlkemizerTest
     }
 
     @Test
-    public void testWidening() throws IllegalAccessException, SecurityException, NoSuchFieldException
+    public void testWidening() throws IllegalAccessException, SecurityException, NoSuchFieldException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final ValueAccessor accessor = MethodHandleFactory.createAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
 
         short s = 1;
         accessor.set(s, new TestAlkemizer());
 
-        final MemberFieldReflectionBasedAccessor reflectAccessor = new MemberFieldReflectionBasedAccessor(f);
+        final AutoCastValueAccessor reflectAccessor = MethodReferenceAccessorFactory.createReflectiveValueAccessor(f);
         reflectAccessor.set(s, new TestAlkemizer());
     }
 
     @Test
-    public void testNarrowing() throws IllegalAccessException, SecurityException, NoSuchFieldException
+    public void testNarrowing() throws IllegalAccessException, SecurityException, NoSuchFieldException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final ValueAccessor accessor = MethodHandleFactory.createAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
 
         double d = 1;
         accessor.set(d, new TestAlkemizer());
 
-        final MemberFieldReflectionBasedAccessor reflectAccessor = new MemberFieldReflectionBasedAccessor(f);
+        final AutoCastValueAccessor reflectAccessor = MethodReferenceAccessorFactory.createReflectiveValueAccessor(f);
         reflectAccessor.set(d, new TestAlkemizer());
     }
 
     @Test
-    public void testEnums() throws IllegalAccessException, SecurityException, NoSuchFieldException
+    public void testEnums() throws IllegalAccessException, SecurityException, NoSuchFieldException, AlkemyException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("ipsum");
         final TestAlkemizer ta = new TestAlkemizer();
-        MethodHandleFactory.createAccessor(f).set("ipsum", ta);
+        MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f).set("ipsum", ta);
         assertThat(ta.ipsum, is(Lorem.ipsum));
     }
 
@@ -200,15 +196,17 @@ public class AlkemizerTest
         System.out.println("**** Compare accessing / creating fiels (1e7 iterations) ****");
 
         final Field field = clazz.getDeclaredField("bar");
-        final Method method = clazz.getDeclaredMethod("get$$bar");
-        final MethodHandle handle = methodHandle(clazz, "get$$bar");
-        final Function<Object, String> function = LambdaRefHelper.ref2MemberGetter(handle, Object.class, String.class);
-        final ValueAccessor barAccessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("bar"));
-        final ValueAccessor fooAccessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("foo"));
-        final ValueAccessor ipsumAccessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("ipsum"));
-        final ValueAccessor dolorAccessor = MethodHandleFactory.createAccessor(clazz.getDeclaredField("dolor"));
-        final NodeConstructor ctortc = MethodHandleFactory.createNodeConstructor(TestAlkemizer.class, null);
-        final NodeConstructor ctortmf = MethodHandleFactory.createNodeConstructor(TestManyFields.class, null);
+        final Method method = clazz.getDeclaredMethod("getBar");
+        final MethodHandle handle = methodHandle(clazz, "getBar");
+        final Function<Object, String> function = getterReference(handle, Object.class, String.class);
+        final ValueAccessor barAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz.getDeclaredField("bar"));
+        final ValueAccessor fooAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz.getDeclaredField("foo"));
+        final ValueAccessor ipsumAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz
+                .getDeclaredField("ipsum"));
+        final ValueAccessor dolorAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz
+                .getDeclaredField("dolor"));
+        final NodeFactory ctortc = MethodReferenceAccessorFactory.createNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
+        final NodeFactory ctortmf = MethodReferenceAccessorFactory.createNodeFactory(TestManyFields.class, null, new SelfAccessor(TestManyFields.class));
 
         final TestAlkemizer tc = new TestAlkemizer();
 
@@ -349,8 +347,9 @@ public class AlkemizerTest
     @Test
     public void compareLambdaRefObjectvsRefPrimitive() throws Throwable
     {
-        final MethodHandle handle = methodHandle(clazz, "get$$foo");
-        final Function<TestAlkemizer, Integer> f1 = LambdaRefHelper.ref2MemberGetter(handle, TestAlkemizer.class, Integer.class);
+        final MethodHandle handle = methodHandle(clazz, "getFoo");
+        final Function<TestAlkemizer, Integer> f1 = getterReference(handle, TestAlkemizer.class,
+                Integer.class);
         final ObjIntFunction<TestAlkemizer> f2 = objIntLambdaRef(handle, TestAlkemizer.class);
 
         final TestAlkemizer tc = new TestAlkemizer();
@@ -394,8 +393,30 @@ public class AlkemizerTest
         final Class<?>[] funcParams = funcMethod.getParameterTypes();
         final MethodType funcType = MethodType.methodType(funcRet, funcParams);
 
-        return (ObjIntFunction<T>) LambdaMetafactory
-                .metafactory(MethodHandles.lookup(), funcMethod.getName(), MethodType.methodType(ObjIntFunction.class), funcType,
-                        handle, handle.type()).getTarget().invoke();
+        return (ObjIntFunction<T>) LambdaMetafactory.metafactory(MethodHandles.lookup(), funcMethod.getName(),
+                MethodType.methodType(ObjIntFunction.class), funcType, handle, handle.type()).getTarget().invoke();
+    }
+
+    @SuppressWarnings("unchecked")
+    // safe
+    static <T, R> Function<T, R> getterReference(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException,
+            SecurityException, NoSuchMethodException
+    {
+        if (handle != null)
+        {
+            try
+            {
+                return MethodReferenceHelper.methodReference(Function.class, Function.class.getMethod("apply", Object.class), handle);
+            }
+            catch (SecurityException e)
+            {
+                throw e;
+            }
+            catch (NoSuchMethodException e)
+            {
+                throw e;
+            }
+        }
+        return null;
     }
 }

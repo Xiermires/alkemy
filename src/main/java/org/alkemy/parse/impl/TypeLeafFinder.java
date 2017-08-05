@@ -69,7 +69,7 @@ public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, Annot
     }
 
     @Override
-    public AlkemyElement createNode(Class<?> desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    public AlkemyElement createNode(Class<?> desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType)
     {
         return null;

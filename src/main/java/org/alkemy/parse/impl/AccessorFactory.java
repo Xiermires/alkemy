@@ -17,16 +17,12 @@ package org.alkemy.parse.impl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.MemberFieldReflectionBasedAccessor;
-import org.alkemy.parse.impl.AbstractReflectionBasedValueAccessor.StaticFieldReflectionBasedAccessor;
 
 class AccessorFactory
 {
@@ -39,46 +35,45 @@ class AccessorFactory
         return new SelfAccessor(type);
     }
 
-    static NodeConstructor notSupported()
+    static NodeFactory notSupported()
     {
         return new UnsupportedConstructor();
     }
 
-    static ValueAccessor createAccessor(Field f)
+    static ValueAccessor createValueAccessor(Field f)
     {
         try
         {
-            if (LambdaRefHelper.isInstrumented(f.getDeclaringClass(), null))
+            if (AlkemizerUtils.isInstrumented(f.getDeclaringClass()))
             {
-                return MethodHandleFactory.createAccessor(f);
+                return MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
             }
             else
             {
-                return Modifier.isStatic(f.getModifiers()) ? new StaticFieldReflectionBasedAccessor(f)
-                        : new MemberFieldReflectionBasedAccessor(f);
+                return MethodReferenceAccessorFactory.createReflectiveValueAccessor(f);
             }
         }
-        catch (IllegalAccessException | SecurityException e)
+        catch (ReflectiveOperationException | SecurityException e)
         {
             throw new AlkemyException("Unable to create value accessor for field '%s'", e, f.getDeclaringClass() + "."
                     + f.getName());
         }
     }
 
-    static NodeConstructor createConstructor(Class<?> type, Class<?> componentType)
+    static NodeFactory createNodeFactory(Class<?> type, Class<?> componentType, AutoCastValueAccessor valueAccessor)
     {
         type = InterfaceDefaultInstance.get(type);
         componentType = InterfaceDefaultInstance.get(componentType);
 
         try
         {
-            if (LambdaRefHelper.isInstrumented(type, componentType))
+            if (AlkemizerUtils.isInstrumented(type))
             {
-                return MethodHandleFactory.createNodeConstructor(type, componentType);
+                return MethodReferenceAccessorFactory.createNodeFactory(type, componentType, valueAccessor);
             }
             else
             {
-                return new ReflectionBasedConstructorAccessor(type, componentType);
+                return new ReflectionBasedConstructorAccessor(type, componentType, valueAccessor);
             }
         }
         catch (IllegalAccessException | SecurityException | NoSuchMethodException e)
@@ -94,7 +89,8 @@ class AccessorFactory
         {
             try
             {
-                invokers.add(new MethodHandleBasedInvoker(m, m.getName(), m.getDeclaringClass(), LambdaRefHelper.methodHandle(m)));
+                invokers.add(new MethodHandleBasedInvoker(m, m.getName(), m.getDeclaringClass(), MethodReferenceHelper
+                        .methodHandle(m)));
             }
             catch (IllegalAccessException e)
             {
@@ -124,14 +120,6 @@ class AccessorFactory
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        // safe
-        public Class<? extends Collection<Object>> collectionType() throws AlkemyException
-        {
-            return collection ? (Class<? extends Collection<Object>>) type : null;
-        }
-        
-        @Override
         public Object get(Object unused) throws AccessException
         {
             return ref;
@@ -144,34 +132,13 @@ class AccessorFactory
         }
 
         @Override
-        public String targetName()
+        public String valueName()
         {
             return type.getTypeName();
         }
-
-        @Override
-        public boolean isCollection()
-        {
-            return collection;
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        // safe
-        public void add(Object value, Object parent) throws AlkemyException
-        {
-            if (collection)
-            {
-                final Collection<Object> col = (Collection<Object>) get(parent);
-                if (col != null)
-                {
-                    col.add(value);
-                }
-            }
-        }
     }
 
-    static class UnsupportedConstructor implements NodeConstructor
+    static class UnsupportedConstructor implements NodeFactory
     {
         @Override
         public Class<?> type() throws AlkemyException
@@ -205,6 +172,30 @@ class AccessorFactory
 
         @Override
         public <T> T newComponentInstance(Class<T> type, Object... args) throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public Object get(Object parent) throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public void set(Object value, Object parent) throws AlkemyException
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public String valueName()
+        {
+            throw new UnsupportedOperationException("Not supported for this type of element.");
+        }
+
+        @Override
+        public boolean isCollection()
         {
             throw new UnsupportedOperationException("Not supported for this type of element.");
         }

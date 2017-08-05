@@ -39,7 +39,7 @@ public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<Annot
     }
 
     @Override
-    public AlkemyElement createNode(AnnotatedMember desc, NodeConstructor valueConstructor, ValueAccessor valueAccessor,
+    public AlkemyElement createNode(AnnotatedMember desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType)
     {
         return new AlkemyElement(desc, valueConstructor, valueAccessor, methodInvokers, AnnotationUtils.findAlkemyTypes(desc),

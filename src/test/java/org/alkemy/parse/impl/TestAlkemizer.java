@@ -34,7 +34,7 @@ public class TestAlkemizer
 
     @Bar
     Lorem ipsum;
-    
+
     @Bar
     float dolor;
 }

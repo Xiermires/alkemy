@@ -18,22 +18,33 @@ package org.alkemy.parse.impl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public class ReflectionBasedConstructorAccessor implements NodeConstructor
+public class ReflectionBasedConstructorAccessor implements NodeFactory
 {
     private final Constructor<?> typeCtor;
     private final Constructor<?> componentTypeCtor;
+    private final AutoCastValueAccessor valueAccessor;
+    private final boolean collection;
 
-    ReflectionBasedConstructorAccessor(Class<?> type, Class<?> componentType) throws NoSuchMethodException, SecurityException
+    ReflectionBasedConstructorAccessor(Class<?> type, Class<?> componentType, AutoCastValueAccessor valueAccessor)
+            throws NoSuchMethodException, SecurityException
     {
         this.typeCtor = type.getDeclaredConstructor();
-        this.componentTypeCtor = componentType.getDeclaredConstructor();
+        if (componentType != null)
+        {
+            this.componentTypeCtor = componentType.getDeclaredConstructor();
+            componentTypeCtor.setAccessible(true);
+        }
+        else componentTypeCtor = null;
+
+        this.valueAccessor = valueAccessor;
+        this.collection = Collection.class.isAssignableFrom(type);
 
         typeCtor.setAccessible(true);
-        componentTypeCtor.setAccessible(true);
     }
 
     @Override
@@ -51,7 +62,7 @@ public class ReflectionBasedConstructorAccessor implements NodeConstructor
     @Override
     public Class<?> componentType() throws AlkemyException
     {
-        return componentType();
+        return componentTypeCtor != null ? componentTypeCtor.getDeclaringClass() : null;
     }
 
     @Override
@@ -73,5 +84,29 @@ public class ReflectionBasedConstructorAccessor implements NodeConstructor
             throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, ctor.getName(),
                     Arrays.asList(args));
         }
+    }
+
+    @Override
+    public Object get(Object parent) throws AlkemyException
+    {
+        return valueAccessor.get(parent);
+    }
+
+    @Override
+    public void set(Object value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public String valueName()
+    {
+        return valueAccessor.valueName();
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        return collection;
     }
 }

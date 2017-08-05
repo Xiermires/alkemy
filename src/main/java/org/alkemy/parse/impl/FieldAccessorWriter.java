@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -32,8 +32,10 @@ import static org.objectweb.asm.Opcodes.RETURN;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.alkemy.annotations.AlkemyLeaf;
 import org.objectweb.asm.AnnotationVisitor;
@@ -52,7 +54,7 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
     // maintain both identified && non-identified leafs markers to speed up the process.
     private final Set<String> leafMarkers = new HashSet<>();
     private final Set<String> nonLeafMarkers = new HashSet<>();
-    private boolean changed = false;
+    private boolean alkemized = false;
 
     public FieldAccessorWriter(ClassVisitor cv, String className)
     {
@@ -61,12 +63,12 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
 
     static String getGetterName(String fieldName)
     {
-        return "get$$" + fieldName;
+        return "get" + AlkemizerUtils.camelUp(fieldName);
     }
 
     static String getSetterName(String fieldName)
     {
-        return "set$$" + fieldName;
+        return "set" + AlkemizerUtils.camelUp(fieldName);
     }
 
     @Override
@@ -86,55 +88,97 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
 
     private void appendGetters()
     {
-        fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).forEach(
-                entry -> appendGetter(entry.getKey(), entry.getValue().desc, entry.getValue().isStatic));
+        alkemizableFields().forEach(entry -> appendGetter(entry.getKey(), entry.getValue().desc, entry.getValue().isStatic));
     }
 
     private void appendSetters()
     {
-        fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).forEach(
-                entry -> appendSetter(entry.getKey(), entry.getValue().desc, entry.getValue().isEnum, entry.getValue().isStatic));
+        alkemizableFields().forEach(entry -> appendSetter(entry.getKey() //
+                , entry.getValue().desc //
+                , entry.getValue().isEnum //
+                , entry.getValue().isStatic));
+    }
+
+    private Stream<Entry<String, FieldProperties>> alkemizableFields()
+    {
+        return fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable);
     }
 
     private void appendGetter(String name, String desc, boolean isStatic)
     {
         final String methodName = getGetterName(name);
-        final MethodVisitor mv = super.visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "()" + desc,
-                null, null);
+        final MethodProperties properties = methodMap.get(methodName);
+        if (properties == null || !("()" + desc).equals(properties.desc))
+        {
+            final MethodVisitor mv = super.visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "()" + desc,
+                    null, null);
 
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, className, name, desc);
-        mv.visitInsn(Type.getType(desc).getOpcode(IRETURN));
-        mv.visitMaxs(0, 0);
-        mv.visitEnd();
-
-        changed = true;
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, className, name, desc);
+            mv.visitInsn(Type.getType(desc).getOpcode(IRETURN));
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
+        alkemized = true;
     }
 
     private void appendSetter(String name, String desc, boolean isEnum, boolean isStatic)
     {
         final String methodName = getSetterName(name);
-        final MethodVisitor mv = visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "("
-                + (isEnum ? "Ljava/lang/Object;" : desc) + ")V", null, null);
+        final MethodProperties properties = methodMap.get(methodName);
+        if (properties == null || !("(" + desc + ")V").equals(properties.desc))
+        {
+            // typified
+            appendSetter(name, desc, methodName, isStatic);
+
+            if (isEnum)
+            {
+                // String support
+                final MethodVisitor mv = visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "("
+                        + "Ljava/lang/String;" + ")V", null, null);
+
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitLdcInsn(Type.getType(desc));
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/AbstractClassFieldVisitor$Proxy", "toEnum", "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;", false);
+                mv.visitTypeInsn(CHECKCAST, AlkemizerUtils.toClassNameFromDesc(desc));
+                mv.visitFieldInsn(isStatic ? PUTSTATIC : PUTFIELD, className, name, desc);
+                mv.visitInsn(RETURN);
+                mv.visitMaxs(0, 0);
+                mv.visitEnd();
+            }
+            else if (!"Ljava/lang/String;".equals(desc))
+            {
+                // String support
+                final MethodVisitor mv = visitMethod(isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "("
+                        + "Ljava/lang/String;" + ")V", null, null);
+
+                mv.visitTypeInsn(NEW, "java/lang/UnsupportedOperationException");
+                mv.visitInsn(DUP);
+                mv.visitLdcInsn("Invalid conversion.");
+                mv.visitMethodInsn(INVOKESPECIAL, "java/lang/UnsupportedOperationException", "<init>", "(Ljava/lang/String;)V",
+                        false);
+                mv.visitInsn(ATHROW);
+                mv.visitMaxs(0, 0);
+                mv.visitEnd();
+            }
+        }
+        alkemized = true;
+    }
+
+    private void appendSetter(String name, String desc, String methodName, boolean isStatic)
+    {
+        final MethodVisitor mv = visitMethod(isStatic ? //
+        ACC_PUBLIC + ACC_STATIC
+                : ACC_PUBLIC, methodName, "(" + desc + ")V", null, null);
 
         mv.visitVarInsn(ALOAD, 0);
-        if (isEnum)
-        {
-            mv.visitLdcInsn(Type.getType(desc));
-        }
         mv.visitVarInsn(Type.getType(desc).getOpcode(ILOAD), 1);
-        if (isEnum)
-        {
-            mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/AbstractClassFieldVisitor$Proxy", "toEnum",
-                    "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false);
-            mv.visitTypeInsn(CHECKCAST, AlkemizerUtils.toClassNameFromDesc(desc));
-        }
+
         mv.visitFieldInsn(isStatic ? PUTSTATIC : PUTFIELD, className, name, desc);
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
-
-        changed = true;
     }
 
     static class FieldProperties
@@ -149,6 +193,22 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
         public FieldProperties(String desc, String signature, boolean isEnum, boolean isStatic)
         {
             this.isEnum = isEnum;
+            this.isStatic = isStatic;
+            this.desc = desc;
+            this.signature = signature;
+        }
+    }
+
+    static class MethodProperties
+    {
+        final boolean isStatic;
+        final String desc;
+        final String signature;
+
+        boolean alkemizable;
+
+        public MethodProperties(String desc, String signature, boolean isStatic)
+        {
             this.isStatic = isStatic;
             this.desc = desc;
             this.signature = signature;
@@ -193,7 +253,8 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
             // Nodes are not annotated themselves, but contain leaves at some depth.
             // If a non-annotated type is found, deep search for leaves to identify it as a node.
             final FieldProperties props = fields.get(name);
-            if (!props.alkemizable && !visited.contains(props.desc) && AlkemizerUtils.isType(props.desc) && !AlkemizerUtils.isEnum(props.desc))
+            if (!props.alkemizable && !visited.contains(props.desc) && AlkemizerUtils.isType(props.desc)
+                    && !AlkemizerUtils.isEnum(props.desc))
             {
                 try
                 {
@@ -257,7 +318,7 @@ public class FieldAccessorWriter extends AbstractClassFieldVisitor
     @Override
     public boolean isAlkemized()
     {
-        return changed;
+        return alkemized;
     }
 
     static class SearchForLeafMarker extends ClassVisitor

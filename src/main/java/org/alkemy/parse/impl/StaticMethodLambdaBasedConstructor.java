@@ -16,22 +16,25 @@
 package org.alkemy.parse.impl;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.function.Supplier;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.util.Assertions;
 
-public class StaticMethodLambdaBasedConstructor implements NodeConstructor
+public class StaticMethodLambdaBasedConstructor implements NodeFactory
 {
     private final Class<?> type;
     private final Class<?> componentType;
     private final Supplier<?> noargsCtor;
     private final Supplier<?> noargsComponentCtor;
-    private final NodeConstructorFunction staticFactory;
+    private final ConstructorFunction staticFactory;
+    private AutoCastValueAccessor valueAccessor;
+    private final boolean collection;
 
     StaticMethodLambdaBasedConstructor(Class<?> type, Class<?> componentType, Supplier<?> noargsCtor,
-            Supplier<?> noargsComponentCtor, NodeConstructorFunction staticFactory)
+            Supplier<?> noargsComponentCtor, ConstructorFunction staticFactory, AutoCastValueAccessor valueAccessor)
     {
         Assertions.noneNull(type, noargsCtor, staticFactory);
 
@@ -40,6 +43,8 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
         this.noargsCtor = noargsCtor;
         this.noargsComponentCtor = noargsComponentCtor;
         this.staticFactory = staticFactory;
+        this.valueAccessor = valueAccessor;
+        this.collection = Collection.class.isAssignableFrom(type);
     }
 
     @Override
@@ -94,5 +99,29 @@ public class StaticMethodLambdaBasedConstructor implements NodeConstructor
             throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays
                     .asList(args), type);
         }
+    }
+
+    @Override
+    public Object get(Object parent) throws AlkemyException
+    {
+        return valueAccessor.get(parent);
+    }
+
+    @Override
+    public void set(Object value, Object parent) throws AlkemyException
+    {
+        valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public String valueName()
+    {
+        return valueAccessor.valueName();
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        return collection;
     }
 }

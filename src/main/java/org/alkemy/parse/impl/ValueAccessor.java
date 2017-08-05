@@ -1,82 +1,142 @@
-/*******************************************************************************
- * Copyright (c) 2017, Xavier Miret Andres <xavier.mires@gmail.com>
- *
- * Permission to use, copy, modify, and/or distribute this software for any 
- * purpose with or without fee is hereby granted, provided that the above 
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES 
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALLIMPLIED WARRANTIES OF 
- * MERCHANTABILITY  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR 
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES 
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN 
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.util.Collection;
-
-import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
-public interface ValueAccessor
+public interface ValueAccessor extends AutoCastValueAccessor
 {
     /**
-     * Returns the value type.
+     * As {@link #set(Object, Object)} for type String.
      */
-    Class<?> type();
-
-    /**
-     * If {@link #isCollection()} returns the type of the collection, null otherwise.
-     */
-    Class<? extends Collection<Object>> collectionType();
-
-    /**
-     * Returns the value.
-     * 
-     * @throws AlkemyException
-     *             If an error occurs while recovering the value.
-     */
-    Object get(Object parent) throws AlkemyException;
-
-    /**
-     * Returns the value if is assignable to type T, null otherwise.
-     * 
-     * @throws AlkemyException
-     *             If an error occurs while recovering the value.
-     */
-    @SuppressWarnings("unchecked")
-    // safe
-    default <T> T get(Object parent, Class<T> type) throws AlkemyException
+    default void set(String value, Object parent) throws AlkemyException
     {
-        final Object v = get(parent);
-        return v != null && type.isInstance(v) ? (T) v : null;
+        set(value, parent);
     }
 
     /**
-     * Sets a value.
-     * 
-     * @throws AccessException
-     *             If an error occurs while setting the value.
+     * As {@link #set(Object, Object)} for type double.
      */
-    void set(Object value, Object parent) throws AlkemyException;
+    default void set(double value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
 
     /**
-     * Returns an identifier of the target value.
+     * Returns the value as a double.
      */
-    String targetName();
+    default double getDouble(Object parent) throws AlkemyException
+    {
+        return get(parent, Double.class);
+    }
 
     /**
-     * True if the target type can be assignable to a collection.
+     * As {@link #set(Object, Object)} for type float.
      */
-    boolean isCollection();
+    default void set(float value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
 
     /**
-     * if {@link #isCollection()}, then adds a value to it.
-     * 
-     * @throws AccessException
-     *             If an error occurs while adding the value.
+     * Returns the value as a float.
      */
-    void add(Object value, Object parent) throws AlkemyException;
+    default float getFloat(Object parent) throws AlkemyException
+    {
+        return get(parent, Float.class);
+    }
+
+    /**
+     * As {@link #set(Object, Object)} for type long.
+     */
+    default void set(long value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
+
+    /**
+     * Returns the value as a long.
+     */
+    default long getLong(Object parent) throws AlkemyException
+    {
+        return get(parent, Long.class);
+    }
+
+    /**
+     * As {@link #set(Object, Object)} for type int.
+     */
+    default void set(int value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
+
+    /**
+     * Returns the value as a int.
+     */
+    default int getInt(Object parent) throws AlkemyException
+    {
+        return get(parent, Integer.class);
+    }
+
+    /**
+     * As {@link #set(Object, Object)} for type short.
+     */
+    default void set(short value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
+
+    /**
+     * Returns the value as a short.
+     */
+    default short getShort(Object parent) throws AlkemyException
+    {
+        return get(parent, Short.class);
+    }
+
+    /**
+     * As {@link #set(Object, Object)} for type char.
+     */
+    default void set(char value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
+
+    /**
+     * Returns the value as a char.
+     */
+    default char getChar(Object parent) throws AlkemyException
+    {
+        return get(parent, Character.class);
+    }
+
+    /**
+     * As {@link #set(Object, Object)} for type byte.
+     */
+    default void set(byte value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
+
+    /**
+     * Returns the value as a byte.
+     */
+    default byte getByte(Object parent) throws AlkemyException
+    {
+        return get(parent, Byte.class);
+    }
+
+    /**
+     * As {@link #set(Object, Object)} for type boolean.
+     */
+    default void set(boolean value, Object parent) throws AlkemyException
+    {
+        set((Object) value, parent);
+    }
+
+    /**
+     * Returns the value as a boolean.
+     */
+    default boolean getBoolean(Object parent) throws AlkemyException
+    {
+        return get(parent, Boolean.class);
+    }
 }

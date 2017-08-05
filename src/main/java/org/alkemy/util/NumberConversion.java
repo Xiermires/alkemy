@@ -90,4 +90,34 @@ public class NumberConversion
         }
         return null;
     }
+    
+    public static Number convert(String n, int rank)
+    {
+            if (INT == rank)
+            {
+                return Integer.valueOf(n);
+            }
+            else if (DOUBLE == rank)
+            {
+                return Double.valueOf(n);
+            }
+            else if (FLOAT == rank)
+            {
+                return Float.valueOf(n);
+            }
+            else if (LONG == rank)
+            {
+                return Long.valueOf(n);
+            }
+            else if (SHORT == rank)
+            {
+                return Short.valueOf(n);
+            }
+            else if (BYTE == rank)
+            {
+                return Byte.valueOf(n);
+            }
+        
+        return null;
+    }
 }

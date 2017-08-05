@@ -16,7 +16,6 @@
 package org.alkemy.util;
 
 import java.lang.reflect.Field;
-import java.util.function.BiConsumer;
 
 import org.alkemy.parse.impl.AlkemyElement;
 
@@ -35,8 +34,7 @@ public class AlkemyUtils
 
     @SuppressWarnings("unchecked")
     // safe
-    public static <T> T getInstance(Node<? extends AlkemyElement> e, Object parent, Class<T> target,
-            boolean newNodeIfNull)
+    public static <T> T getInstance(Node<? extends AlkemyElement> e, Object parent, Class<T> target, boolean newNodeIfNull)
     {
         Object instance = e.data().get(parent);
         if (newNodeIfNull && instance == null)
@@ -47,24 +45,21 @@ public class AlkemyUtils
         return (T) instance;
     }
 
-    public static void setEnum(Class<?> type, BiConsumer<Object, Object> setter, Object value, Object parent)
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<T>> void setEnum(Field f, String name, Object parent) throws IllegalArgumentException,
+            IllegalAccessException
     {
-        setter.accept(parent, toEnum(type, value));
+        f.set(parent, toEnum((Class<T>) f.getType(), name));
     }
 
-    public static void setEnum(Field f, Object value, Object parent) throws IllegalArgumentException, IllegalAccessException
+    public static <T extends Enum<T>> T toEnum(Class<T> type, String name)
     {
-        f.set(parent, toEnum(f.getType(), value));
+        return Enum.valueOf(type, name);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    // caller responsibility
-    public static Object toEnum(Class<?> type, Object value)
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<T>> Object toEnum(Class<T> type, Object value)
     {
-        if (value instanceof String)
-        {
-            return Enum.valueOf((Class<? extends Enum>) type, (String) value);
-        }
-        else return value;
+        return value instanceof String ? toEnum(type, (String) value) : (T) value;
     }
 }
