@@ -30,6 +30,9 @@ import org.alkemy.annotations.Order;
 import org.alkemy.exception.InvalidOrder;
 import org.alkemy.parse.AlkemyLexer;
 import org.alkemy.parse.AlkemyParser;
+import org.alkemy.parse.MethodInvoker;
+import org.alkemy.parse.NodeFactory;
+import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.Node;
 import org.alkemy.util.Nodes;
 import org.alkemy.util.Types;
@@ -92,13 +95,14 @@ class TypeParser implements AlkemyParser
         for (final Field f : sortIfRequired(type.getDeclaredFields(), type.getAnnotation(Order.class), type))
         {
             final AnnotatedMember am = new AnnotatedMember(f.getName(), f, f.getType(), f.getDeclaringClass(), componentType);
-            final ValueAccessor valueAccessor = AccessorFactory.createValueAccessor(f);
             if (lexer.isLeaf(am))
             {
+                final ValueAccessor valueAccessor = AccessorFactory.createValueAccessor(f);
                 parent.addChild(lexer.createLeaf(am, valueAccessor));
             }
             else if (lexer.isNode(am))
             {
+                final ValueAccessor valueAccessor = AccessorFactory.createValueAccessor(f);
                 final NodeFactory nodeFactory = AccessorFactory.createNodeFactory(am.getType(), Types.getComponentType(f),
                         valueAccessor);
                 final List<Method> leafMethods = getLeafMethods(type);

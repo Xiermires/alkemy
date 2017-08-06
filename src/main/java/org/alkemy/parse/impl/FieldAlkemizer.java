@@ -16,23 +16,28 @@
 package org.alkemy.parse.impl;
 
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
+import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.NEW;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.FormattedException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +51,12 @@ import org.slf4j.LoggerFactory;
  * can allow enabling / disabling the instr. version on runtime).
  * <li>Creates an {@link Order} annotation with the declaration order of the fields, or leave it
  * untouched if present.
- * <li>Makes the default constructor public if it isn't already.
+ * <li>Makes the default constructor public if it isn't already or creates a default one if it
+ * doesn't exist.
  * <li>Creates a public static factory for the type : 'public static TypeClass
  * create$$instance(Object[] args) { ... }', where the args follow the order established in the
  * {@link Order} annotation.
- * <li>Creates for each alkemized member a getter and a setter 'public fie  ldType get$$fieldName() {
+ * <li>Creates for each alkemized member a getter and a setter 'public fie ldType get$$fieldName() {
  * ... }' && 'public void set$$fieldName(fieldType newValue) { ... }'
  * <li>Creates for each alkemized static member a getter and a setter 'public static fieldType
  * get$$fieldName() { ... }' && 'public static void set$$fieldName(fieldType newValue) { ... }'
@@ -59,12 +65,15 @@ import org.slf4j.LoggerFactory;
  */
 public class FieldAlkemizer extends Alkemizer
 {
+    static final String CREATE_DEFAULT = "create$$default";
+    static final String INSTATIATOR = "obj$$instantiator";
     static final String IS_INSTRUMENTED = "is$$instrumented";
+
     private static final Logger log = LoggerFactory.getLogger(FieldAlkemizer.class);
     private final String className;
     private boolean hasDefaultCtor;
 
-    private FieldAlkemizer(String className, ClassVisitor cv)
+    private FieldAlkemizer(ClassVisitor cv, String className)
     {
         super(ASM5, cv);
         this.className = className;
@@ -77,7 +86,7 @@ public class FieldAlkemizer extends Alkemizer
         alkemizers.add(new AlkemizerProcessFactory()
         {
             final List<Alkemizer> alkemizers = new ArrayList<>();
-            
+
             @Override
             public Alkemizer create(String className, ClassWriter cw)
             {
@@ -92,7 +101,7 @@ public class FieldAlkemizer extends Alkemizer
                 for (Alkemizer alkemizer : alkemizers)
                     if (alkemizer.isAlkemized())
                         return true;
-                
+
                 return false;
             }
         });
@@ -101,8 +110,8 @@ public class FieldAlkemizer extends Alkemizer
 
     static byte[] alkemize(String className, byte[] classBytes, List<AlkemizerProcessFactory> alkemizers)
     {
-        if (Objects.nonNull(className)) // do not instrument on the fly created classes by for
-                                        // instance Unsafe#define...
+        if (className != null) // do not instrument on the fly created classes by for
+                               // instance Unsafe#define...
         {
             byte[] copy = Arrays.copyOf(classBytes, classBytes.length);
 
@@ -126,7 +135,7 @@ public class FieldAlkemizer extends Alkemizer
                     final ClassReader cr = new ClassReader(copy);
                     final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
-                    cr.accept(new FieldAlkemizer(cr.getClassName(), cw), ClassReader.SKIP_FRAMES);
+                    cr.accept(new FieldAlkemizer(cw, className), ClassReader.SKIP_FRAMES);
                     return cw.toByteArray();
                 }
             }
@@ -163,21 +172,53 @@ public class FieldAlkemizer extends Alkemizer
     }
 
     @Override
+    public boolean isAlkemized()
+    {
+        return false;
+    }
+
+    @Override
     public void visitEnd()
     {
-        if (!hasDefaultCtor)
-        {
-            log.debug("Alkemization failed. Trying to alkemize type : '{}' without default constructor.", className);
-            throw new Stop("no ctor");
-        }
+        appendCreateDefault();
         appendIsInstrumented();
         super.visitEnd();
     }
 
-    @Override
-    public boolean isAlkemized()
+    private void appendCreateDefault()
     {
-        return false;
+        if (!hasDefaultCtor)
+        {
+            final FieldVisitor fv = super.visitField(ACC_PRIVATE, INSTATIATOR,
+                    "Lorg/objenesis/instantiator/ObjectInstantiator;", "Lorg/objenesis/instantiator/ObjectInstantiator<"
+                            + AlkemizerUtils.toDescFromClassName(className) + ">;", null);
+            fv.visitEnd();
+        }
+
+        final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_DEFAULT, //
+                "()" + AlkemizerUtils.toDescFromClassName(className), null, null);
+
+        mv.visitCode();
+        final Label l0 = new Label();
+        mv.visitLabel(l0);
+
+        if (hasDefaultCtor)
+        {
+            mv.visitTypeInsn(NEW, className);
+            mv.visitInsn(DUP);
+            mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
+            mv.visitInsn(ARETURN);
+        }
+        else
+        {
+            mv.visitFieldInsn(GETSTATIC, className, "instantiator", "Lorg/objenesis/instantiator/ObjectInstantiator;");
+            mv.visitMethodInsn(INVOKEINTERFACE, "org/objenesis/instantiator/ObjectInstantiator", "newInstance",
+                    "()Ljava/lang/Object;", true);
+            mv.visitTypeInsn(CHECKCAST, className);
+            mv.visitInsn(ARETURN);
+        }
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
     }
 
     private void appendIsInstrumented()
@@ -201,7 +242,7 @@ public class FieldAlkemizer extends Alkemizer
     static class Stop extends FormattedException
     {
         private static final long serialVersionUID = 1L;
-        
+
         public Stop(String format, Object... args)
         {
             super(format, args);

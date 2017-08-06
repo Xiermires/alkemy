@@ -21,8 +21,7 @@
  *******************************************************************************/
 package org.alkemy.functional;
 
-@FunctionalInterface
-public interface ToShortFunction<R>
+public interface ObjLongConsumer<T>
 {
-    short apply(R value);
+    void accept(T t, long value);
 }

@@ -13,13 +13,34 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.parse;
 
-/**
- * Lambda wrapper for the {@link FieldOrderWriter#CREATE_INSTANCE} method.
- */
-@FunctionalInterface
-public interface ConstructorFunction
+import java.lang.reflect.AnnotatedElement;
+import java.util.Optional;
+
+import org.alkemy.exception.AlkemyException;
+
+public interface MethodInvoker
 {
-    Object newInstance(Object... args);
+    AnnotatedElement desc();
+    
+    String name();
+    
+    Class<?> declaringClass();
+    
+    /**
+     * Invokes the method and returns the value if any (can be void).
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while invoking the method.
+     */
+    Optional<Object> invoke(Object parent, Object... args) throws AlkemyException;
+    
+    /**
+     * Invokes the method and returns the value if is assignable to type T, null otherwise.
+     * 
+     * @throws AlkemyException
+     *             If an error occurs while invoking the method.
+     */
+    <R> R invoke(Object parent, Class<R> retType, Object... args) throws AlkemyException;
 }

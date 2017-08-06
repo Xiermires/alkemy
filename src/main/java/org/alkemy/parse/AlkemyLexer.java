@@ -18,9 +18,6 @@ package org.alkemy.parse;
 import java.util.List;
 
 import org.alkemy.parse.impl.AlkemyElement;
-import org.alkemy.parse.impl.MethodInvoker;
-import org.alkemy.parse.impl.NodeFactory;
-import org.alkemy.parse.impl.ValueAccessor;
 
 public interface AlkemyLexer<N, L>
 {

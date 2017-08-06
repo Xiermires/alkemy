@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.parse;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -53,10 +53,10 @@ public interface NodeFactory extends AutoCastValueAccessor
      *             If an error occurs while adding the values.
      */
     @SuppressWarnings("unchecked")
-    default <T> void addAll(Object parent, T first, T... others) throws AlkemyException {
+    default <E> void addAll(Object parent, E first, E... others) throws AlkemyException {
         if (isCollection() && componentType().isInstance(first))
         {
-            final Collection<T> c = get(parent, Collection.class);
+            final Collection<E> c = get(parent, Collection.class);
             if (c != null)
             {
                 Collections.addAll(c, first);
@@ -89,10 +89,10 @@ public interface NodeFactory extends AutoCastValueAccessor
      */
     @SuppressWarnings("unchecked")
     // safe
-    default <T> T newInstance(Class<T> type, Object... args) throws AlkemyException
+    default <E> E newInstance(Class<E> type, Object... args) throws AlkemyException
     {
         final Object v = newInstance(args);
-        return v != null && type.isInstance(v) ? (T) v : null;
+        return v != null && type.isInstance(v) ? (E) v : null;
     }
 
     /**
@@ -103,9 +103,9 @@ public interface NodeFactory extends AutoCastValueAccessor
      */
     @SuppressWarnings("unchecked")
     // safe
-    default <T> T newComponentInstance(Class<T> type, Object... args) throws AlkemyException
+    default <E> E newComponentInstance(Class<E> type, Object... args) throws AlkemyException
     {
         final Object v = newComponentInstance(args);
-        return v != null && type.isInstance(v) ? (T) v : null;
+        return v != null && type.isInstance(v) ? (E) v : null;
     }
 }

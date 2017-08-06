@@ -22,7 +22,7 @@
 package org.alkemy.functional;
 
 @FunctionalInterface
-public interface ToShortFunction<R>
+public interface ObjDoubleConsumer<T>
 {
-    short apply(R value);
+    void accept(T t, double value);
 }

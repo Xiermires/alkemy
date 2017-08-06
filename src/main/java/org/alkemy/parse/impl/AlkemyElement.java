@@ -23,6 +23,9 @@ import java.util.Map;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.MethodInvoker;
+import org.alkemy.parse.NodeFactory;
+import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.Assertions;
 
 public class AlkemyElement implements ValueAccessor, NodeFactory
@@ -85,7 +88,7 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     }
 
     @Override
-    public <T> T newInstance(Class<T> type, Object... args) throws AlkemyException
+    public <E> E newInstance(Class<E> type, Object... args) throws AlkemyException
     {
         return nodeConstructor.newInstance(type, args);
     }
@@ -97,7 +100,7 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     }
 
     @Override
-    public <T> T get(Object parent, Class<T> type) throws AccessException
+    public <E> E get(Object parent, Class<E> type) throws AccessException
     {
         return valueAccessor.get(parent, type);
     }
@@ -127,7 +130,7 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     }
 
     @Override
-    public <T> T newComponentInstance(Class<T> type, Object... args) throws AlkemyException
+    public <E> E newComponentInstance(Class<E> type, Object... args) throws AlkemyException
     {
         return nodeConstructor.newComponentInstance(type, args);
     }
@@ -167,7 +170,7 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
 
     @Override
     @SafeVarargs
-    public final <T> void addAll(Object parent, T first, T... others) throws AlkemyException
+    public final <E> void addAll(Object parent, E first, E... others) throws AlkemyException
     {
         nodeConstructor.addAll(parent, first, others);
     }

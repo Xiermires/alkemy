@@ -18,6 +18,9 @@ package org.alkemy.parse.impl;
 import java.util.List;
 
 import org.alkemy.parse.AlkemyLexer;
+import org.alkemy.parse.MethodInvoker;
+import org.alkemy.parse.NodeFactory;
+import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
 
 class TypeLexer implements AlkemyLexer<AnnotatedMember, AnnotatedMember>

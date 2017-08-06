@@ -15,75 +15,64 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Supplier;
 
-import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.AutoCastValueAccessor;
+import org.alkemy.parse.NodeFactory;
+import org.objenesis.Objenesis;
+import org.objenesis.ObjenesisStd;
+import org.objenesis.instantiator.ObjectInstantiator;
 
-public class ReflectionBasedConstructorAccessor implements NodeFactory
+public class ReflectedNodeFactory implements NodeFactory
 {
-    private final Constructor<?> typeCtor;
-    private final Constructor<?> componentTypeCtor;
+    private final Class<?> type;
+    private final Class<?> componentType;
+    private final Supplier<Object> typeCtor;
+    private final Supplier<Object> componentTypeCtor;
     private final AutoCastValueAccessor valueAccessor;
     private final boolean collection;
 
-    ReflectionBasedConstructorAccessor(Class<?> type, Class<?> componentType, AutoCastValueAccessor valueAccessor)
-            throws NoSuchMethodException, SecurityException
+    ReflectedNodeFactory(Class<?> type, Class<?> componentType, AutoCastValueAccessor valueAccessor)
     {
-        this.typeCtor = type.getDeclaredConstructor();
-        if (componentType != null)
-        {
-            this.componentTypeCtor = componentType.getDeclaredConstructor();
-            componentTypeCtor.setAccessible(true);
-        }
-        else componentTypeCtor = null;
-
+        this.type = type;
+        this.componentType = componentType;
+        this.typeCtor = getCtor(type);
+        this.componentTypeCtor = componentType != null ? getCtor(componentType) : null;
         this.valueAccessor = valueAccessor;
         this.collection = Collection.class.isAssignableFrom(type);
+    }
 
-        typeCtor.setAccessible(true);
+    Supplier<Object> getCtor(Class<?> type)
+    {
+        final Objenesis objenesis = new ObjenesisStd();
+        final ObjectInstantiator<?> instantiator = objenesis.getInstantiatorOf(type);
+        return () -> instantiator.newInstance();
     }
 
     @Override
-    public Object newInstance(Object... args) throws AlkemyException
+    public Object newInstance(Object... unused) throws AlkemyException
     {
-        return newInstance(typeCtor, args);
+        return typeCtor.get();
     }
 
     @Override
     public Class<?> type() throws AlkemyException
     {
-        return typeCtor.getDeclaringClass();
+        return type;
     }
 
     @Override
     public Class<?> componentType() throws AlkemyException
     {
-        return componentTypeCtor != null ? componentTypeCtor.getDeclaringClass() : null;
+        return componentType;
     }
 
     @Override
-    public Object newComponentInstance(Object... args) throws AlkemyException
+    public Object newComponentInstance(Object... unused) throws AlkemyException
     {
-        return newInstance(componentTypeCtor, args);
-    }
-
-    private Object newInstance(Constructor<?> ctor, Object... args)
-    {
-        if (args.length > 0) { throw new AccessException(
-                "Reflection based constructor of type '%s' expect no parameters, but received '%s'.", type(), Arrays.asList(args)); }
-        try
-        {
-            return ctor.newInstance();
-        }
-        catch (final InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-        {
-            throw new AccessException("Couldn't create instance for constructor '%s' with arguments '%s'", e, ctor.getName(),
-                    Arrays.asList(args));
-        }
+        return componentTypeCtor.get();
     }
 
     @Override

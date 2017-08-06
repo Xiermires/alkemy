@@ -21,9 +21,12 @@ import java.util.function.Supplier;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.AutoCastValueAccessor;
+import org.alkemy.parse.ConstructorFunction;
+import org.alkemy.parse.NodeFactory;
 import org.alkemy.util.Assertions;
 
-public class StaticMethodLambdaBasedConstructor implements NodeFactory
+public class ReferencedNodeFactory implements NodeFactory
 {
     private final Class<?> type;
     private final Class<?> componentType;
@@ -33,7 +36,7 @@ public class StaticMethodLambdaBasedConstructor implements NodeFactory
     private AutoCastValueAccessor valueAccessor;
     private final boolean collection;
 
-    StaticMethodLambdaBasedConstructor(Class<?> type, Class<?> componentType, Supplier<?> noargsCtor,
+    ReferencedNodeFactory(Class<?> type, Class<?> componentType, Supplier<?> noargsCtor,
             Supplier<?> noargsComponentCtor, ConstructorFunction staticFactory, AutoCastValueAccessor valueAccessor)
     {
         Assertions.noneNull(type, noargsCtor, staticFactory);

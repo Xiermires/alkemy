@@ -15,7 +15,10 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import org.alkemy.Bar;
 import org.alkemy.Foo;
+import org.alkemy.parse.impl.TestAlkemizer.Lorem;
+import org.alkemy.util.AlkemyUtils;
 
 
 public class TestAlkemizerCompiledVersion
@@ -36,11 +39,19 @@ public class TestAlkemizerCompiledVersion
     @Foo
     private String bar;
     
-    public static TestAlkemizerCompiledVersion create$$instance(int foo, String bar)
+    @Bar
+    Lorem ipsum;
+
+    @Bar
+    float dolor;
+    
+    public static TestAlkemizerCompiledVersion create$$args(int foo, String bar, Object ipsum, float dolor)
     {
         final TestAlkemizerCompiledVersion tacv = new TestAlkemizerCompiledVersion();
         tacv.foo = foo;
         tacv.bar = bar;
+        tacv.ipsum = ipsum instanceof String ? AlkemyUtils.toEnum(Lorem.class, (String) ipsum) : (Lorem) ipsum;
+        tacv.dolor = dolor;
         return tacv;
     }
     

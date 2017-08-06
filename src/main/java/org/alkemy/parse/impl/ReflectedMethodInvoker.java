@@ -22,8 +22,9 @@ import java.util.Optional;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.MethodInvoker;
 
-public class MethodHandleBasedInvoker implements MethodInvoker
+public class ReflectedMethodInvoker implements MethodInvoker
 {
     private final AnnotatedElement desc;
     private final String name;
@@ -31,7 +32,7 @@ public class MethodHandleBasedInvoker implements MethodInvoker
     private final MethodHandle mh;
     private final boolean hasArgs;
 
-    MethodHandleBasedInvoker(AnnotatedElement desc, String name, Class<?> declaringClass, MethodHandle mh)
+    ReflectedMethodInvoker(AnnotatedElement desc, String name, Class<?> declaringClass, MethodHandle mh)
     {
         this.desc = desc;
         this.name = name;

@@ -13,41 +13,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.parse;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-
-public class AnnotatedElementWrapper implements AnnotatedElement
+@FunctionalInterface
+public interface ConstructorFunction
 {
-    private final Annotation[] annotations;
-
-    AnnotatedElementWrapper(Annotation[] annotations)
-    {
-        this.annotations = annotations;
-    }
-
-    @Override
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass)
-    {
-        throw new UnsupportedOperationException("not needed.");
-    }
-
-    @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass)
-    {
-        throw new UnsupportedOperationException("not needed.");
-    }
-
-    @Override
-    public Annotation[] getAnnotations()
-    {
-        return annotations;
-    }
-
-    @Override
-    public Annotation[] getDeclaredAnnotations()
-    {
-        return annotations;
-    }
+    Object newInstance(Object... args);
 }

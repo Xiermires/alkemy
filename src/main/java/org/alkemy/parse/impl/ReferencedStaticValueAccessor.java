@@ -1,38 +1,62 @@
+/*******************************************************************************
+ * Copyright (c) 2017, Xavier Miret Andres <xavier.mires@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *******************************************************************************/
 package org.alkemy.parse.impl;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.ObjDoubleConsumer;
-import java.util.function.ObjIntConsumer;
-import java.util.function.ObjLongConsumer;
-import java.util.function.Predicate;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
 
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.functional.ObjBooleanConsumer;
 import org.alkemy.functional.ObjByteConsumer;
 import org.alkemy.functional.ObjCharConsumer;
+import org.alkemy.functional.ObjDoubleConsumer;
 import org.alkemy.functional.ObjFloatConsumer;
+import org.alkemy.functional.ObjIntConsumer;
+import org.alkemy.functional.ObjLongConsumer;
 import org.alkemy.functional.ObjShortConsumer;
+import org.alkemy.functional.ObjStringConsumer;
+import org.alkemy.functional.ToBooleanFunction;
 import org.alkemy.functional.ToByteFunction;
 import org.alkemy.functional.ToCharFunction;
+import org.alkemy.functional.ToDoubleFunction;
 import org.alkemy.functional.ToFloatFunction;
+import org.alkemy.functional.ToIntFunction;
+import org.alkemy.functional.ToLongFunction;
 import org.alkemy.functional.ToShortFunction;
+import org.alkemy.functional.ToStringFunction;
+import org.alkemy.parse.ValueAccessor;
 
-public class StaticInstrumentAccessor implements ValueAccessor
+public class ReferencedStaticValueAccessor implements ValueAccessor
 {
     protected final String name;
     protected final Class<?> type;
 
-    // Untypified.
+    // All types.
     protected final Function<Object, ?> getter;
     protected final BiConsumer<Object, Object> setter;
 
-    // Typified.
-    protected Function<Object, String> stringGetter;
-    protected BiConsumer<Object, String> stringSetter;
+    // Primitives + String.
+    protected ToStringFunction<Object> stringGetter;
+    protected ObjStringConsumer<Object> stringSetter;
 
     protected ToDoubleFunction<Object> doubleGetter;
     protected ObjDoubleConsumer<Object> doubleSetter;
@@ -55,10 +79,10 @@ public class StaticInstrumentAccessor implements ValueAccessor
     protected ToByteFunction<Object> byteGetter;
     protected ObjByteConsumer<Object> byteSetter;
 
-    protected Predicate<Object> booleanGetter;
+    protected ToBooleanFunction<Object> booleanGetter;
     protected ObjBooleanConsumer<Object> booleanSetter;
 
-    protected StaticInstrumentAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
+    protected ReferencedStaticValueAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
         this.name = name;
         this.type = type;
@@ -66,103 +90,109 @@ public class StaticInstrumentAccessor implements ValueAccessor
         this.setter = setter;
     }
 
-    StaticInstrumentAccessor stringSetter(BiConsumer<Object, String> stringSetter)
+    ReferencedStaticValueAccessor stringSetter(ObjStringConsumer<Object> stringSetter)
     {
         this.stringSetter = stringSetter;
         return this;
     }
+    
+    ReferencedStaticValueAccessor stringGetter(ToStringFunction<Object> stringGetter)
+    {
+        this.stringGetter = stringGetter;
+        return this;
+    }
 
-    StaticInstrumentAccessor doubleSetter(ObjDoubleConsumer<Object> doubleSetter)
+    ReferencedStaticValueAccessor doubleSetter(ObjDoubleConsumer<Object> doubleSetter)
     {
         this.doubleSetter = doubleSetter;
         return this;
     }
 
-    StaticInstrumentAccessor doubleGetter(ToDoubleFunction<Object> doubleGetter)
+    ReferencedStaticValueAccessor doubleGetter(ToDoubleFunction<Object> doubleGetter)
     {
         this.doubleGetter = doubleGetter;
         return this;
     }
 
-    StaticInstrumentAccessor floatSetter(ObjFloatConsumer<Object> floatSetter)
+    ReferencedStaticValueAccessor floatSetter(ObjFloatConsumer<Object> floatSetter)
     {
         this.floatSetter = floatSetter;
         return this;
     }
 
-    StaticInstrumentAccessor floatGetter(ToFloatFunction<Object> floatGetter)
+    ReferencedStaticValueAccessor floatGetter(ToFloatFunction<Object> floatGetter)
     {
         this.floatGetter = floatGetter;
         return this;
     }
 
-    StaticInstrumentAccessor longSetter(ObjLongConsumer<Object> longSetter)
+    ReferencedStaticValueAccessor longSetter(ObjLongConsumer<Object> longSetter)
     {
         this.longSetter = longSetter;
         return this;
     }
 
-    StaticInstrumentAccessor longGetter(ToLongFunction<Object> longGetter)
+    ReferencedStaticValueAccessor longGetter(ToLongFunction<Object> longGetter)
     {
         this.longGetter = longGetter;
         return this;
     }
 
-    StaticInstrumentAccessor intSetter(ObjIntConsumer<Object> intSetter)
+    ReferencedStaticValueAccessor intSetter(ObjIntConsumer<Object> intSetter)
     {
         this.intSetter = intSetter;
         return this;
     }
 
-    StaticInstrumentAccessor intGetter(ToIntFunction<Object> intGetter)
+    ReferencedStaticValueAccessor intGetter(ToIntFunction<Object> intGetter)
     {
         this.intGetter = intGetter;
         return this;
     }
 
-    StaticInstrumentAccessor shortSetter(ObjShortConsumer<Object> shortSetter)
+    ReferencedStaticValueAccessor shortSetter(ObjShortConsumer<Object> shortSetter)
     {
         this.shortSetter = shortSetter;
         return this;
     }
 
-    StaticInstrumentAccessor shortGetter(ToShortFunction<Object> shortGetter)
+    ReferencedStaticValueAccessor shortGetter(ToShortFunction<Object> shortGetter)
     {
         this.shortGetter = shortGetter;
         return this;
     }
 
-    StaticInstrumentAccessor charSetter(ObjCharConsumer<Object> charSetter)
+    ReferencedStaticValueAccessor charSetter(ObjCharConsumer<Object> charSetter)
     {
         this.charSetter = charSetter;
         return this;
     }
 
-    StaticInstrumentAccessor charGetter(ToCharFunction<Object> charGetter)
+    ReferencedStaticValueAccessor charGetter(ToCharFunction<Object> charGetter)
     {
         this.charGetter = charGetter;
         return this;
     }
 
-    StaticInstrumentAccessor byteSetter(ObjByteConsumer<Object> byteSetter)
+    ReferencedStaticValueAccessor byteSetter(ObjByteConsumer<Object> byteSetter)
     {
         this.byteSetter = byteSetter;
         return this;
     }
 
-    StaticInstrumentAccessor byteGetter(ToByteFunction<Object> byteGetter)
+    ReferencedStaticValueAccessor byteGetter(ToByteFunction<Object> byteGetter)
     {
         this.byteGetter = byteGetter;
         return this;
     }
 
-    StaticInstrumentAccessor booleanSetter(ObjBooleanConsumer<Object> booleanSetter)
+    ReferencedStaticValueAccessor booleanSetter(ObjBooleanConsumer<Object> booleanSetter)
     {
         this.booleanSetter = booleanSetter;
         return this;
     }
 
-    StaticInstrumentAccessor booleanGetter(Predicate<Object> booleanGetter)
+    ReferencedStaticValueAccessor booleanGetter(ToBooleanFunction<Object> booleanGetter)
     {
         this.booleanGetter = booleanGetter;
         return this;
@@ -203,7 +233,7 @@ public class StaticInstrumentAccessor implements ValueAccessor
     @Override
     public double getDouble(Object parent) throws AlkemyException
     {
-        return doubleGetter != null ? doubleGetter.applyAsDouble(parent) : get(parent, Double.class);
+        return doubleGetter != null ? doubleGetter.apply(parent) : get(parent, Double.class);
     }
 
     @Override
@@ -231,7 +261,7 @@ public class StaticInstrumentAccessor implements ValueAccessor
     @Override
     public long getLong(Object parent) throws AlkemyException
     {
-        return longGetter != null ? longGetter.applyAsLong(parent) : get(parent, Long.class);
+        return longGetter != null ? longGetter.apply(parent) : get(parent, Long.class);
     }
 
     @Override
@@ -245,7 +275,7 @@ public class StaticInstrumentAccessor implements ValueAccessor
     @Override
     public int getInt(Object parent) throws AlkemyException
     {
-        return intGetter != null ? intGetter.applyAsInt(parent) : get(parent, Integer.class);
+        return intGetter != null ? intGetter.apply(parent) : get(parent, Integer.class);
     }
 
     @Override
@@ -301,7 +331,7 @@ public class StaticInstrumentAccessor implements ValueAccessor
     @Override
     public boolean getBoolean(Object parent) throws AlkemyException
     {
-        return booleanGetter != null ? booleanGetter.test(parent) : get(parent, Boolean.class);
+        return booleanGetter != null ? booleanGetter.apply(parent) : get(parent, Boolean.class);
     }
 
     @Override

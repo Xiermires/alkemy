@@ -19,10 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package org.alkemy.functional;
 
-@FunctionalInterface
-public interface ToShortFunction<R>
-{
-    short apply(R value);
-}
+
+/**
+ * This package contains classes to provide lambda reference support to 
+ * the all java primitives + the type String.
+ * <p>
+ * It also includes some which exist already in java.util.function to standardize the methods.
+ */
+package org.alkemy.functional;

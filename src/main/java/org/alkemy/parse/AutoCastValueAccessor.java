@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.parse;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
@@ -41,10 +41,10 @@ public interface AutoCastValueAccessor
      */
     @SuppressWarnings("unchecked")
     // safe
-    default <T> T get(Object parent, Class<T> type) throws AlkemyException
+    default <E> E get(Object parent, Class<E> type) throws AlkemyException
     {
         final Object v = get(parent);
-        return v != null && type.isInstance(v) ? (T) v : null;
+        return v != null && type.isInstance(v) ? (E) v : null;
     }
 
     /**

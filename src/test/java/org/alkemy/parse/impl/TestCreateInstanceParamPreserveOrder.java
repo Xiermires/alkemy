@@ -20,7 +20,7 @@ import org.alkemy.annotations.Order;
 
 public class TestCreateInstanceParamPreserveOrder
 {
-    @Order({ "b", "a" })
+    @Order({ "c", "a", "b" })
     public static class FollowsOrder
     {
         @Foo
@@ -28,6 +28,9 @@ public class TestCreateInstanceParamPreserveOrder
 
         @Foo
         int b;
+        
+        @Foo
+        float c;
     }
     
     public static class FollowsDeclaration
@@ -37,5 +40,8 @@ public class TestCreateInstanceParamPreserveOrder
 
         @Foo
         int b;
+        
+        @Foo
+        float c;
     }
 }

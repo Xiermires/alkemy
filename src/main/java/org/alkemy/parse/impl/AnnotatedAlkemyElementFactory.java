@@ -18,17 +18,20 @@ package org.alkemy.parse.impl;
 import java.util.Collections;
 import java.util.List;
 
+import org.alkemy.parse.MethodInvoker;
+import org.alkemy.parse.NodeFactory;
+import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
 
-public class TypeFieldAlkemyElementFactory implements AlkemyElementFactory<AnnotatedMember>
+public class AnnotatedAlkemyElementFactory implements AlkemyElementFactory<AnnotatedMember>
 {
-    private TypeFieldAlkemyElementFactory()
+    private AnnotatedAlkemyElementFactory()
     {
     }
 
     public static AlkemyElementFactory<AnnotatedMember> create()
     {
-        return new TypeFieldAlkemyElementFactory();
+        return new AnnotatedAlkemyElementFactory();
     }
 
     @Override

@@ -24,17 +24,14 @@ import static org.objectweb.asm.Opcodes.ASM5;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ICONST_2;
 import static org.objectweb.asm.Opcodes.ICONST_3;
 import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
@@ -54,7 +51,7 @@ import org.objectweb.asm.Type;
 
 public class FieldOrderWriter extends FieldAccessorWriter
 {
-    static final String CREATE_INSTANCE = "create$$instance";
+    static final String CREATE_ARGS = "create$$args";
 
     private boolean ordered;
     private final List<String> orderedFields = new ArrayList<>();
@@ -82,7 +79,7 @@ public class FieldOrderWriter extends FieldAccessorWriter
         if (isAlkemized())
         {
             appendOrder();
-            appendNodeConstructor();
+            appendCreateArgs();
         }
     }
 
@@ -100,24 +97,23 @@ public class FieldOrderWriter extends FieldAccessorWriter
         }
     }
 
-    private void appendNodeConstructor()
+    private void appendCreateArgs()
     {
-        final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, "create$$instance", "([Ljava/lang/Object;)"
-                + AlkemizerUtils.toDescFromClassName(className), null, null);
+        final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_ARGS, //
+                "([Ljava/lang/Object;)" + AlkemizerUtils.toDescFromClassName(className), null, null);
 
         mv.visitCode();
 
         final Label l0 = new Label();
         mv.visitLabel(l0);
-        mv.visitTypeInsn(NEW, className);
-        mv.visitInsn(DUP);
-        mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
 
+        mv.visitMethodInsn(INVOKESTATIC, className, FieldAlkemizer.CREATE_DEFAULT, //
+                "()" + AlkemizerUtils.toDescFromClassName(className), false);
         mv.visitVarInsn(ASTORE, 1);
 
         // need this label for the local variables
-        final Label l2 = new Label();
-        mv.visitLabel(l2);
+        //final Label l2 = new Label();
+        //mv.visitLabel(l2);
 
         final List<String> fields = fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).map(
                 entry -> entry.getKey()).collect(Collectors.toList());
@@ -160,11 +156,11 @@ public class FieldOrderWriter extends FieldAccessorWriter
         mv.visitVarInsn(ALOAD, 1);
         mv.visitInsn(ARETURN);
 
-        final Label ln = new Label();
-        mv.visitLabel(ln);
+        //final Label ln = new Label();
+        //mv.visitLabel(ln);
 
-        mv.visitLocalVariable("args", "[Ljava/lang/Object;", null, l0, ln, 0);
-        mv.visitLocalVariable("instance", AlkemizerUtils.toDescFromClassName(className), null, l2, ln, 1);
+        //mv.visitLocalVariable("args", "[Ljava/lang/Object;", null, l0, ln, 0);
+        //mv.visitLocalVariable("instance", AlkemizerUtils.toDescFromClassName(className), null, l2, ln, 1);
 
         mv.visitMaxs(0, 0);
         mv.visitEnd();
@@ -172,8 +168,6 @@ public class FieldOrderWriter extends FieldAccessorWriter
 
     private void checkFieldNames(Collection<String> fields, List<String> orderedFields)
     {
-        if (fields.size() != orderedFields.size())
-            throw new Stop("Invalid order definition (size)."); // invalid definition
         if (!fields.containsAll(orderedFields))
             throw new Stop("Invalid order definition (alien)."); // invalid definition
     }

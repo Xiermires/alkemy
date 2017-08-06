@@ -19,10 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package org.alkemy.functional;
+package org.alkemy.parse;
 
-@FunctionalInterface
-public interface ToShortFunction<R>
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+// TODO configurable
+public class InterfaceDefaultInstance
 {
-    short apply(R value);
+    private InterfaceDefaultInstance()
+    {
+    }
+
+    private final static Map<Class<?>, Class<?>> supported = new HashMap<>();
+
+    static
+    {
+        supported.put(List.class, ArrayList.class);
+        supported.put(Set.class, HashSet.class);
+    }
+
+    public static Class<?> get(Class<?> clazz)
+    {
+        final Class<?> c = supported.get(clazz);
+        return c == null ? clazz : c;
+    }
 }

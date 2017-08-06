@@ -22,7 +22,7 @@
 package org.alkemy.functional;
 
 @FunctionalInterface
-public interface ToShortFunction<R>
+public interface ToLongFunction<R>
 {
-    short apply(R value);
+    long apply(R value);
 }

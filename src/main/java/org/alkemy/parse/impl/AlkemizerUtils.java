@@ -15,15 +15,11 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import static org.alkemy.parse.impl.MethodReferenceHelper.methodReference;
 import static org.objectweb.asm.Opcodes.ACC_ENUM;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandle;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,22 +30,6 @@ import org.objectweb.asm.ClassVisitor;
 public class AlkemizerUtils
 {
     private static final Pattern DESC = Pattern.compile("^L(.+\\/.+)+;$");
-
-    @SuppressWarnings("unchecked")
-    static boolean isInstrumented(Class<?> clazz) throws IllegalAccessException, SecurityException
-    {
-        try
-        {
-            final Method get = Supplier.class.getMethod("get");
-            final MethodHandle referent = MethodReferenceHelper.methodHandle(clazz, FieldAlkemizer.IS_INSTRUMENTED);
-            final Supplier<Boolean> instrumented = methodReference(Supplier.class, get, referent);
-            return instrumented != null && instrumented.get();
-        }
-        catch (NoSuchMethodException e)
-        {
-            return false;
-        }
-    }
 
     public static boolean isDefaultCtor(String name, String desc)
     {

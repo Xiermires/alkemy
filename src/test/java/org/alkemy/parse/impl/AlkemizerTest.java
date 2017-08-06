@@ -38,6 +38,9 @@ import java.util.function.Function;
 import org.alkemy.AlkemyNodes;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.AutoCastValueAccessor;
+import org.alkemy.parse.NodeFactory;
+import org.alkemy.parse.ValueAccessor;
 import org.alkemy.parse.impl.AccessorFactory.SelfAccessor;
 import org.alkemy.parse.impl.TestAlkemizer.Lorem;
 import org.alkemy.parse.impl.TestCreateInstanceParamPreserveOrder.FollowsDeclaration;
@@ -60,9 +63,9 @@ public class AlkemizerTest
     }
 
     @Test
-    public void alkemizeNodeConstructorMethod() throws IOException, NoSuchMethodException, SecurityException
+    public void alkemizeCreateArgsMethod() throws IOException, NoSuchMethodException, SecurityException
     {
-        final Method m = clazz.getMethod(FieldOrderWriter.CREATE_INSTANCE, Object[].class);
+        final Method m = clazz.getMethod(FieldOrderWriter.CREATE_ARGS, Object[].class);
         assertThat(Modifier.isStatic(m.getModifiers()), is(true));
     }
 
@@ -75,23 +78,23 @@ public class AlkemizerTest
     }
 
     @Test
-    public void nodeConstructorArgsPreserveOrder() throws IllegalAccessException, SecurityException
+    public void createArgsPreserveOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(FollowsOrder.class, null, new SelfAccessor(FollowsOrder.class));
-        ctor.newInstance(1, "a");
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(FollowsOrder.class, null, new SelfAccessor(FollowsOrder.class));
+        ctor.newInstance(1f, "a", 1);
     }
 
     @Test
-    public void nodeConstructorArgsInDeclarationOrder() throws IllegalAccessException, SecurityException
+    public void createArgsInDeclarationOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(FollowsDeclaration.class, null, new SelfAccessor(FollowsDeclaration.class));
-        ctor.newInstance("a", 1);
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(FollowsDeclaration.class, null, new SelfAccessor(FollowsDeclaration.class));
+        ctor.newInstance("a", 1, 1f);
     }
 
     @Test
     public void alkemizeIsInstrumented() throws IllegalAccessException, NoSuchMethodException, SecurityException, Throwable
     {
-        assertThat(AlkemizerUtils.isInstrumented(clazz), is(true));
+        assertThat(MethodReferenceFactory.isInstrumented(clazz), is(true));
     }
 
     @Test
@@ -108,7 +111,7 @@ public class AlkemizerTest
     @Test(expected = AlkemyException.class)
     public void testNodeConstructorWithArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance(1, "foo");
 
         assertThat(1, is(tc.foo));
@@ -120,7 +123,7 @@ public class AlkemizerTest
 
     public void testNodeConstructorNoArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeFactory ctor = MethodReferenceAccessorFactory.createNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance();
 
         assertThat(tc, is(not(nullValue())));
@@ -132,7 +135,7 @@ public class AlkemizerTest
     public void testAccessorGetter() throws NoSuchFieldException, SecurityException, IllegalAccessException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceFactory.createReferencedValueAccessor(f);
 
         final TestAlkemizer tc = new TestAlkemizer();
         assertThat(-1, is(accessor.get(tc)));
@@ -142,7 +145,7 @@ public class AlkemizerTest
     public void testAccessorSetter() throws NoSuchFieldException, SecurityException, IllegalAccessException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceFactory.createReferencedValueAccessor(f);
 
         final TestAlkemizer tc = new TestAlkemizer();
         accessor.set(1, tc);
@@ -153,12 +156,12 @@ public class AlkemizerTest
     public void testWidening() throws IllegalAccessException, SecurityException, NoSuchFieldException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceFactory.createReferencedValueAccessor(f);
 
         short s = 1;
         accessor.set(s, new TestAlkemizer());
 
-        final AutoCastValueAccessor reflectAccessor = MethodReferenceAccessorFactory.createReflectiveValueAccessor(f);
+        final AutoCastValueAccessor reflectAccessor = MethodReferenceFactory.createReflectedValueAccessor(f);
         reflectAccessor.set(s, new TestAlkemizer());
     }
 
@@ -166,12 +169,12 @@ public class AlkemizerTest
     public void testNarrowing() throws IllegalAccessException, SecurityException, NoSuchFieldException, NoSuchMethodException
     {
         final Field f = clazz.getDeclaredField("foo");
-        final AutoCastValueAccessor accessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
+        final AutoCastValueAccessor accessor = MethodReferenceFactory.createReferencedValueAccessor(f);
 
         double d = 1;
         accessor.set(d, new TestAlkemizer());
 
-        final AutoCastValueAccessor reflectAccessor = MethodReferenceAccessorFactory.createReflectiveValueAccessor(f);
+        final AutoCastValueAccessor reflectAccessor = MethodReferenceFactory.createReflectedValueAccessor(f);
         reflectAccessor.set(d, new TestAlkemizer());
     }
 
@@ -180,11 +183,11 @@ public class AlkemizerTest
     {
         final Field f = clazz.getDeclaredField("ipsum");
         final TestAlkemizer ta = new TestAlkemizer();
-        MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f).set("ipsum", ta);
+        MethodReferenceFactory.createReferencedValueAccessor(f).set("ipsum", ta);
         assertThat(ta.ipsum, is(Lorem.ipsum));
     }
 
-    @Test(expected = AlkemyException.class)
+    @Test
     public void testNoDefaultCtor()
     {
         AlkemyNodes.get(TestCreatedDefaultCtor.class);
@@ -196,29 +199,34 @@ public class AlkemizerTest
         System.out.println("**** Compare accessing / creating fiels (1e7 iterations) ****");
 
         final Field field = clazz.getDeclaredField("bar");
+        field.setAccessible(true);
         final Method method = clazz.getDeclaredMethod("getBar");
+        method.setAccessible(true);
         final MethodHandle handle = methodHandle(clazz, "getBar");
         final Function<Object, String> function = getterReference(handle, Object.class, String.class);
-        final ValueAccessor barAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz.getDeclaredField("bar"));
-        final ValueAccessor fooAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz.getDeclaredField("foo"));
-        final ValueAccessor ipsumAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz
+        final ValueAccessor barAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz.getDeclaredField("bar"));
+        final ValueAccessor fooAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz.getDeclaredField("foo"));
+        final ValueAccessor ipsumAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz
                 .getDeclaredField("ipsum"));
-        final ValueAccessor dolorAccessor = MethodReferenceAccessorFactory.createInstrumentedValueAccessor(clazz
+        final ValueAccessor dolorAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz
                 .getDeclaredField("dolor"));
-        final NodeFactory ctortc = MethodReferenceAccessorFactory.createNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
-        final NodeFactory ctortmf = MethodReferenceAccessorFactory.createNodeFactory(TestManyFields.class, null, new SelfAccessor(TestManyFields.class));
+        final NodeFactory ctortc = MethodReferenceFactory.createReferencedNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
+        final NodeFactory ctortmf = MethodReferenceFactory.createReferencedNodeFactory(TestManyFields.class, null, new SelfAccessor(TestManyFields.class));
 
         final TestAlkemizer tc = new TestAlkemizer();
 
         // warm up
-        for (int i = 0; i < ITER; i++)
+        for (int i = 0; i < 1000; i++)
         {
             @SuppressWarnings("unused")
             String bar = (String) handle.invokeExact(tc);
-            bar = (String) handle.invoke(tc);
-            bar = function.apply(tc);
-            bar = (String) method.invoke(tc);
-            bar = (String) barAccessor.get(tc);
+            handle.invoke(tc);
+            function.apply(tc);
+            method.invoke(tc);
+            barAccessor.get(tc);
+            fooAccessor.get(tc);
+            barAccessor.set("foo", tc);
+            fooAccessor.set(1, tc);
         }
 
         System.out.println("MethodHandle#invokeExact(): " + Measure.measure(() ->
@@ -253,8 +261,16 @@ public class AlkemizerTest
                 String.class.cast(barAccessor.get(tc));
             }
         }) / 1000000 + " ms");
-
-        System.out.println("Reflection (get): " + Measure.measure(() ->
+                
+        System.out.println("Accessor get (TestClass)int: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                fooAccessor.get(tc);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("Reflection (field.get): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -269,8 +285,16 @@ public class AlkemizerTest
                 barAccessor.set("foo", tc);
             }
         }) / 1000000 + " ms");
-
-        System.out.println("Reflection (set): " + Measure.measure(() ->
+        
+        System.out.println("Accessor set (TestClass)int: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                fooAccessor.set(1, tc);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("Reflection (field.set): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -278,7 +302,7 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
-        System.out.println("Reflection (call get$$bar): " + Measure.measure(() ->
+        System.out.println("Reflection (getXXX()): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -295,26 +319,6 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
-        System.out.println("create$$instance (TestAlkemizer): " + Measure.measure(() ->
-        {
-            for (int i = 0; i < ITER; i++)
-            {
-                ctortc.newInstance(1, "two", "ipsum", 1f);
-            }
-        }) / 1000000 + " ms");
-
-        System.out.println("default ctor + sets (TestAlkemizer): " + Measure.measure(() ->
-        {
-            for (int i = 0; i < ITER; i++)
-            {
-                final Object instance = ctortc.newInstance();
-                fooAccessor.set(1, instance);
-                barAccessor.set("two", instance);
-                ipsumAccessor.set("ipsum", instance);
-                dolorAccessor.set(1f, instance);
-            }
-        }) / 1000000 + " ms");
-
         System.out.println("Enum conversion: " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
@@ -325,7 +329,7 @@ public class AlkemizerTest
 
         final Object[] fields = new Object[26];
         Arrays.fill(fields, 1);
-        System.out.println("create$$instance (TestManyFields: " + Measure.measure(() ->
+        System.out.println(FieldOrderWriter.CREATE_ARGS + "(TestManyFields: " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -333,11 +337,31 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
-        System.out.println("Direct access (call static factory): " + Measure.measure(() ->
+        System.out.println(FieldAlkemizer.CREATE_DEFAULT + " + set(value, parent) (TestAlkemizer): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
-                TestAlkemizerCompiledVersion.create$$instance(1, "two");
+                final Object instance = ctortc.newInstance();
+                fooAccessor.set(1, instance);
+                barAccessor.set("two", instance);
+                ipsumAccessor.set(Lorem.ipsum, instance);
+                dolorAccessor.set(1f, instance);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println(FieldOrderWriter.CREATE_ARGS + "(TestAlkemizer#newInstance(...): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                ctortc.newInstance(1, "two", Lorem.ipsum, 1f);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("Direct access (TestAlkemizerCompiledVersion.create$$args): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                TestAlkemizerCompiledVersion.create$$args(1, "two", Lorem.ipsum, 1f);
             }
         }) / 1000000 + " ms");
 
@@ -406,7 +430,7 @@ public class AlkemizerTest
         {
             try
             {
-                return MethodReferenceHelper.methodReference(Function.class, Function.class.getMethod("apply", Object.class), handle);
+                return MethodReferenceFactory.methodReference(Function.class, Function.class.getMethod("apply", Object.class), handle);
             }
             catch (SecurityException e)
             {

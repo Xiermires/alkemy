@@ -27,13 +27,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.alkemy.parse.impl.AlkemyElement;
-import org.alkemy.parse.impl.AutoCastValueAccessor;
-import org.alkemy.parse.impl.ValueAccessor;
-import org.alkemy.util.Measure;
-import org.alkemy.util.Node;
 import org.junit.Test;
 
 public class CoreAlkemy
@@ -123,31 +117,6 @@ public class CoreAlkemy
         assertThat(elements.get(20), is("org.alkemy.TestTraverse$NestedC.c2"));
         assertThat(elements.get(21), is("org.alkemy.TestTraverse.nc"));
         assertThat(elements.get(22), is("org.alkemy.TestTraverse"));
-    }
-
-    @Test
-    public void testPrimitiveVsAutoCast() throws Throwable
-    {
-        final int ITER = 10000000;
-
-        final TestClass tc = new TestClass();
-        final Node<AlkemyElement> root = AlkemyNodes.get(TestClass.class);
-        final List<ValueAccessor> primitives = root.stream().filter(e -> !e.isNode()).collect(Collectors.toList());
-        final List<AutoCastValueAccessor> autoCast = root.stream().filter(e -> !e.isNode()).collect(Collectors.toList());
-
-        System.out.println("Primitive: " + Measure.measure(() ->
-        {
-            for (int i = 0; i < ITER; i++)
-                for (ValueAccessor e : primitives)
-                    e.set(i, tc);
-        }) / 1000000 + " ms");
-
-        System.out.println("Auto-cast: " + Measure.measure(() ->
-        {
-            for (int i = 0; i < ITER; i++)
-                for (AutoCastValueAccessor e : autoCast)
-                    e.set(i, tc);
-        }) / 1000000 + " ms");
     }
 
     public static class Summation

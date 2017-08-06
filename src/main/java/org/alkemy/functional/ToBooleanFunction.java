@@ -21,8 +21,7 @@
  *******************************************************************************/
 package org.alkemy.functional;
 
-@FunctionalInterface
-public interface ToShortFunction<R>
+public interface ToBooleanFunction<R>
 {
-    short apply(R value);
+    boolean apply(R value);
 }

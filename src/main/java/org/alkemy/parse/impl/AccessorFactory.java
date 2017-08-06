@@ -15,6 +15,12 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import static org.alkemy.parse.impl.MethodReferenceFactory.createReferencedNodeFactory;
+import static org.alkemy.parse.impl.MethodReferenceFactory.createReferencedValueAccessor;
+import static org.alkemy.parse.impl.MethodReferenceFactory.createReflectedValueAccessor;
+import static org.alkemy.parse.impl.MethodReferenceFactory.isInstrumented;
+import static org.alkemy.parse.impl.MethodReferenceFactory.methodHandle;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -23,6 +29,11 @@ import java.util.List;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.parse.AutoCastValueAccessor;
+import org.alkemy.parse.InterfaceDefaultInstance;
+import org.alkemy.parse.MethodInvoker;
+import org.alkemy.parse.NodeFactory;
+import org.alkemy.parse.ValueAccessor;
 
 class AccessorFactory
 {
@@ -44,13 +55,13 @@ class AccessorFactory
     {
         try
         {
-            if (AlkemizerUtils.isInstrumented(f.getDeclaringClass()))
+            if (isInstrumented(f.getDeclaringClass()))
             {
-                return MethodReferenceAccessorFactory.createInstrumentedValueAccessor(f);
+                return createReferencedValueAccessor(f);
             }
             else
             {
-                return MethodReferenceAccessorFactory.createReflectiveValueAccessor(f);
+                return createReflectedValueAccessor(f);
             }
         }
         catch (ReflectiveOperationException | SecurityException e)
@@ -67,16 +78,16 @@ class AccessorFactory
 
         try
         {
-            if (AlkemizerUtils.isInstrumented(type))
+            if (isInstrumented(type))
             {
-                return MethodReferenceAccessorFactory.createNodeFactory(type, componentType, valueAccessor);
+                return createReferencedNodeFactory(type, componentType, valueAccessor);
             }
             else
             {
-                return new ReflectionBasedConstructorAccessor(type, componentType, valueAccessor);
+                return new ReflectedNodeFactory(type, componentType, valueAccessor);
             }
         }
-        catch (IllegalAccessException | SecurityException | NoSuchMethodException e)
+        catch (IllegalAccessException | SecurityException e)
         {
             throw new AlkemyException("Unable to create a constructor accessor for type '%s'", e, type.getName());
         }
@@ -89,8 +100,7 @@ class AccessorFactory
         {
             try
             {
-                invokers.add(new MethodHandleBasedInvoker(m, m.getName(), m.getDeclaringClass(), MethodReferenceHelper
-                        .methodHandle(m)));
+                invokers.add(new ReflectedMethodInvoker(m, m.getName(), m.getDeclaringClass(), methodHandle(m)));
             }
             catch (IllegalAccessException e)
             {
@@ -153,7 +163,7 @@ class AccessorFactory
         }
 
         @Override
-        public <T> T newInstance(Class<T> type, Object... args) throws AlkemyException
+        public <E> E newInstance(Class<E> type, Object... args) throws AlkemyException
         {
             throw new UnsupportedOperationException("Not supported for this type of element.");
         }
@@ -171,7 +181,7 @@ class AccessorFactory
         }
 
         @Override
-        public <T> T newComponentInstance(Class<T> type, Object... args) throws AlkemyException
+        public <E> E newComponentInstance(Class<E> type, Object... args) throws AlkemyException
         {
             throw new UnsupportedOperationException("Not supported for this type of element.");
         }

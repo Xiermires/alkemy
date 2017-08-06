@@ -29,7 +29,7 @@ public class AlkemyParsers
 
     public static AlkemyLexer<AnnotatedMember, AnnotatedMember> fieldLexer()
     {
-        final AlkemyElementFactory<AnnotatedMember> elementFactory = TypeFieldAlkemyElementFactory.create();
+        final AlkemyElementFactory<AnnotatedMember> elementFactory = AnnotatedAlkemyElementFactory.create();
         return TypeLexer.create(elementFactory);
     }
 
