@@ -16,7 +16,6 @@
 package org.alkemy.parse.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.Supplier;
 
 import org.alkemy.exception.AccessException;
@@ -28,32 +27,26 @@ import org.alkemy.util.Assertions;
 
 public class ReferencedNodeFactory implements NodeFactory
 {
-    private final Class<?> type;
-    private final Class<?> componentType;
     private final Supplier<?> noargsCtor;
     private final Supplier<?> noargsComponentCtor;
     private final ConstructorFunction staticFactory;
     private AutoCastValueAccessor valueAccessor;
-    private final boolean collection;
 
-    ReferencedNodeFactory(Class<?> type, Class<?> componentType, Supplier<?> noargsCtor,
-            Supplier<?> noargsComponentCtor, ConstructorFunction staticFactory, AutoCastValueAccessor valueAccessor)
+    ReferencedNodeFactory(Supplier<?> noargsCtor, Supplier<?> noargsComponentCtor, ConstructorFunction staticFactory,
+            AutoCastValueAccessor valueAccessor)
     {
-        Assertions.noneNull(type, noargsCtor, staticFactory);
+        Assertions.noneNull(noargsCtor, staticFactory);
 
-        this.type = type;
-        this.componentType = componentType;
         this.noargsCtor = noargsCtor;
         this.noargsComponentCtor = noargsComponentCtor;
         this.staticFactory = staticFactory;
         this.valueAccessor = valueAccessor;
-        this.collection = Collection.class.isAssignableFrom(type);
     }
 
     @Override
     public Class<?> type() throws AlkemyException
     {
-        return type;
+        return valueAccessor.type();
     }
 
     @Override
@@ -65,22 +58,23 @@ public class ReferencedNodeFactory implements NodeFactory
             {
                 return noargsCtor.get();
             }
-            else
+            else if (!valueAccessor.isCollection())
             {
                 return staticFactory.newInstance(args);
             }
+            else return null;
         }
         catch (Throwable e)
         {
             throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays
-                    .asList(args), type);
+                    .asList(args), type());
         }
     }
 
     @Override
     public Class<?> componentType() throws AlkemyException
     {
-        return componentType;
+        return valueAccessor.componentType();
     }
 
     @Override
@@ -92,15 +86,16 @@ public class ReferencedNodeFactory implements NodeFactory
             {
                 return noargsComponentCtor.get();
             }
-            else
+            else if (valueAccessor.isCollection())
             {
                 return staticFactory.newInstance(args);
             }
+            else return null;
         }
         catch (Throwable e)
         {
             throw new AccessException("Provided arguments '%s' do not match the ctor expected arguments of type '%s'.", e, Arrays
-                    .asList(args), type);
+                    .asList(args), type());
         }
     }
 
@@ -125,6 +120,6 @@ public class ReferencedNodeFactory implements NodeFactory
     @Override
     public boolean isCollection()
     {
-        return collection;
+        return valueAccessor.isCollection();
     }
 }

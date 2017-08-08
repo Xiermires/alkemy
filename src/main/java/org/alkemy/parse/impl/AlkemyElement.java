@@ -32,23 +32,21 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
 {
     private final AnnotatedMember desc;
     private final ValueAccessor valueAccessor;
-    private final NodeFactory nodeConstructor;
+    private final NodeFactory nodeFactory;
     private final Map<String, MethodInvoker> methodInvokers;
     private final Class<? extends Annotation> alkemyType;
     private final boolean node;
-    private final boolean collection;
 
-    AlkemyElement(AnnotatedMember desc, NodeFactory nodeConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node)
+    AlkemyElement(AnnotatedMember desc, NodeFactory nodeFactory, ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers,
+            Class<? extends Annotation> alkemyType, boolean node)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
-        this.nodeConstructor = nodeConstructor;
+        this.nodeFactory = nodeFactory;
         this.methodInvokers = new HashMap<String, MethodInvoker>();
         methodInvokers.forEach(c -> this.methodInvokers.put(c.name(), c));
         this.alkemyType = alkemyType;
         this.node = node;
-        this.collection = Collection.class.isAssignableFrom(desc.getType());
     }
 
     protected AlkemyElement(AlkemyElement other)
@@ -57,11 +55,10 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
 
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
-        this.nodeConstructor = other.nodeConstructor;
+        this.nodeFactory = other.nodeFactory;
         this.methodInvokers = other.methodInvokers;
         this.alkemyType = other.alkemyType;
         this.node = other.node;
-        this.collection = other.collection;
     }
 
     public AnnotatedMember desc()
@@ -83,14 +80,14 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     @Override
     public Object newInstance(Object... args) throws AlkemyException
     {
-        if (node) { return nodeConstructor.newInstance(args); }
+        if (node) { return nodeFactory.newInstance(args); }
         throw new AlkemyException("Alkemy elements w/o children cannot be instantiated");
     }
 
     @Override
     public <E> E newInstance(Class<E> type, Object... args) throws AlkemyException
     {
-        return nodeConstructor.newInstance(type, args);
+        return nodeFactory.newInstance(type, args);
     }
 
     @Override
@@ -120,19 +117,19 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     @Override
     public Class<?> componentType()
     {
-        return nodeConstructor.componentType();
+        return nodeFactory.componentType();
     }
 
     @Override
     public Object newComponentInstance(Object... args) throws AlkemyException
     {
-        return nodeConstructor.newComponentInstance(args);
+        return nodeFactory.newComponentInstance(args);
     }
 
     @Override
     public <E> E newComponentInstance(Class<E> type, Object... args) throws AlkemyException
     {
-        return nodeConstructor.newComponentInstance(type, args);
+        return nodeFactory.newComponentInstance(type, args);
     }
 
     public Collection<MethodInvoker> getMethodInvokers()
@@ -165,14 +162,20 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     @Override
     public boolean isCollection()
     {
-        return nodeConstructor.isCollection();
+        return nodeFactory.isCollection();
     }
 
     @Override
     @SafeVarargs
     public final <E> void addAll(Object parent, E first, E... others) throws AlkemyException
     {
-        nodeConstructor.addAll(parent, first, others);
+        nodeFactory.addAll(parent, first, others);
+    }
+
+    @Override
+    public final <E> void addAll(Object parent, List<E> others) throws AlkemyException
+    {
+        nodeFactory.addAll(parent, others);
     }
 
     @Override

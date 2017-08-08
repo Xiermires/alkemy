@@ -50,13 +50,16 @@ import org.alkemy.functional.ToShortFunction;
 import org.alkemy.functional.ToStringFunction;
 import org.alkemy.parse.AutoCastValueAccessor;
 import org.alkemy.parse.ConstructorFunction;
+import org.alkemy.parse.InterfaceDefaultInstance;
 import org.alkemy.parse.NodeFactory;
 import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Pair;
+import org.alkemy.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Iterables;
@@ -107,7 +110,7 @@ public class MethodReferenceFactory
         setGetters.put(boolean.class, (t1, t2) -> t1.booleanGetter((ToBooleanFunction<Object>) t2));
         setGetters.put(String.class, (t1, t2) -> t1.stringGetter((ToStringFunction<Object>) t2));
         referencedGetters = setGetters.build();
-        
+
         final Builder<Class<?>, BiConsumer<ReferencedStaticValueAccessor, Object>> setSetters = ImmutableMap.builder();
         setSetters.put(double.class, (t1, t2) -> t1.doubleSetter((ObjDoubleConsumer<Object>) t2));
         setSetters.put(float.class, (t1, t2) -> t1.floatSetter((ObjFloatConsumer<Object>) t2));
@@ -169,11 +172,11 @@ public class MethodReferenceFactory
 
         if (Modifier.isStatic(f.getModifiers()))
         {
-            valueAccessor = new ReferencedStaticValueAccessor(name, f.getType(), getter, setter);
+            valueAccessor = new ReferencedStaticValueAccessor(name, f.getType(), Types.getComponentType(f), getter, setter);
         }
         else
         {
-            valueAccessor = new ReferencedMemberValueAccessor(name, f.getType(), getter, setter);
+            valueAccessor = new ReferencedMemberValueAccessor(name, f.getType(), Types.getComponentType(f), getter, setter);
         }
         return valueAccessor;
     }
@@ -247,44 +250,53 @@ public class MethodReferenceFactory
     // The assumption is the parsing of the method is faster than the GC claiming this objects.
     static final WeakHashMap<Pair<Field, Class<?>>, Object> failed = new WeakHashMap<>();
 
-    static NodeFactory createReferencedNodeFactory(Class<?> clazz, Class<?> componentTypeClass,
-            AutoCastValueAccessor valueAccessor) throws IllegalAccessException, SecurityException
+    static NodeFactory createReferencedNodeFactory(AutoCastValueAccessor valueAccessor) throws IllegalAccessException,
+            SecurityException
     {
         // If an alkemizable class extends another alkemizable class, it receives two static
         // methods. Get the explicit one of this type.
         Method factoryMethod = null;
-        for (Method m : Iterables.filter(Arrays.asList(clazz.getMethods())//
+        final Class<? extends Object> instrumentedType = MoreObjects.firstNonNull(valueAccessor.componentType(), valueAccessor
+                .type());
+        for (Method m : Iterables.filter(Arrays.asList(instrumentedType.getMethods())//
                 , f -> FieldOrderWriter.CREATE_ARGS.equals(f.getName())))
-            if (m.getReturnType().equals(clazz))
+        {
+            if (m.getReturnType().equals(instrumentedType))
                 factoryMethod = m;
+        }
 
         Assertions.nonNull(factoryMethod);
 
         MethodHandle factory = null;
         try
         {
-            factory = MethodReferenceFactory.methodHandle(clazz, FieldOrderWriter.CREATE_ARGS, factoryMethod.getParameterTypes());
+            factory = MethodReferenceFactory.methodHandle(instrumentedType, FieldOrderWriter.CREATE_ARGS, factoryMethod
+                    .getParameterTypes());
         }
         catch (NoSuchMethodException e)
         {
-            log.debug("Factory method not present in type '{}'.", clazz.getName());
+            log.debug("Factory method not present in type '{}'.", valueAccessor.type().getName());
         }
 
         try
         {
             final Method get = Supplier.class.getMethod("get");
-            final MethodHandle ctorClass = MethodHandles.lookup().unreflect(
-                    clazz.getDeclaredMethod(FieldAlkemizer.CREATE_DEFAULT));
+            final MethodHandle ctorClass;
+            if (valueAccessor.isCollection())
+                ctorClass = MethodHandles.lookup().unreflectConstructor(InterfaceDefaultInstance.get(valueAccessor.type()).getConstructor());
+            else ctorClass = MethodHandles.lookup().unreflect(
+                    valueAccessor.type().getDeclaredMethod(FieldAlkemizer.CREATE_DEFAULT));
+            
             final Supplier<Object> classCtor = MethodReferenceFactory.methodReference(Supplier.class, get, ctorClass);
             final Method factoryReference = ConstructorFunction.class.getMethod("newInstance", Object[].class);
             final ConstructorFunction factoryWithArgs = MethodReferenceFactory.methodReference(ConstructorFunction.class,
                     factoryReference, factory);
 
             final Supplier<Object> componentClassCtor;
-            if (componentTypeClass != null)
+            if (valueAccessor.componentType() != null)
             {
                 final MethodHandle ctorComponentClass = MethodHandles.lookup()//
-                        .unreflect(componentTypeClass.getDeclaredMethod(FieldAlkemizer.CREATE_DEFAULT));
+                        .unreflect(valueAccessor.componentType().getDeclaredMethod(FieldAlkemizer.CREATE_DEFAULT));
 
                 componentClassCtor = MethodReferenceFactory.methodReference(Supplier.class, get, ctorComponentClass);
             }
@@ -293,10 +305,7 @@ public class MethodReferenceFactory
                 componentClassCtor = null;
             }
 
-            return new ReferencedNodeFactory(//
-                    clazz//
-                    , componentTypeClass//
-                    , classCtor//
+            return new ReferencedNodeFactory(classCtor//
                     , componentClassCtor//
                     , factoryWithArgs//
                     , valueAccessor);

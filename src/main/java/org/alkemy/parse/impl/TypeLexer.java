@@ -40,9 +40,8 @@ class TypeLexer implements AlkemyLexer<AnnotatedMember, AnnotatedMember>
     @Override
     public boolean isNode(AnnotatedMember desc)
     {
-        final TypeLeafFinder leafFinder = new TypeLeafFinder();
-        final Class<?> type = desc.getComponentType() != null ? desc.getComponentType() : desc.getType();
-        leafFinder.parse(type);
+        final DeepLeafSearch leafFinder = new DeepLeafSearch();
+        leafFinder.search(desc.type);
         return leafFinder.get();
     }
 

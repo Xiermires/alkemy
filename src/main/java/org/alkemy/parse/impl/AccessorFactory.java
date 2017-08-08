@@ -29,11 +29,11 @@ import java.util.List;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
-import org.alkemy.parse.AutoCastValueAccessor;
-import org.alkemy.parse.InterfaceDefaultInstance;
 import org.alkemy.parse.MethodInvoker;
 import org.alkemy.parse.NodeFactory;
 import org.alkemy.parse.ValueAccessor;
+
+import com.google.common.base.MoreObjects;
 
 class AccessorFactory
 {
@@ -71,25 +71,22 @@ class AccessorFactory
         }
     }
 
-    static NodeFactory createNodeFactory(Class<?> type, Class<?> componentType, AutoCastValueAccessor valueAccessor)
+    static NodeFactory createNodeFactory(ValueAccessor valueAccessor)
     {
-        type = InterfaceDefaultInstance.get(type);
-        componentType = InterfaceDefaultInstance.get(componentType);
-
         try
         {
-            if (isInstrumented(type))
+            if (isInstrumented(MoreObjects.firstNonNull(valueAccessor.componentType(), valueAccessor.type())))
             {
-                return createReferencedNodeFactory(type, componentType, valueAccessor);
+                return createReferencedNodeFactory(valueAccessor);
             }
             else
             {
-                return new ReflectedNodeFactory(type, componentType, valueAccessor);
+                return new ReflectedNodeFactory(valueAccessor);
             }
         }
         catch (IllegalAccessException | SecurityException e)
         {
-            throw new AlkemyException("Unable to create a constructor accessor for type '%s'", e, type.getName());
+            throw new AlkemyException("Unable to create a constructor accessor for type '%s'", e, valueAccessor.type().getName());
         }
     }
 
@@ -127,6 +124,18 @@ class AccessorFactory
         public Class<?> type() throws AlkemyException
         {
             return type;
+        }
+
+        @Override
+        public boolean isCollection()
+        {
+            return collection;
+        }
+
+        @Override
+        public Class<?> componentType()
+        {
+            return null;
         }
 
         @Override

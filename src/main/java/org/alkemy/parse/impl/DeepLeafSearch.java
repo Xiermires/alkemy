@@ -15,66 +15,32 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.function.Supplier;
 
-import org.alkemy.parse.AlkemyLexer;
-import org.alkemy.parse.AlkemyParser;
-import org.alkemy.parse.MethodInvoker;
-import org.alkemy.parse.NodeFactory;
-import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.AnnotationUtils;
 import org.alkemy.util.Node;
 
-public class TypeLeafFinder implements AlkemyParser, AlkemyLexer<Class<?>, AnnotatedElement>, Supplier<Boolean>
+public class DeepLeafSearch implements Supplier<Boolean>
 {
     private boolean leafFound;
 
-    @Override
-    public Node<AlkemyElement> parse(Class<?> type)
+    public Node<AlkemyElement> search(Class<?> type)
     {
         for (final Field f : type.getDeclaredFields())
         {
-            if (isLeaf(f))
+            if (AnnotationUtils.findAlkemyTypes(f) != null)
             {
                 leafFound = true;
                 break;
             }
-            else if (isNode(f.getType()))
+            else
             {
-                // nothing
+                final DeepLeafSearch leafFinder = new DeepLeafSearch();
+                leafFinder.search(f.getType());
+                leafFound = leafFinder.get();
             }
         }
-        return null;
-    }
-
-    @Override
-    public boolean isNode(Class<?> desc)
-    {
-        final TypeLeafFinder leafFinder = new TypeLeafFinder();
-        leafFinder.parse(desc);
-        leafFound = leafFinder.get();
-        return false;
-    }
-
-    @Override
-    public boolean isLeaf(AnnotatedElement desc)
-    {
-        return AnnotationUtils.findAlkemyTypes(desc) != null;
-    }
-
-    @Override
-    public AlkemyElement createLeaf(AnnotatedElement desc, ValueAccessor valueAccessor)
-    {
-        return null;
-    }
-
-    @Override
-    public AlkemyElement createNode(Class<?> desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
-            List<MethodInvoker> methodInvokers, Class<?> nodeType)
-    {
         return null;
     }
 

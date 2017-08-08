@@ -15,11 +15,13 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
-import java.util.Collection;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.parse.AutoCastValueAccessor;
+import org.alkemy.parse.InterfaceDefaultInstance;
 import org.alkemy.parse.NodeFactory;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
@@ -27,30 +29,47 @@ import org.objenesis.instantiator.ObjectInstantiator;
 
 public class ReflectedNodeFactory implements NodeFactory
 {
-    private final Class<?> type;
-    private final Class<?> componentType;
     private final Supplier<Object> typeCtor;
     private final Supplier<Object> componentTypeCtor;
     private final AutoCastValueAccessor valueAccessor;
-    private final boolean collection;
 
-    ReflectedNodeFactory(Class<?> type, Class<?> componentType, AutoCastValueAccessor valueAccessor)
+    ReflectedNodeFactory(AutoCastValueAccessor valueAccessor)
     {
-        this.type = type;
-        this.componentType = componentType;
-        this.typeCtor = getCtor(type);
-        this.componentTypeCtor = componentType != null ? getCtor(componentType) : null;
+        this.typeCtor = getCtor(InterfaceDefaultInstance.get(valueAccessor.type()));
+        this.componentTypeCtor = valueAccessor.componentType() != null ? //
+        getCtor(InterfaceDefaultInstance.get(valueAccessor.componentType()))
+                : null;
         this.valueAccessor = valueAccessor;
-        this.collection = Collection.class.isAssignableFrom(type);
     }
 
     Supplier<Object> getCtor(Class<?> type)
     {
-        final Objenesis objenesis = new ObjenesisStd();
-        final ObjectInstantiator<?> instantiator = objenesis.getInstantiatorOf(type);
-        return () -> instantiator.newInstance();
+        try
+        {
+            final Constructor<?> ctor = type.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            return () -> _newInstance(ctor);
+        }
+        catch (NoSuchMethodException e)
+        {
+            // default values are ignored. any alternatives ?
+            final Objenesis objenesis = new ObjenesisStd();
+            final ObjectInstantiator<?> instantiator = objenesis.getInstantiatorOf(type);
+            return () -> instantiator.newInstance();
+        }
     }
 
+    Object _newInstance(Constructor<?> ctor) throws AlkemyException {
+        try
+        {
+            return ctor.newInstance();
+        }
+        catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+        {
+            throw new AlkemyException("Unable to instantiate type '%s'", e, ctor.getName());
+        }
+    }
+    
     @Override
     public Object newInstance(Object... unused) throws AlkemyException
     {
@@ -60,13 +79,13 @@ public class ReflectedNodeFactory implements NodeFactory
     @Override
     public Class<?> type() throws AlkemyException
     {
-        return type;
+        return valueAccessor.type();
     }
 
     @Override
     public Class<?> componentType() throws AlkemyException
     {
-        return componentType;
+        return valueAccessor.componentType();
     }
 
     @Override
@@ -96,6 +115,6 @@ public class ReflectedNodeFactory implements NodeFactory
     @Override
     public boolean isCollection()
     {
-        return collection;
+        return valueAccessor.isCollection();
     }
 }

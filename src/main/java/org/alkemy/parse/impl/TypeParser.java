@@ -80,21 +80,24 @@ class TypeParser implements AlkemyParser
     public Node<AlkemyElement> parse(Class<?> type)
     {
         final ValueAccessor valueAccessor = AccessorFactory.createSelfAccessor(type);
-        final NodeFactory nodeFactory = AccessorFactory.createNodeFactory(type, null, valueAccessor);
+        final NodeFactory nodeFactory = AccessorFactory.createNodeFactory(valueAccessor);
         final List<MethodInvoker> methodInvokers = AccessorFactory.createInvokers(getLeafMethods(type));
-        final AnnotatedMember am = new AnnotatedMember(type.getName(), type);
+        final AnnotatedMember am = new AnnotatedMember(type.getName(), type, type);
         final AlkemyElement root = lexer.createNode(am, nodeFactory, valueAccessor, methodInvokers, type);
         return _parse(nodeFactory, Nodes.arborescence(root)).build();
     }
 
     private Node.Builder<AlkemyElement> _parse(NodeFactory parentNodeFactory, Node.Builder<AlkemyElement> parent)
     {
-        final Class<?> componentType = parentNodeFactory.componentType();
-        final Class<?> type = componentType != null ? componentType : parentNodeFactory.type();
+        final Class<?> parentComponentType = parentNodeFactory.componentType();
+        final Class<?> parentType = parentComponentType != null ? parentComponentType : parentNodeFactory.type();
 
-        for (final Field f : sortIfRequired(type.getDeclaredFields(), type.getAnnotation(Order.class), type))
+        for (final Field f : sortIfRequired(parentType.getDeclaredFields(), parentType.getAnnotation(Order.class), parentType))
         {
-            final AnnotatedMember am = new AnnotatedMember(f.getName(), f, f.getType(), f.getDeclaringClass(), componentType);
+            final Class<?> childComponentType = Types.getComponentType(f);
+            final Class<?> childType = childComponentType != null ? childComponentType : f.getType();
+
+            final AnnotatedMember am = new AnnotatedMember(f.getName(), f, childType);
             if (lexer.isLeaf(am))
             {
                 final ValueAccessor valueAccessor = AccessorFactory.createValueAccessor(f);
@@ -103,11 +106,10 @@ class TypeParser implements AlkemyParser
             else if (lexer.isNode(am))
             {
                 final ValueAccessor valueAccessor = AccessorFactory.createValueAccessor(f);
-                final NodeFactory nodeFactory = AccessorFactory.createNodeFactory(am.getType(), Types.getComponentType(f),
-                        valueAccessor);
-                final List<Method> leafMethods = getLeafMethods(type);
+                final NodeFactory nodeFactory = AccessorFactory.createNodeFactory(valueAccessor);
+                final List<Method> leafMethods = getLeafMethods(parentType);
                 final List<MethodInvoker> methodInvokers = AccessorFactory.createInvokers(leafMethods);
-                final AlkemyElement node = lexer.createNode(am, nodeFactory, valueAccessor, methodInvokers, am.getType());
+                final AlkemyElement node = lexer.createNode(am, nodeFactory, valueAccessor, methodInvokers, am.type);
                 _parse(nodeFactory, parent.addChild(node));
             }
         }
@@ -119,7 +121,7 @@ class TypeParser implements AlkemyParser
         final List<Method> ms = new ArrayList<Method>();
         for (Method m : type.getDeclaredMethods())
         {
-            if (lexer.isLeaf(new AnnotatedMember(m.getName(), m, null, m.getDeclaringClass(), null)))
+            if (lexer.isLeaf(new AnnotatedMember(m.getName(), m, null)))
             {
                 ms.add(m);
             }

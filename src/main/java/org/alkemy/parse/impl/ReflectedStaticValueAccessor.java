@@ -24,12 +24,14 @@ package org.alkemy.parse.impl;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.util.Collection;
 
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.exception.TypeMismatch;
 import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.NumberConversion;
+import org.alkemy.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,8 @@ public class ReflectedStaticValueAccessor implements ValueAccessor
     private final Class<?> type;
     private final String name;
     private final boolean isEnum;
+    private final boolean collection;
+    private final Class<?> componentType;
     private final Field f;
     private MethodHandle getter;
     private MethodHandle setter;
@@ -51,6 +55,8 @@ public class ReflectedStaticValueAccessor implements ValueAccessor
         type = f.getType();
         name = f.getDeclaringClass().getTypeName() + "." + f.getName();
         isEnum = type.isEnum();
+        collection = Collection.class.isAssignableFrom(type);
+        componentType = Types.getComponentType(f);
         rank = NumberConversion.getRank(f.getType());
 
         try
@@ -79,6 +85,18 @@ public class ReflectedStaticValueAccessor implements ValueAccessor
     public Class<?> type()
     {
         return type;
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        return collection;
+    }
+
+    @Override
+    public Class<?> componentType()
+    {
+        return componentType;
     }
 
     @Override

@@ -28,9 +28,9 @@ import org.alkemy.exception.AlkemyException;
 
 public class ReferencedMemberValueAccessor extends ReferencedStaticValueAccessor
 {
-    public ReferencedMemberValueAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
+    public ReferencedMemberValueAccessor(String name, Class<?> type, Class<?> componentType, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
-        super(name, type, getter, setter);
+        super(name, type, componentType, getter, setter);
     }
 
     @Override

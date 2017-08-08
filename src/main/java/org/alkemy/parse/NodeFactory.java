@@ -16,36 +16,15 @@
 package org.alkemy.parse;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 import org.alkemy.exception.AccessException;
 import org.alkemy.exception.AlkemyException;
 
+import com.google.common.collect.Lists;
+
 public interface NodeFactory extends AutoCastValueAccessor
 {
-    /**
-     * Returns the class type.
-     * 
-     * @throws AccessException
-     *             If an error occurs while recovering the class type.
-     */
-    @Override
-    Class<?> type() throws AlkemyException;
-
-    /**
-     * True if the target type can be assignable to a collection.
-     */
-    boolean isCollection();
-    
-    /**
-     * <ul>
-     * <li>If the type is an array. Equivalent to {@link Class#getComponentType()}
-     * <li>If the type is a collection, returns the collection's defined generic type.
-     * <li>Otherwise returns null.
-     * </ul>
-     */
-    Class<?> componentType() throws AlkemyException;
-
     /**
      * if {@link #isCollection()}, then adds the values to it.
      * 
@@ -54,13 +33,17 @@ public interface NodeFactory extends AutoCastValueAccessor
      */
     @SuppressWarnings("unchecked")
     default <E> void addAll(Object parent, E first, E... others) throws AlkemyException {
-        if (isCollection() && componentType().isInstance(first))
+        addAll(parent, Lists.asList(first, others));
+    }
+    
+    @SuppressWarnings("unchecked")
+    default <E> void addAll(Object parent, List<E> others) throws AlkemyException {
+        if (isCollection() && !others.isEmpty() && componentType().isInstance(others.get(0)))
         {
             final Collection<E> c = get(parent, Collection.class);
             if (c != null)
             {
-                Collections.addAll(c, first);
-                Collections.addAll(c, others);
+                c.addAll(others);
             }
         }
     }

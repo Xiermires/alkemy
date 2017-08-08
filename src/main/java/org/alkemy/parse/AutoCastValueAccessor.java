@@ -24,6 +24,20 @@ public interface AutoCastValueAccessor
      * Returns the value type.
      */
     Class<?> type();
+    
+    /**
+     * True if the target type can be assignable to a collection.
+     */
+    boolean isCollection();
+    
+    /**
+     * <ul>
+     * <li>If the type is an array. Equivalent to {@link Class#getComponentType()}
+     * <li>If the type is a collection, returns the collection's defined generic type.
+     * <li>Otherwise returns null.
+     * </ul>
+     */
+    Class<?> componentType();
 
     /**
      * Returns the value.

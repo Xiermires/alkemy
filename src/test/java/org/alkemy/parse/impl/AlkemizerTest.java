@@ -80,14 +80,14 @@ public class AlkemizerTest
     @Test
     public void createArgsPreserveOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(FollowsOrder.class, null, new SelfAccessor(FollowsOrder.class));
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(FollowsOrder.class));
         ctor.newInstance(1f, "a", 1);
     }
 
     @Test
     public void createArgsInDeclarationOrder() throws IllegalAccessException, SecurityException
     {
-        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(FollowsDeclaration.class, null, new SelfAccessor(FollowsDeclaration.class));
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(FollowsDeclaration.class));
         ctor.newInstance("a", 1, 1f);
     }
 
@@ -111,7 +111,7 @@ public class AlkemizerTest
     @Test(expected = AlkemyException.class)
     public void testNodeConstructorWithArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(TestAlkemizer.class));
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance(1, "foo");
 
         assertThat(1, is(tc.foo));
@@ -123,7 +123,7 @@ public class AlkemizerTest
 
     public void testNodeConstructorNoArgs() throws NoSuchFieldException, SecurityException, IllegalAccessException
     {
-        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
+        final NodeFactory ctor = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(TestAlkemizer.class));
         final TestAlkemizer tc = (TestAlkemizer) ctor.newInstance();
 
         assertThat(tc, is(not(nullValue())));
@@ -210,8 +210,8 @@ public class AlkemizerTest
                 .getDeclaredField("ipsum"));
         final ValueAccessor dolorAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz
                 .getDeclaredField("dolor"));
-        final NodeFactory ctortc = MethodReferenceFactory.createReferencedNodeFactory(TestAlkemizer.class, null, new SelfAccessor(TestAlkemizer.class));
-        final NodeFactory ctortmf = MethodReferenceFactory.createReferencedNodeFactory(TestManyFields.class, null, new SelfAccessor(TestManyFields.class));
+        final NodeFactory ctortc = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(TestAlkemizer.class));
+        final NodeFactory ctortmf = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(TestManyFields.class));
 
         final TestAlkemizer tc = new TestAlkemizer();
 

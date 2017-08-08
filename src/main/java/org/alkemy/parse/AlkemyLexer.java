@@ -32,12 +32,12 @@ public interface AlkemyLexer<N, L>
     boolean isLeaf(L desc);
 
     /**
-     * Creates an unbound {@link AlkemyElement} for this leaf.
+     * Creates an {@link AlkemyElement} for this leaf.
      */
     AlkemyElement createLeaf(L desc, ValueAccessor valueAccessor);
 
     /**
-     * Creates an unbound {@link AlkemyElement} for this node.
+     * Creates an {@link AlkemyElement} for this node.
      */
     AlkemyElement createNode(N desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType);

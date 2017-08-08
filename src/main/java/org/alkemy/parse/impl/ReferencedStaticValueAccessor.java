@@ -21,6 +21,7 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -49,7 +50,9 @@ public class ReferencedStaticValueAccessor implements ValueAccessor
 {
     protected final String name;
     protected final Class<?> type;
-
+    protected final Class<?> componentType;
+    protected final boolean collection;
+    
     // All types.
     protected final Function<Object, ?> getter;
     protected final BiConsumer<Object, Object> setter;
@@ -81,13 +84,15 @@ public class ReferencedStaticValueAccessor implements ValueAccessor
 
     protected ToBooleanFunction<Object> booleanGetter;
     protected ObjBooleanConsumer<Object> booleanSetter;
-
-    protected ReferencedStaticValueAccessor(String name, Class<?> type, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
+    
+    protected ReferencedStaticValueAccessor(String name, Class<?> type, Class<?> componentType, Function<Object, ?> getter, BiConsumer<Object, Object> setter)
     {
         this.name = name;
         this.type = type;
+        this.componentType = componentType;
         this.getter = getter;
         this.setter = setter;
+        this.collection = Collection.class.isAssignableFrom(type);
     }
 
     ReferencedStaticValueAccessor stringSetter(ObjStringConsumer<Object> stringSetter)
@@ -340,5 +345,17 @@ public class ReferencedStaticValueAccessor implements ValueAccessor
         if (booleanSetter != null)
             booleanSetter.accept(parent, value);
         else setter.accept(parent, value);
+    }
+
+    @Override
+    public boolean isCollection()
+    {
+        return collection;
+    }
+
+    @Override
+    public Class<?> componentType()
+    {
+        return componentType;
     }
 }

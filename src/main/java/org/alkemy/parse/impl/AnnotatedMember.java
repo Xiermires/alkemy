@@ -27,30 +27,15 @@ public class AnnotatedMember implements AnnotatedElement
 {
     private final AnnotatedElement annotatedElement;
     private final String name;
-    private final Class<?> type;
-    private final Class<?> declaringClass;
-    private final Class<?> componentType;
+    final Class<?> type;
 
-    public AnnotatedMember(String name, AnnotatedElement annotatedElement)
+    public AnnotatedMember(String name, AnnotatedElement annotatedElement, Class<?> type)
     {
         Assertions.nonNull(annotatedElement);
-
-        this.name = name;
-        this.annotatedElement = annotatedElement;
-        this.type = annotatedElement.getClass();
-        this.declaringClass = annotatedElement.getClass();
-        this.componentType = null;
-    }
-    
-    public AnnotatedMember(String name, AnnotatedElement annotatedElement, Class<?> type, Class<?> declaringClass, Class<?> componentType)
-    {
-        Assertions.nonNull(annotatedElement);
-
+        
         this.name = name;
         this.annotatedElement = annotatedElement;
         this.type = type;
-        this.declaringClass = declaringClass;
-        this.componentType = componentType;
     }
 
     @Override
@@ -74,20 +59,5 @@ public class AnnotatedMember implements AnnotatedElement
     public String getName()
     {
         return name;
-    }
-
-    public Class<?> getDeclaringClass()
-    {
-        return declaringClass;
-    }
-
-    public Class<?> getType()
-    {
-        return type;
-    }
-    
-    public Class<?> getComponentType()
-    {
-        return componentType;
     }
 }
