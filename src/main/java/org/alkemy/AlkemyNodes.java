@@ -47,7 +47,7 @@ public class AlkemyNodes
     private static final AlkemyParser parser = AlkemyParsers.typeParser();
     private static final LoadingCache<Class<?>, Node<AlkemyElement>> cache = CacheBuilder.newBuilder()//
             .maximumWeight(MAXIMUM_BYTE_SIZE)//
-            .weigher((k, v) -> Number.class.cast(Agents.getObjectSize(k)).intValue())//
+            .weigher((k, v) -> (int) Agents.getObjectSize(k))//
             .expireAfterAccess(60, TimeUnit.MINUTES)//
             .build(new CacheLoader<Class<?>, Node<AlkemyElement>>()
             {
