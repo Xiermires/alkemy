@@ -64,33 +64,32 @@ public class TestClass
     @Uuid
     String s;
 }
-```
 
 ```java
-@Test
 public void generateRandoms()
 {
     final TestClass tc = new TestClass();
-    AlkemyNodes.get(TestClass.class).stream() //
-                                    .filter(f -> Random.class == f.alkemyType() && !f.isNode()) //
-				    .forEach(e -> {
-		                        final Random desc = e.desc().getAnnotation(Random.class);
-				                final double min = desc.min();
-					            final double max = desc.max();
-					            final double rand = min + (Math.random() * ((max - min)));
-					            e.set(rand, tc);
-				    });
+    AlkemyNodes.get(TestClass.class)//
+        .stream() //
+        .filter(f -> Random.class == f.alkemyType() && !f.isNode()) //
+		.forEach(e -> {
+		    final Random desc = e.desc().getAnnotation(Random.class);
+		    final double min = desc.min();
+		    final double max = desc.max();
+		    final double rand = min + (Math.random() * ((max - min)));
+		    e.set(rand, tc);
+		});
 }
 
-@Test
 public void generateUuid()
 {
     final TestClass tc = new TestClass();
-    AlkemyNodes.get(TestClass.class).stream() //
-                                    .filter(f -> Uuid.class == f.alkemyType() && !f.isNode()) //
-				    .forEach(e -> {
-		                        e.set(java.util.UUID.randomUUID(), tc);
-				    });
+    AlkemyNodes.get(TestClass.class)//
+        .stream() //
+        .filter(f -> Uuid.class == f.alkemyType() && !f.isNode()) //
+		.forEach(e -> {
+		    e.set(java.util.UUID.randomUUID(), tc);
+		});
 }
 ```
 
@@ -123,11 +122,14 @@ public class RandomElement extends AlkemyElement
 public void generateRandoms()
 {
     final TestClass tc = new TestClass();
-    final Node<RandomElement> root = AlkemyNodes.get(TestClass.class), p -> Random.class == p.alkemyType(), f -> new RandomElement(f));
-    root.forEach(e -> {
-		final double rand = e.min + (Math.random() * ((e.max - e.min)));
-		e.set(rand, tc);
-	});
+    final Node<RandomElement> root = AlkemyNodes.get(TestClass.class) //
+                                                    , p -> Random.class == p.alkemyType() //
+                                                    , f -> new RandomElement(f));
+    root.stream().filter(f -> !f.isNode()) //
+        .forEach(e -> {
+	        final double rand = e.min + (Math.random() * ((e.max - e.min)));
+	        e.set(rand, tc);
+	    });
 }
 ```
 
