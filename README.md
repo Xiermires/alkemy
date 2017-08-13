@@ -64,6 +64,7 @@ public class TestClass
     @Uuid
     String s;
 }
+```
 
 ```java
 public void generateRandoms()
@@ -117,8 +118,9 @@ public class RandomElement extends AlkemyElement
         max = desc.max();
     }
 }
+```
 
-@Test
+```java
 public void generateRandoms()
 {
     final TestClass tc = new TestClass();
