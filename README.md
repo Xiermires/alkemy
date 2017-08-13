@@ -72,13 +72,13 @@ public void generateRandoms()
     AlkemyNodes.get(TestClass.class)//
         .stream() //
         .filter(f -> Random.class == f.alkemyType() && !f.isNode()) //
-		.forEach(e -> {
-		    final Random desc = e.desc().getAnnotation(Random.class);
-		    final double min = desc.min();
-		    final double max = desc.max();
-		    final double rand = min + (Math.random() * ((max - min)));
-		    e.set(rand, tc);
-		});
+        .forEach(e -> {
+            final Random desc = e.desc().getAnnotation(Random.class);
+            final double min = desc.min();
+            final double max = desc.max();
+            final double rand = min + (Math.random() * ((max - min)));
+            e.set(rand, tc);
+        });
 }
 
 public void generateUuid()
@@ -87,9 +87,9 @@ public void generateUuid()
     AlkemyNodes.get(TestClass.class)//
         .stream() //
         .filter(f -> Uuid.class == f.alkemyType() && !f.isNode()) //
-		.forEach(e -> {
-		    e.set(java.util.UUID.randomUUID(), tc);
-		});
+        .forEach(e -> {
+            e.set(java.util.UUID.randomUUID(), tc);
+        });
 }
 ```
 
