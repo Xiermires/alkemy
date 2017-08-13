@@ -38,6 +38,7 @@ import java.util.function.Function;
 import org.alkemy.AlkemyNodes;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
+import org.alkemy.instr.ConstructorWriter;
 import org.alkemy.parse.AutoCastValueAccessor;
 import org.alkemy.parse.NodeFactory;
 import org.alkemy.parse.ValueAccessor;
@@ -65,7 +66,7 @@ public class AlkemizerTest
     @Test
     public void alkemizeCreateArgsMethod() throws IOException, NoSuchMethodException, SecurityException
     {
-        final Method m = clazz.getMethod(FieldOrderWriter.CREATE_ARGS, Object[].class);
+        final Method m = clazz.getMethod(ConstructorWriter.CREATE_ARGS, Object[].class);
         assertThat(Modifier.isStatic(m.getModifiers()), is(true));
     }
 
@@ -329,7 +330,7 @@ public class AlkemizerTest
 
         final Object[] fields = new Object[26];
         Arrays.fill(fields, 1);
-        System.out.println(FieldOrderWriter.CREATE_ARGS + "(TestManyFields: " + Measure.measure(() ->
+        System.out.println(ConstructorWriter.CREATE_ARGS + "(TestManyFields: " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -337,7 +338,7 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
-        System.out.println(FieldAlkemizer.CREATE_DEFAULT + " + set(value, parent) (TestAlkemizer): " + Measure.measure(() ->
+        System.out.println(ConstructorWriter.CREATE_DEFAULT + " + set(value, parent) (TestAlkemizer): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -349,7 +350,7 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
         
-        System.out.println(FieldOrderWriter.CREATE_ARGS + "(TestAlkemizer#newInstance(...): " + Measure.measure(() ->
+        System.out.println(ConstructorWriter.CREATE_ARGS + "(TestAlkemizer#newInstance(...): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {

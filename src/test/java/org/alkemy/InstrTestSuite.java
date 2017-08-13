@@ -18,7 +18,7 @@ package org.alkemy;
 import org.alkemy.InstrumentClassWithLambdas;
 import org.alkemy.InstrumentClassWithLambdas.Instr;
 import org.alkemy.InstrumentClassWithLambdas.InstrumentableLambdaClasses;
-import org.alkemy.parse.impl.AlkemizerCTF;
+import org.alkemy.instr.AlkemizerCTF;
 import org.junit.runner.RunWith;
 
 @RunWith(InstrumentClassWithLambdas.class)

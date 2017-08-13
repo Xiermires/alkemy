@@ -19,16 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.instr;
 
 import org.objectweb.asm.ClassVisitor;
 
 public abstract class Alkemizer extends ClassVisitor
 {
-    public Alkemizer(int api, ClassVisitor cv)
+    public Alkemizer(int api)
     {
-        super(api, cv);
+        super(api);
     }
 
-    abstract boolean isAlkemized();
+    abstract boolean isClassAlkemizable();
 }

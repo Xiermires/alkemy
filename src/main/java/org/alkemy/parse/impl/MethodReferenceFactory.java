@@ -48,6 +48,9 @@ import org.alkemy.functional.ToIntFunction;
 import org.alkemy.functional.ToLongFunction;
 import org.alkemy.functional.ToShortFunction;
 import org.alkemy.functional.ToStringFunction;
+import org.alkemy.instr.AlkemizerUtils;
+import org.alkemy.instr.ConstructorWriter;
+import org.alkemy.instr.DefaultAlkemizerWriter;
 import org.alkemy.parse.AutoCastValueAccessor;
 import org.alkemy.parse.ConstructorFunction;
 import org.alkemy.parse.InterfaceDefaultInstance;
@@ -129,7 +132,7 @@ public class MethodReferenceFactory
         try
         {
             final Method get = Supplier.class.getMethod("get");
-            final MethodHandle referent = methodHandle(clazz, FieldAlkemizer.IS_INSTRUMENTED);
+            final MethodHandle referent = methodHandle(clazz, DefaultAlkemizerWriter.IS_INSTRUMENTED);
             final Supplier<Boolean> instrumented = methodReference(Supplier.class, get, referent);
             return instrumented != null && instrumented.get();
         }
@@ -149,10 +152,9 @@ public class MethodReferenceFactory
             NoSuchMethodException
     {
         final Class<?> clazz = f.getDeclaringClass();
-        final MethodHandle getterHandle = MethodReferenceFactory.methodHandle(clazz, FieldAccessorWriter.getGetterName(f
-                .getName()));
-        final MethodHandle setterHandle = MethodReferenceFactory.methodHandle(clazz, FieldAccessorWriter.getSetterName(f
-                .getName()), f.getType());
+        final MethodHandle getterHandle = MethodReferenceFactory.methodHandle(clazz, AlkemizerUtils.getGetterName(f.getName()));
+        final MethodHandle setterHandle = MethodReferenceFactory.methodHandle(clazz, AlkemizerUtils.getSetterName(f.getName()), f
+                .getType());
 
         final ReferencedStaticValueAccessor valueAccessor = create(f, clazz, getterHandle, setterHandle);
         return createTypifiedInstrumentedAccessors(f, clazz, valueAccessor);
@@ -187,8 +189,8 @@ public class MethodReferenceFactory
         if (f.getType().isEnum())
         {
             // string to enum
-            final MethodHandle setterHandle = MethodReferenceFactory.methodHandle(clazz, FieldAccessorWriter.getSetterName(f
-                    .getName()), String.class);
+            final MethodHandle setterHandle = MethodReferenceFactory.methodHandle(clazz, AlkemizerUtils
+                    .getSetterName(f.getName()), String.class);
             final Method accept = ObjStringConsumer.class.getMethod("accept", Object.class, String.class);
             valueAccessor.stringSetter(MethodReferenceFactory.methodReference(ObjStringConsumer.class, accept, setterHandle));
         }
@@ -198,7 +200,7 @@ public class MethodReferenceFactory
             {
                 try
                 {
-                    final String setterName = FieldAccessorWriter.getSetterName(f.getName());
+                    final String setterName = AlkemizerUtils.getSetterName(f.getName());
                     if (!primitive.equals(f.getType()))
                         setterName.concat(AlkemizerUtils.camelUp(primitive.getSimpleName()));
 
@@ -223,7 +225,7 @@ public class MethodReferenceFactory
 
             try
             {
-                final String getterName = FieldAccessorWriter.getGetterName(f.getName());
+                final String getterName = AlkemizerUtils.getGetterName(f.getName());
                 final MethodHandle getterHandle = MethodReferenceFactory.methodHandle(clazz, getterName);
                 final Pair<Class<?>, String> reference = dataTypeGetters.get(f.getType());
                 final Method method = reference.first.getDeclaredMethod(reference.second, Object.class);
@@ -259,7 +261,7 @@ public class MethodReferenceFactory
         final Class<? extends Object> instrumentedType = MoreObjects.firstNonNull(valueAccessor.componentType(), valueAccessor
                 .type());
         for (Method m : Iterables.filter(Arrays.asList(instrumentedType.getMethods())//
-                , f -> FieldOrderWriter.CREATE_ARGS.equals(f.getName())))
+                , f -> ConstructorWriter.CREATE_ARGS.equals(f.getName())))
         {
             if (m.getReturnType().equals(instrumentedType))
                 factoryMethod = m;
@@ -270,7 +272,7 @@ public class MethodReferenceFactory
         MethodHandle factory = null;
         try
         {
-            factory = MethodReferenceFactory.methodHandle(instrumentedType, FieldOrderWriter.CREATE_ARGS, factoryMethod
+            factory = MethodReferenceFactory.methodHandle(instrumentedType, ConstructorWriter.CREATE_ARGS, factoryMethod
                     .getParameterTypes());
         }
         catch (NoSuchMethodException e)
@@ -283,10 +285,11 @@ public class MethodReferenceFactory
             final Method get = Supplier.class.getMethod("get");
             final MethodHandle ctorClass;
             if (valueAccessor.isCollection())
-                ctorClass = MethodHandles.lookup().unreflectConstructor(InterfaceDefaultInstance.get(valueAccessor.type()).getConstructor());
+                ctorClass = MethodHandles.lookup().unreflectConstructor(
+                        InterfaceDefaultInstance.get(valueAccessor.type()).getConstructor());
             else ctorClass = MethodHandles.lookup().unreflect(
-                    valueAccessor.type().getDeclaredMethod(FieldAlkemizer.CREATE_DEFAULT));
-            
+                    valueAccessor.type().getDeclaredMethod(ConstructorWriter.CREATE_DEFAULT));
+
             final Supplier<Object> classCtor = MethodReferenceFactory.methodReference(Supplier.class, get, ctorClass);
             final Method factoryReference = ConstructorFunction.class.getMethod("newInstance", Object[].class);
             final ConstructorFunction factoryWithArgs = MethodReferenceFactory.methodReference(ConstructorFunction.class,
@@ -296,7 +299,7 @@ public class MethodReferenceFactory
             if (valueAccessor.componentType() != null)
             {
                 final MethodHandle ctorComponentClass = MethodHandles.lookup()//
-                        .unreflect(valueAccessor.componentType().getDeclaredMethod(FieldAlkemizer.CREATE_DEFAULT));
+                        .unreflect(valueAccessor.componentType().getDeclaredMethod(ConstructorWriter.CREATE_DEFAULT));
 
                 componentClassCtor = MethodReferenceFactory.methodReference(Supplier.class, get, ctorComponentClass);
             }

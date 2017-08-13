@@ -16,7 +16,7 @@
 package org.alkemy.parse.impl;
 
 import org.agenttools.AgentTools;
-import org.alkemy.parse.impl.AlkemizerCTF;
+import org.alkemy.instr.AlkemizerCTF;
 import org.junit.Test;
 
 // TODO figure out how to test log contents in LogBack 

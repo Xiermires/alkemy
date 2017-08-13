@@ -13,7 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.instr;
 
 import static org.objectweb.asm.Opcodes.ACC_ENUM;
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -23,7 +23,8 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alkemy.parse.impl.FieldAlkemizer.Stop;
+import org.alkemy.instr.DefaultAlkemizer.Stop;
+import org.alkemy.util.AlkemyUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 
@@ -36,6 +37,16 @@ public class AlkemizerUtils
         return "<init>".equals(name) && "()V".equals(desc);
     }
 
+    public static String getSetterName(String fieldName)
+    {
+        return "set" + camelUp(fieldName);
+    }
+
+    public static String getGetterName(String fieldName)
+    {
+        return "get" + camelUp(fieldName);
+    }
+    
     public static String toQualifiedName(String className)
     {
         return className.replace('/', '.');
@@ -149,6 +160,21 @@ public class AlkemizerUtils
         {
             isImplemented = Arrays.asList(interfaces).contains(desc);
             super.visit(version, access, name, signature, superName, interfaces);
+        }
+    }
+
+    // Compile check so changing proxy'ed classes doesn't miss this class.
+    // If any changes in the behaviour, change also the instrumentation accordingly.
+    public static class Proxy
+    {
+        public static <T extends Enum<T>> T toEnum(Class<T> type, String namee)
+        {
+            return AlkemyUtils.toEnum(type, namee);
+        }
+        
+        public static <T extends Enum<T>> Object toEnum(Class<T> type, Object value)
+        {
+            return AlkemyUtils.toEnum(type, value);
         }
     }
 }

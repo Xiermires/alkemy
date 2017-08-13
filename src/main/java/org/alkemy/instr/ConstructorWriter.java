@@ -1,105 +1,110 @@
 /*******************************************************************************
  * Copyright (c) 2017, Xavier Miret Andres <xavier.mires@gmail.com>
  *
- * Permission to use, copy, modify, and/or distribute this software for any 
- * purpose with or without fee is hereby granted, provided that the above 
- * copyright notice and this permission notice appear in all copies.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES 
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALLIMPLIED WARRANTIES OF 
- * MERCHANTABILITY  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR 
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES 
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN 
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *******************************************************************************/
-package org.alkemy.parse.impl;
+package org.alkemy.instr;
 
 import static org.objectweb.asm.Opcodes.AALOAD;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.ASM5;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ICONST_2;
 import static org.objectweb.asm.Opcodes.ICONST_3;
 import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-import org.alkemy.annotations.Order;
-import org.alkemy.parse.impl.FieldAlkemizer.Stop;
-import org.objectweb.asm.AnnotationVisitor;
+import org.alkemy.instr.DefaultAlkemizableVisitor.FieldProperties;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
-public class FieldOrderWriter extends FieldAccessorWriter
+public class ConstructorWriter
 {
-    static final String CREATE_ARGS = "create$$args";
-
-    private boolean ordered;
-    private final List<String> orderedFields = new ArrayList<>();
-
-    public FieldOrderWriter(ClassVisitor cv, String className)
-    {
-        super(cv, className);
+    public static final String CREATE_DEFAULT = "create$$default";
+    public static final String INSTATIATOR = "obj$$instantiator";
+    public static final String CREATE_ARGS = "create$$args";
+    
+    private ConstructorWriter() {
     }
-
-    @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible)
+    
+    static void appendCreateDefault(ClassVisitor cv, String className, boolean defaultCtor)
     {
-        if (Order.class.getName().equals(AlkemizerUtils.toQualifiedNameFromDesc(desc)))
+        if (!defaultCtor)
         {
-            ordered = true;
-            return new OrderValueReader(orderedFields, super.visitAnnotation(desc, visible));
+            final FieldVisitor fv = cv.visitField(ACC_PRIVATE, INSTATIATOR, "Lorg/objenesis/instantiator/ObjectInstantiator;",
+                    "Lorg/objenesis/instantiator/ObjectInstantiator<" + AlkemizerUtils.toDescFromClassName(className) + ">;",
+                    null);
+            fv.visitEnd();
         }
-        return super.visitAnnotation(desc, visible);
-    }
 
-    @Override
-    public void visitEnd()
-    {
-        super.visitEnd();
-        if (isAlkemized())
+        final MethodVisitor mv = cv.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_DEFAULT, //
+                "()" + AlkemizerUtils.toDescFromClassName(className), null, null);
+
+        mv.visitCode();
+        final Label l0 = new Label();
+        mv.visitLabel(l0);
+
+        if (defaultCtor)
         {
-            appendOrder();
-            appendCreateArgs();
+            mv.visitTypeInsn(NEW, className);
+            mv.visitInsn(DUP);
+            mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
+            mv.visitInsn(ARETURN);
         }
-    }
-
-    // forces field declaration order if none specified.
-    private void appendOrder()
-    {
-        if (!ordered)
+        else
         {
-            final AnnotationVisitor av = super.visitAnnotation("Lorg/alkemy/annotations/Order;", true);
-            final AnnotationVisitor aav = av.visitArray("value");
-            fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).map(entry -> entry.getKey()).forEach(
-                    name -> aav.visit(null, name));
-            aav.visitEnd();
-            av.visitEnd();
+            mv.visitFieldInsn(GETSTATIC, className, "instantiator", "Lorg/objenesis/instantiator/ObjectInstantiator;");
+            mv.visitMethodInsn(INVOKEINTERFACE, "org/objenesis/instantiator/ObjectInstantiator", "newInstance",
+                    "()Ljava/lang/Object;", true);
+            mv.visitTypeInsn(CHECKCAST, className);
+            mv.visitInsn(ARETURN);
         }
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
     }
 
-    private void appendCreateArgs()
+    public static void appendCreateArgs(ClassWriter cw, String className, List<String> orderedNames, Map<String, FieldProperties> fieldMap)
     {
-        final MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_ARGS, //
+        final MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_ARGS, //
                 "([Ljava/lang/Object;)" + AlkemizerUtils.toDescFromClassName(className), null, null);
 
         mv.visitCode();
@@ -107,26 +112,13 @@ public class FieldOrderWriter extends FieldAccessorWriter
         final Label l0 = new Label();
         mv.visitLabel(l0);
 
-        mv.visitMethodInsn(INVOKESTATIC, className, FieldAlkemizer.CREATE_DEFAULT, //
+        mv.visitMethodInsn(INVOKESTATIC, className, CREATE_DEFAULT, //
                 "()" + AlkemizerUtils.toDescFromClassName(className), false);
         mv.visitVarInsn(ASTORE, 1);
 
-        // need this label for the local variables
-        //final Label l2 = new Label();
-        //mv.visitLabel(l2);
-
-        final List<String> fields = fieldMap.entrySet().stream().filter(entry -> entry.getValue().alkemizable).map(
-                entry -> entry.getKey()).collect(Collectors.toList());
-
-        if (ordered)
+        for (int i = 0; i < orderedNames.size(); i++)
         {
-            checkFieldNames(fields, orderedFields);
-            sortByOrder(fields, orderedFields);
-        }
-
-        for (int i = 0; i < fields.size(); i++)
-        {
-            final String name = fields.get(i);
+            final String name = orderedNames.get(i);
             final FieldProperties props = fieldMap.get(name);
 
             mv.visitVarInsn(ALOAD, 1);
@@ -141,7 +133,7 @@ public class FieldOrderWriter extends FieldAccessorWriter
             final ClassCaster classCaster = getCastClassForDesc(props.desc);
             if (props.isEnum)
             {
-                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/AbstractClassFieldVisitor$Proxy", "toEnum",
+                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/AlkemizerUtils$Proxy", "toEnum",
                         "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false);
             }
             mv.visitTypeInsn(CHECKCAST, classCaster.name);
@@ -155,32 +147,11 @@ public class FieldOrderWriter extends FieldAccessorWriter
         mv.visitLabel(new Label());
         mv.visitVarInsn(ALOAD, 1);
         mv.visitInsn(ARETURN);
-
-        //final Label ln = new Label();
-        //mv.visitLabel(ln);
-
-        //mv.visitLocalVariable("args", "[Ljava/lang/Object;", null, l0, ln, 0);
-        //mv.visitLocalVariable("instance", AlkemizerUtils.toDescFromClassName(className), null, l2, ln, 1);
-
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }
 
-    private void checkFieldNames(Collection<String> fields, List<String> orderedFields)
-    {
-        if (!fields.containsAll(orderedFields))
-            throw new Stop("Invalid order definition (alien)."); // invalid definition
-    }
-
-    private void sortByOrder(List<String> fields, List<String> orderedFields)
-    {
-        Collections.sort(fields, (lhs, rhs) ->
-        {
-            return Integer.compare(orderedFields.indexOf(lhs), orderedFields.indexOf(rhs));
-        });
-    }
-
-    private ClassCaster getCastClassForDesc(String desc)
+    private static ClassCaster getCastClassForDesc(String desc)
     {
         if ("D".equals(desc))
         {
@@ -224,7 +195,7 @@ public class FieldOrderWriter extends FieldAccessorWriter
         }
     }
 
-    private void visitInStack(int i, MethodVisitor mv)
+    private static void visitInStack(int i, MethodVisitor mv)
     {
         if (i == 0)
         {
@@ -257,30 +228,6 @@ public class FieldOrderWriter extends FieldAccessorWriter
         else
         {
             mv.visitIntInsn(SIPUSH, i);
-        }
-    }
-
-    static class OrderValueReader extends AnnotationVisitor
-    {
-        private List<String> fields;
-
-        public OrderValueReader(List<String> fields, AnnotationVisitor av)
-        {
-            super(ASM5, av);
-            this.fields = fields;
-        }
-
-        @Override
-        public AnnotationVisitor visitArray(String name)
-        {
-            return new OrderValueReader(fields, super.visitArray(name));
-        }
-
-        @Override
-        public void visit(String name, Object value)
-        {
-            fields.add(String.valueOf(value));
-            super.visit(name, value);
         }
     }
 
