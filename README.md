@@ -127,9 +127,9 @@ public void generateRandoms()
                                                     , f -> new RandomElement(f));
     root.stream().filter(f -> !f.isNode()) //
         .forEach(e -> {
-	        final double rand = e.min + (Math.random() * ((e.max - e.min)));
-	        e.set(rand, tc);
-	    });
+            final double rand = e.min + (Math.random() * ((e.max - e.min)));
+            e.set(rand, tc);
+        });
 }
 ```
 
