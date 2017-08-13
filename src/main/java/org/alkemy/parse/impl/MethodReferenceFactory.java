@@ -282,34 +282,22 @@ public class MethodReferenceFactory
 
         try
         {
-            final Method get = Supplier.class.getMethod("get");
-            final MethodHandle ctorClass;
-            if (valueAccessor.isCollection())
-                ctorClass = MethodHandles.lookup().unreflectConstructor(
-                        InterfaceDefaultInstance.get(valueAccessor.type()).getConstructor());
-            else ctorClass = MethodHandles.lookup().unreflect(
-                    valueAccessor.type().getDeclaredMethod(ConstructorWriter.CREATE_DEFAULT));
-
-            final Supplier<Object> classCtor = MethodReferenceFactory.methodReference(Supplier.class, get, ctorClass);
+            final Supplier<Object> typeCtor = getTypeCtor(valueAccessor.type());
             final Method factoryReference = ConstructorFunction.class.getMethod("newInstance", Object[].class);
             final ConstructorFunction factoryWithArgs = MethodReferenceFactory.methodReference(ConstructorFunction.class,
                     factoryReference, factory);
 
-            final Supplier<Object> componentClassCtor;
+            final Supplier<Object> componentTypeCtor;
             if (valueAccessor.componentType() != null)
             {
-                final MethodHandle ctorComponentClass = MethodHandles.lookup()//
-                        .unreflect(valueAccessor.componentType().getDeclaredMethod(ConstructorWriter.CREATE_DEFAULT));
-
-                componentClassCtor = MethodReferenceFactory.methodReference(Supplier.class, get, ctorComponentClass);
+                componentTypeCtor = getTypeCtor(valueAccessor.componentType());
             }
             else
             {
-                componentClassCtor = null;
+                componentTypeCtor = null;
             }
-
-            return new ReferencedNodeFactory(classCtor//
-                    , componentClassCtor//
+            return new ReferencedNodeFactory(typeCtor//
+                    , componentTypeCtor//
                     , factoryWithArgs//
                     , valueAccessor);
         }
@@ -318,6 +306,29 @@ public class MethodReferenceFactory
             log.debug("Method not found. Can't use lambdas.", e);
         }
         return null;
+    }
+
+    static Supplier<Object> getTypeCtor(Class<?> type) throws IllegalAccessException, SecurityException, NoSuchMethodException
+    {
+        final Method get = Supplier.class.getMethod("get");
+
+        final Class<?> _type;
+        if (type.isInterface())
+        {
+            _type = InterfaceDefaultInstance.get(type);
+        }
+        else _type = type;
+
+        MethodHandle ctorHandle;
+        try
+        {
+            ctorHandle = MethodHandles.lookup().unreflectConstructor(_type.getConstructor());
+        }
+        catch (NoSuchMethodException e)
+        {
+            ctorHandle = MethodHandles.lookup().unreflect(_type.getDeclaredMethod(ConstructorWriter.CREATE_DEFAULT));
+        }
+        return MethodReferenceFactory.methodReference(Supplier.class, get, ctorHandle);
     }
 
     static <T> T methodReference(Class<T> funcClass, Method reference, MethodHandle referent)

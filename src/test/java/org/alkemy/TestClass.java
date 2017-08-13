@@ -28,9 +28,9 @@ public class TestClass
     @Foo
     int n3 = 3;
     
-    @Foo
+    @Bar
     int n4 = 4;
     
-    @Foo
+    @Bar
     int n5 = 5;
 }

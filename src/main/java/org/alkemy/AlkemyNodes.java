@@ -16,6 +16,8 @@
 package org.alkemy;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.agenttools.AgentTools;
 import org.alkemy.exception.AlkemyException;
@@ -24,6 +26,8 @@ import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.parse.impl.AlkemyParsers;
 import org.alkemy.util.Assertions;
 import org.alkemy.util.Node;
+import org.alkemy.util.Node.Builder;
+import static org.alkemy.util.Nodes.*;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -48,6 +52,12 @@ public class AlkemyNodes
                 }
             });
 
+    private static boolean caching = true;
+
+    public static void setCaching(boolean enabled) {
+        caching = enabled;
+    }
+    
     private static final Node<AlkemyElement> _create(Class<?> type)
     {
         return parser.parse(type);
@@ -58,11 +68,20 @@ public class AlkemyNodes
         Assertions.nonNull(type);
         try
         {
-            return cache.get(type);
+            return caching ? cache.get(type) : _create(type);
         }
         catch (Exception e)
         {
             throw new AlkemyException("Can't create an alkemy tree for The requested type '%s'.", e, type.getName());
         }
+    }
+
+    public static <T extends AlkemyElement> Node<T> get(Class<?> type//
+            , Predicate<AlkemyElement> filter//
+            , Function<AlkemyElement, T> function)
+    {
+        final Node<AlkemyElement> src = get(type);
+        final Builder<T> dst = arborescence(function.apply(src.data()));
+        return copy(src, dst, filter, function).build();
     }
 }

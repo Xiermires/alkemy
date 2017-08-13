@@ -28,6 +28,8 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alkemy.parse.impl.BarElement;
+import org.alkemy.util.Node;
 import org.junit.Test;
 
 public class CoreAlkemy
@@ -53,6 +55,17 @@ public class CoreAlkemy
         AlkemyNodes.get(TestClass.class).stream().filter(c -> !c.isNode()).forEach(c -> sum.add(c.get(tc, Integer.class)));
 
         assertThat(sum.sum, is(15));
+    }
+    
+    @Test
+    public void transformTree()
+    {
+        final TestClass tc = new TestClass();
+        final Summation sum = new Summation();
+        final Node<BarElement> root = AlkemyNodes.get(TestClass.class, p -> p.alkemyType() == Bar.class, f -> new BarElement(f));
+        root.stream().filter(c -> !c.isNode()).forEach(c -> sum.add(c.get(tc, Integer.class)));
+
+        assertThat(sum.sum, is(9));
     }
 
     @Test

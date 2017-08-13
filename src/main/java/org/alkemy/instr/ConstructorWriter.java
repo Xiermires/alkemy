@@ -28,9 +28,8 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.BIPUSH;
+import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
@@ -39,10 +38,8 @@ import static org.objectweb.asm.Opcodes.ICONST_3;
 import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
@@ -53,7 +50,6 @@ import org.alkemy.instr.DefaultAlkemizableVisitor.FieldProperties;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
@@ -62,10 +58,11 @@ public class ConstructorWriter
     public static final String CREATE_DEFAULT = "create$$default";
     public static final String INSTATIATOR = "obj$$instantiator";
     public static final String CREATE_ARGS = "create$$args";
-    
-    private ConstructorWriter() {
+
+    private ConstructorWriter()
+    {
     }
-    
+
     static void appendCreateDefault(ClassVisitor cv, String className, boolean defaultCtor)
     {
         if (!defaultCtor)
@@ -74,48 +71,42 @@ public class ConstructorWriter
                     "Lorg/objenesis/instantiator/ObjectInstantiator<" + AlkemizerUtils.toDescFromClassName(className) + ">;",
                     null);
             fv.visitEnd();
-        }
 
-        final MethodVisitor mv = cv.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_DEFAULT, //
-                "()" + AlkemizerUtils.toDescFromClassName(className), null, null);
+            final MethodVisitor mv = cv.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_DEFAULT, //
+                    "()" + AlkemizerUtils.toDescFromClassName(className), null, null);
 
-        mv.visitCode();
-        final Label l0 = new Label();
-        mv.visitLabel(l0);
-
-        if (defaultCtor)
-        {
-            mv.visitTypeInsn(NEW, className);
-            mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
-            mv.visitInsn(ARETURN);
-        }
-        else
-        {
             mv.visitFieldInsn(GETSTATIC, className, "instantiator", "Lorg/objenesis/instantiator/ObjectInstantiator;");
             mv.visitMethodInsn(INVOKEINTERFACE, "org/objenesis/instantiator/ObjectInstantiator", "newInstance",
                     "()Ljava/lang/Object;", true);
             mv.visitTypeInsn(CHECKCAST, className);
             mv.visitInsn(ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
         }
-        mv.visitMaxs(0, 0);
-        mv.visitEnd();
     }
 
-    public static void appendCreateArgs(ClassWriter cw, String className, List<String> orderedNames, Map<String, FieldProperties> fieldMap)
+    public static void appendCreateArgs(ClassWriter cw, String className, List<String> orderedNames,
+            Map<String, FieldProperties> fieldMap, boolean defaultCtor)
     {
         final MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, CREATE_ARGS, //
                 "([Ljava/lang/Object;)" + AlkemizerUtils.toDescFromClassName(className), null, null);
 
         mv.visitCode();
 
-        final Label l0 = new Label();
-        mv.visitLabel(l0);
-
-        mv.visitMethodInsn(INVOKESTATIC, className, CREATE_DEFAULT, //
-                "()" + AlkemizerUtils.toDescFromClassName(className), false);
-        mv.visitVarInsn(ASTORE, 1);
-
+        if (defaultCtor)
+        {
+            mv.visitTypeInsn(NEW, className);
+            mv.visitInsn(DUP);
+            mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V", false);
+            mv.visitVarInsn(ASTORE, 1);
+        }
+        else
+        {
+            mv.visitMethodInsn(INVOKESTATIC, className, CREATE_DEFAULT, //
+                    "()" + AlkemizerUtils.toDescFromClassName(className), false);
+            mv.visitVarInsn(ASTORE, 1);
+        }
+        
         for (int i = 0; i < orderedNames.size(); i++)
         {
             final String name = orderedNames.get(i);
@@ -133,7 +124,7 @@ public class ConstructorWriter
             final ClassCaster classCaster = getCastClassForDesc(props.desc);
             if (props.isEnum)
             {
-                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/AlkemizerUtils$Proxy", "toEnum",
+                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/instr/AlkemizerUtils$Proxy", "toEnum",
                         "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false);
             }
             mv.visitTypeInsn(CHECKCAST, classCaster.name);
@@ -144,7 +135,6 @@ public class ConstructorWriter
             mv.visitFieldInsn(PUTFIELD, className, name, props.desc);
         }
 
-        mv.visitLabel(new Label());
         mv.visitVarInsn(ALOAD, 1);
         mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);

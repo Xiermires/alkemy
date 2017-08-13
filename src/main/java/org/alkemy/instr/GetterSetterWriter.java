@@ -106,7 +106,7 @@ public class GetterSetterWriter
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitLdcInsn(Type.getType(fieldProperties.desc));
                 mv.visitVarInsn(ALOAD, 1);
-                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/parse/impl/AlkemizerUtils$Proxy", "toEnum",
+                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/instr/AlkemizerUtils$Proxy", "toEnum",
                         "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;", false);
                 mv.visitTypeInsn(CHECKCAST, AlkemizerUtils.toClassNameFromDesc(fieldProperties.desc));
                 mv.visitFieldInsn(fieldProperties.isStatic ? PUTSTATIC : PUTFIELD, className, fieldName, fieldProperties.desc);

@@ -44,7 +44,7 @@ public class DefaultAlkemizerWriter extends ClassVisitor
     private final Map<String, MethodProperties> methodMap;
     private final List<String> orderedFields;
 
-    private boolean hasDefaultCtor;
+    private boolean defaultCtor;
     private boolean ordered = false;
 
     public DefaultAlkemizerWriter(ClassWriter cw, String className, List<String> orderedFields,
@@ -71,7 +71,7 @@ public class DefaultAlkemizerWriter extends ClassVisitor
         int _access = access;
         if (AlkemizerUtils.isDefaultCtor(name, desc))
         {
-            hasDefaultCtor = true;
+            defaultCtor = true;
             // if not accessible, make it public
             if (_access == 0) // package default
             {
@@ -97,8 +97,8 @@ public class DefaultAlkemizerWriter extends ClassVisitor
         
         appendIsInstrumented();
         
-        ConstructorWriter.appendCreateDefault(cw, className, hasDefaultCtor);
-        ConstructorWriter.appendCreateArgs(cw, className, orderedFields, fieldMap);
+        ConstructorWriter.appendCreateDefault(cw, className, defaultCtor);
+        ConstructorWriter.appendCreateArgs(cw, className, orderedFields, fieldMap, defaultCtor);
         GetterSetterWriter.appendGetters(cw, className, orderedFields, fieldMap, methodMap);
         GetterSetterWriter.appendSetters(cw, className, orderedFields, fieldMap, methodMap);
 

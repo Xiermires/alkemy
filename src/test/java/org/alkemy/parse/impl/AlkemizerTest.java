@@ -330,7 +330,7 @@ public class AlkemizerTest
 
         final Object[] fields = new Object[26];
         Arrays.fill(fields, 1);
-        System.out.println(ConstructorWriter.CREATE_ARGS + "(TestManyFields: " + Measure.measure(() ->
+        System.out.println(ConstructorWriter.CREATE_ARGS + "(TestManyFields): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -338,7 +338,7 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
-        System.out.println(ConstructorWriter.CREATE_DEFAULT + " + set(value, parent) (TestAlkemizer): " + Measure.measure(() ->
+        System.out.println("no-args ctor + set(value, parent) (TestAlkemizer): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
@@ -350,7 +350,7 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
         
-        System.out.println(ConstructorWriter.CREATE_ARGS + "(TestAlkemizer#newInstance(...): " + Measure.measure(() ->
+        System.out.println(ConstructorWriter.CREATE_ARGS + "(TestAlkemizer): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
