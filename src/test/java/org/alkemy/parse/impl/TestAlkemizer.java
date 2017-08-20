@@ -43,4 +43,8 @@ public class TestAlkemizer
 
     @Bar
     float dolor;
+    
+    public float getDolor() {
+        return dolor;
+    }
 }

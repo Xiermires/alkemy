@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.alkemy.AlkemyNodes;
 import org.alkemy.annotations.Order;
@@ -213,14 +214,16 @@ public class AlkemizerTest
         final Function<Object, String> function = getterReference(handle, Object.class, String.class);
         final ValueAccessor barAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz.getDeclaredField("bar"));
         final ValueAccessor fooAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz.getDeclaredField("foo"));
-        final ValueAccessor ipsumAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz
-                .getDeclaredField("ipsum"));
-        final ValueAccessor dolorAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz
-                .getDeclaredField("dolor"));
+        final ValueAccessor ipsumAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz.getDeclaredField("ipsum"));
+        final ValueAccessor dolorAccessor = MethodReferenceFactory.createReferencedValueAccessor(clazz.getDeclaredField("dolor"));
         final NodeFactory ctortc = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(TestAlkemizer.class));
         final NodeFactory ctortmf = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(TestManyFields.class));
+        final ToDoubleFunction<TestAlkemizer> lambda = l -> l.getDolor();
 
         final TestAlkemizer tc = new TestAlkemizer();
+
+        final Field foo = TestAlkemizer.class.getDeclaredField("foo");
+        final ValueAccessor iref = new IntReference(foo);
 
         // warm up
         for (int i = 0; i < 1000; i++)
@@ -231,9 +234,11 @@ public class AlkemizerTest
             function.apply(tc);
             method.invoke(tc);
             barAccessor.get(tc);
-            fooAccessor.get(tc);
+            fooAccessor.getInt(tc);
             barAccessor.set("foo", tc);
+            iref.getInt(tc);
             fooAccessor.set(1, tc);
+            lambda.applyAsDouble(tc);
         }
 
         System.out.println("MethodHandle#invokeExact(): " + Measure.measure(() ->
@@ -265,18 +270,26 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                String.class.cast(barAccessor.get(tc));
+                barAccessor.get(tc);
             }
         }) / 1000000 + " ms");
-                
+
         System.out.println("Accessor get (TestClass)int: " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
-                fooAccessor.get(tc);
+                fooAccessor.getInt(tc);
             }
         }) / 1000000 + " ms");
-        
+
+        System.out.println("Accessor iref (TestClass)int: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                iref.getInt(tc);
+            }
+        }) / 1000000 + " ms");
+
         System.out.println("Reflection (field.get): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
@@ -292,7 +305,7 @@ public class AlkemizerTest
                 barAccessor.set("foo", tc);
             }
         }) / 1000000 + " ms");
-        
+
         System.out.println("Accessor set (TestClass)int: " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
@@ -300,7 +313,7 @@ public class AlkemizerTest
                 fooAccessor.set(1, tc);
             }
         }) / 1000000 + " ms");
-        
+
         System.out.println("Reflection (field.set): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
@@ -323,6 +336,14 @@ public class AlkemizerTest
             for (int i = 0; i < ITER; i++)
             {
                 tce.get$$bar();
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("Lambda (getter): " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                lambda.applyAsDouble(tc);
             }
         }) / 1000000 + " ms");
 
@@ -355,7 +376,7 @@ public class AlkemizerTest
                 dolorAccessor.set(1f, instance);
             }
         }) / 1000000 + " ms");
-        
+
         System.out.println(ConstructorWriter.CREATE_ARGS + "(TestAlkemizer): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
@@ -363,7 +384,7 @@ public class AlkemizerTest
                 ctortc.newInstance(1, "two", Lorem.ipsum, 1f);
             }
         }) / 1000000 + " ms");
-        
+
         System.out.println("Direct access (TestAlkemizerCompiledVersion.create$$args): " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
@@ -379,8 +400,7 @@ public class AlkemizerTest
     public void compareLambdaRefObjectvsRefPrimitive() throws Throwable
     {
         final MethodHandle handle = methodHandle(clazz, "getFoo");
-        final Function<TestAlkemizer, Integer> f1 = getterReference(handle, TestAlkemizer.class,
-                Integer.class);
+        final Function<TestAlkemizer, Integer> f1 = getterReference(handle, TestAlkemizer.class, Integer.class);
         final ObjIntFunction<TestAlkemizer> f2 = objIntLambdaRef(handle, TestAlkemizer.class);
 
         final TestAlkemizer tc = new TestAlkemizer();
@@ -410,8 +430,7 @@ public class AlkemizerTest
         }) / 1000000 + " ms");
     }
 
-    private MethodHandle methodHandle(Class<?> clazz, String methodName) throws IllegalAccessException, NoSuchMethodException,
-            SecurityException
+    private MethodHandle methodHandle(Class<?> clazz, String methodName) throws IllegalAccessException, NoSuchMethodException, SecurityException
     {
         final Method method = clazz.getDeclaredMethod(methodName);
         return MethodHandles.lookup().unreflect(method);
@@ -424,14 +443,13 @@ public class AlkemizerTest
         final Class<?>[] funcParams = funcMethod.getParameterTypes();
         final MethodType funcType = MethodType.methodType(funcRet, funcParams);
 
-        return (ObjIntFunction<T>) LambdaMetafactory.metafactory(MethodHandles.lookup(), funcMethod.getName(),
-                MethodType.methodType(ObjIntFunction.class), funcType, handle, handle.type()).getTarget().invoke();
+        return (ObjIntFunction<T>) LambdaMetafactory.metafactory(MethodHandles.lookup(), funcMethod.getName(), MethodType.methodType(ObjIntFunction.class), funcType, handle, handle.type())
+                .getTarget().invoke();
     }
 
     @SuppressWarnings("unchecked")
     // safe
-    static <T, R> Function<T, R> getterReference(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException,
-            SecurityException, NoSuchMethodException
+    static <T, R> Function<T, R> getterReference(MethodHandle handle, Class<T> clazz, Class<R> r) throws IllegalAccessException, SecurityException, NoSuchMethodException
     {
         if (handle != null)
         {

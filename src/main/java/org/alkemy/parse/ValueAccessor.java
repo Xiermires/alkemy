@@ -160,4 +160,9 @@ public interface ValueAccessor extends AutoCastValueAccessor
     {
         return get(parent, Boolean.class);
     }
+
+    default String getString(Object parent) throws AlkemyException
+    {
+        return get(parent, String.class);
+    }
 }
