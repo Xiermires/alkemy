@@ -35,9 +35,9 @@ import org.alkemy.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReflectedStaticValueAccessor implements ValueAccessor
+public class ReflectedReference implements ValueAccessor
 {
-    private static final Logger log = LoggerFactory.getLogger(ReflectedStaticValueAccessor.class);
+    private static final Logger log = LoggerFactory.getLogger(ReflectedReference.class);
 
     private final Class<?> type;
     private final String name;
@@ -50,7 +50,7 @@ public class ReflectedStaticValueAccessor implements ValueAccessor
 
     private final int rank;
 
-    public ReflectedStaticValueAccessor(Field f)
+    public ReflectedReference(Field f)
     {
         type = f.getType();
         name = f.getDeclaringClass().getTypeName() + "." + f.getName();

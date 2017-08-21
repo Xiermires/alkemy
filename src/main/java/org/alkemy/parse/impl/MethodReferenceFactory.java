@@ -28,7 +28,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
@@ -68,7 +67,7 @@ public class MethodReferenceFactory
 
     static ValueAccessor createReflectedValueAccessor(Field f) throws IllegalAccessException, SecurityException, NoSuchMethodException
     {
-        return Modifier.isStatic(f.getModifiers()) ? new ReflectedStaticValueAccessor(f) : new ReflectedMemberValueAccessor(f);
+        return new ReflectedReference(f);
     }
 
     static ValueAccessor createReferencedValueAccessor(Field f) throws IllegalAccessException, SecurityException, NoSuchMethodException

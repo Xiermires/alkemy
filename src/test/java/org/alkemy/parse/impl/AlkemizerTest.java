@@ -223,7 +223,8 @@ public class AlkemizerTest
         final TestAlkemizer tc = new TestAlkemizer();
 
         final Field foo = TestAlkemizer.class.getDeclaredField("foo");
-        final ValueAccessor iref = new IntReference(foo);
+        final IntReference iref = new IntReference(foo);
+        final ValueAccessor reflectedFooAccessor = new ReflectedReference(foo);       
 
         // warm up
         for (int i = 0; i < 1000; i++)
@@ -235,6 +236,7 @@ public class AlkemizerTest
             method.invoke(tc);
             barAccessor.get(tc);
             fooAccessor.getInt(tc);
+            reflectedFooAccessor.getInt(tc);
             barAccessor.set("foo", tc);
             iref.getInt(tc);
             fooAccessor.set(1, tc);
@@ -282,6 +284,14 @@ public class AlkemizerTest
             }
         }) / 1000000 + " ms");
 
+        System.out.println("Reflected accessor get (TestClass)int: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                reflectedFooAccessor.getInt(tc);
+            }
+        }) / 1000000 + " ms");
+        
         System.out.println("Accessor iref (TestClass)int: " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
