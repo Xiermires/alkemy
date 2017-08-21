@@ -10,7 +10,7 @@ import org.alkemy.exception.AlkemyException;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class DoubleReference extends ObjectReference implements ValueAccessor
+public class DoubleReference extends LambdaReference implements ValueAccessor
 {
     private final ToDoubleFunction<Object> dgetter;
     private final ObjDoubleConsumer<Object> dsetter;

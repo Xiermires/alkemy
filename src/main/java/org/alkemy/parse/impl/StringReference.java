@@ -10,7 +10,7 @@ import org.alkemy.functional.ToStringFunction;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class StringReference extends ObjectReference implements ValueAccessor
+public class StringReference extends LambdaReference implements ValueAccessor
 {
     private final ToStringFunction<Object> sgetter;
     private final ObjStringConsumer<Object> ssetter;

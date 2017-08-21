@@ -10,7 +10,7 @@ import org.alkemy.functional.ToShortFunction;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class ShortReference extends ObjectReference implements ValueAccessor
+public class ShortReference extends LambdaReference implements ValueAccessor
 {
     private final ToShortFunction<Object> sgetter;
     private final ObjShortConsumer<Object> ssetter;

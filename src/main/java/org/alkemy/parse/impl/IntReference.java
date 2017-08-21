@@ -10,7 +10,7 @@ import org.alkemy.exception.AlkemyException;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class IntReference extends ObjectReference implements ValueAccessor
+public class IntReference extends LambdaReference implements ValueAccessor
 {
     private final ToIntFunction<Object> igetter;
     private final ObjIntConsumer<Object> isetter;

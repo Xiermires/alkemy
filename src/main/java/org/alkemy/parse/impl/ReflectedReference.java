@@ -24,26 +24,19 @@ package org.alkemy.parse.impl;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
-import java.util.Collection;
 
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.exception.TypeMismatch;
-import org.alkemy.parse.ValueAccessor;
 import org.alkemy.util.AlkemyUtils;
 import org.alkemy.util.NumberConversion;
-import org.alkemy.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReflectedReference implements ValueAccessor
+public class ReflectedReference extends Reference
 {
     private static final Logger log = LoggerFactory.getLogger(ReflectedReference.class);
 
-    private final Class<?> type;
-    private final String name;
     private final boolean isEnum;
-    private final boolean collection;
-    private final Class<?> componentType;
     private final Field f;
     private MethodHandle getter;
     private MethodHandle setter;
@@ -52,11 +45,8 @@ public class ReflectedReference implements ValueAccessor
 
     public ReflectedReference(Field f)
     {
-        type = f.getType();
-        name = f.getDeclaringClass().getTypeName() + "." + f.getName();
-        isEnum = type.isEnum();
-        collection = Collection.class.isAssignableFrom(type);
-        componentType = Types.getComponentType(f);
+        super(f);
+        isEnum = f.getType().isEnum();
         rank = NumberConversion.getRank(f.getType());
 
         try
@@ -82,30 +72,6 @@ public class ReflectedReference implements ValueAccessor
     }
 
     @Override
-    public Class<?> type()
-    {
-        return type;
-    }
-
-    @Override
-    public boolean isCollection()
-    {
-        return collection;
-    }
-
-    @Override
-    public Class<?> componentType()
-    {
-        return componentType;
-    }
-
-    @Override
-    public String valueName()
-    {
-        return name;
-    }
-
-    @Override
     public Object get(Object parent) throws AlkemyException
     {
         try
@@ -114,8 +80,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -128,8 +93,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -142,8 +106,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -156,8 +119,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -170,8 +132,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -184,8 +145,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -198,8 +158,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -212,8 +171,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -226,8 +184,7 @@ public class ReflectedReference implements ValueAccessor
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e,
-                    parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
+            throw new TypeMismatch("Can't get value from parent type '{}' for target '{}' of type '{}'", e, parent != null ? parent.getClass().getName() : "null", f.getName(), f.getType().getName());
         }
     }
 
@@ -237,14 +194,14 @@ public class ReflectedReference implements ValueAccessor
         try
         {
             value = rank != -1 ? NumberConversion.convert(value, rank) : value;
-            if (f != null)
-                f.set(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.set(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, value != null ? value.getClass().getName() : "null");
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, value != null ? value.getClass().getName()
+                    : "null");
         }
     }
 
@@ -255,19 +212,19 @@ public class ReflectedReference implements ValueAccessor
         {
             if (isEnum)
             {
-                set(toEnum(type, value), parent);
+                set(toEnum(type(), value), parent);
             }
             else
             {
-                if (f != null)
-                    f.set(parent, value);
-                else setter.invoke(parent, value);
+                if (f != null) f.set(parent, value);
+                else
+                    setter.invoke(parent, value);
             }
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, value != null ? value.getClass().getName() : "null");
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, value != null ? value.getClass().getName()
+                    : "null");
         }
     }
 
@@ -282,14 +239,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setDouble(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setDouble(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, double.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, double.class.getName());
         }
     }
 
@@ -298,14 +254,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setFloat(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setFloat(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, float.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, float.class.getName());
         }
     }
 
@@ -314,14 +269,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setLong(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setLong(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, long.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, long.class.getName());
         }
     }
 
@@ -330,14 +284,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setInt(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setInt(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, int.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, int.class.getName());
         }
     }
 
@@ -346,14 +299,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setShort(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setShort(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, short.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, short.class.getName());
         }
     }
 
@@ -362,14 +314,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setChar(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setChar(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, char.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, char.class.getName());
         }
     }
 
@@ -378,14 +329,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setByte(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setByte(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, byte.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, byte.class.getName());
         }
     }
 
@@ -394,14 +344,13 @@ public class ReflectedReference implements ValueAccessor
     {
         try
         {
-            if (f != null)
-                f.setBoolean(parent, value);
-            else setter.invoke(parent, value);
+            if (f != null) f.setBoolean(parent, value);
+            else
+                setter.invoke(parent, value);
         }
         catch (Throwable e)
         {
-            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType()
-                    .getName(), f.getName(), value, boolean.class.getName());
+            throw new TypeMismatch("Can't set into type '%s' for target '%s' the value '%s' of type '%s'", e, f.getType().getName(), f.getName(), value, boolean.class.getName());
         }
     }
 }

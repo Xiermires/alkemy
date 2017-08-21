@@ -10,7 +10,7 @@ import org.alkemy.exception.AlkemyException;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class LongReference extends ObjectReference implements ValueAccessor
+public class LongReference extends LambdaReference implements ValueAccessor
 {
     private final ToLongFunction<Object> jgetter;
     private final ObjLongConsumer<Object> jsetter;

@@ -10,7 +10,7 @@ import org.alkemy.functional.ToBooleanFunction;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class BooleanReference extends ObjectReference implements ValueAccessor
+public class BooleanReference extends LambdaReference implements ValueAccessor
 {
     private final ToBooleanFunction<Object> zgetter;
     private final ObjBooleanConsumer<Object> zsetter;

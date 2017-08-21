@@ -10,7 +10,7 @@ import org.alkemy.functional.ToByteFunction;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class ByteReference extends ObjectReference implements ValueAccessor
+public class ByteReference extends LambdaReference implements ValueAccessor
 {
     private final ToByteFunction<Object> bgetter;
     private final ObjByteConsumer<Object> bsetter;

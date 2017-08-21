@@ -10,7 +10,7 @@ import org.alkemy.functional.ToFloatFunction;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class FloatReference extends ObjectReference implements ValueAccessor
+public class FloatReference extends LambdaReference implements ValueAccessor
 {
     private final ToFloatFunction<Object> fgetter;
     private final ObjFloatConsumer<Object> fsetter;

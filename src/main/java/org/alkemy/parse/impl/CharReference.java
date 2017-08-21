@@ -10,7 +10,7 @@ import org.alkemy.functional.ToCharFunction;
 import org.alkemy.instr.AlkemizerUtils;
 import org.alkemy.parse.ValueAccessor;
 
-public class CharReference extends ObjectReference implements ValueAccessor
+public class CharReference extends LambdaReference implements ValueAccessor
 {
     private final ToCharFunction<Object> cgetter;
     private final ObjCharConsumer<Object> csetter;
