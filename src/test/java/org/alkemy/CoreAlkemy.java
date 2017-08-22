@@ -56,7 +56,7 @@ public class CoreAlkemy
 
         assertThat(sum.sum, is(15));
     }
-    
+
     @Test
     public void transformTree()
     {
@@ -130,6 +130,30 @@ public class CoreAlkemy
         assertThat(elements.get(20), is("org.alkemy.TestTraverse$NestedC.c2"));
         assertThat(elements.get(21), is("org.alkemy.TestTraverse.nc"));
         assertThat(elements.get(22), is("org.alkemy.TestTraverse"));
+    }
+
+    @Test
+    public void testStaticGet()
+    {
+        final TestStatic ts = new TestStatic();
+        final Summation sum = new Summation();
+        AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
+        .forEach(c -> sum.add(c.getInt(ts)));
+
+        assertThat(sum.sum, is(1));
+    }
+    
+    @Test
+    public void testStaticSet()
+    {
+        AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
+        .forEach(c -> c.set(5, null));
+
+        final Summation sum = new Summation();
+        AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
+        .forEach(c -> sum.add(c.getInt(null)));
+
+        assertThat(sum.sum, is(5));
     }
 
     public static class Summation
