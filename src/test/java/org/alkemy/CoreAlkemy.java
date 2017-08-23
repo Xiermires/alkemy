@@ -38,7 +38,7 @@ public class CoreAlkemy
     public void set()
     {
         final TestClass tc = new TestClass();
-        AlkemyNodes.get(TestClass.class).forEach(e -> e.set(-1, tc));
+        Alkemy.parse(TestClass.class).forEach(e -> e.set(-1, tc));
 
         assertThat(tc.n1, is(-1));
         assertThat(tc.n2, is(-1));
@@ -52,7 +52,7 @@ public class CoreAlkemy
     {
         final TestClass tc = new TestClass();
         final Summation sum = new Summation();
-        AlkemyNodes.get(TestClass.class).stream().filter(c -> !c.isNode()).forEach(c -> sum.add(c.get(tc, Integer.class)));
+        Alkemy.parse(TestClass.class).stream().filter(c -> !c.isNode()).forEach(c -> sum.add(c.get(tc, Integer.class)));
 
         assertThat(sum.sum, is(15));
     }
@@ -62,7 +62,7 @@ public class CoreAlkemy
     {
         final TestClass tc = new TestClass();
         final Summation sum = new Summation();
-        final Node<BarElement> root = AlkemyNodes.get(TestClass.class, p -> p.alkemyType() == Bar.class, f -> new BarElement(f));
+        final Node<BarElement> root = Alkemy.parse(TestClass.class, p -> p.alkemyType() == Bar.class, f -> new BarElement(f));
         root.stream().filter(c -> !c.isNode()).forEach(c -> sum.add(c.get(tc, Integer.class)));
 
         assertThat(sum.sum, is(9));
@@ -72,7 +72,7 @@ public class CoreAlkemy
     public void preorder()
     {
         final List<String> elements = new ArrayList<String>();
-        AlkemyNodes.get(TestTraverse.class).forEach(e -> elements.add(e.valueName()));
+        Alkemy.parse(TestTraverse.class).forEach(e -> elements.add(e.valueName()));
 
         assertThat(elements, hasSize(23));
         assertThat(elements.get(0), is("org.alkemy.TestTraverse"));
@@ -104,7 +104,7 @@ public class CoreAlkemy
     public void postorder()
     {
         final List<String> elements = new ArrayList<String>();
-        AlkemyNodes.get(TestTraverse.class).postorder().forEach(e -> elements.add(e.valueName()));
+        Alkemy.parse(TestTraverse.class).postorder().forEach(e -> elements.add(e.valueName()));
 
         assertThat(elements, hasSize(23));
         assertThat(elements.get(0), is("org.alkemy.TestTraverse.a"));
@@ -136,7 +136,7 @@ public class CoreAlkemy
     public void testStaticGet()
     {
         final Summation sum = new Summation();
-        AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
+        Alkemy.parse(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
                 .forEach(c -> sum.add(c.get(null, Integer.class)));
 
         assertThat(sum.sum, is(1));
@@ -145,11 +145,11 @@ public class CoreAlkemy
     @Test
     public void testStaticSet()
     {
-        AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
+        Alkemy.parse(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
                 .forEach(c -> c.set(5, null));
 
         final Summation sum = new Summation();
-        AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
+        Alkemy.parse(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
                 .forEach(c -> sum.add(c.get(null, Integer.class)));
 
         assertThat(sum.sum, is(5));

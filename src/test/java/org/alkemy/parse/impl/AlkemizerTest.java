@@ -43,7 +43,7 @@ import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
-import org.alkemy.AlkemyNodes;
+import org.alkemy.Alkemy;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.instr.ConstructorWriter;
@@ -199,7 +199,7 @@ public class AlkemizerTest
     @Test
     public void testNoDefaultCtor()
     {
-        AlkemyNodes.get(TestCreatedDefaultCtor.class);
+        Alkemy.parse(TestCreatedDefaultCtor.class);
     }
 
     @Test
@@ -407,7 +407,7 @@ public class AlkemizerTest
     public void performanceAlkemyElementGet() throws Throwable
     {
         final TestAlkemizer testee = new TestAlkemizer();
-        final AlkemyElement ae = AlkemyNodes.get(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
+        final AlkemyElement ae = Alkemy.parse(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
 
         System.out.println("AlkemyElement#getInt: " + Measure.measure(() ->
         {
@@ -422,7 +422,7 @@ public class AlkemizerTest
     public void performanceAlkemyElementSet() throws Throwable
     {
         final TestAlkemizer testee = new TestAlkemizer();
-        final AlkemyElement ae = AlkemyNodes.get(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
+        final AlkemyElement ae = Alkemy.parse(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
 
         System.out.println("AlkemyElement#setInt: " + Measure.measure(() ->
         {

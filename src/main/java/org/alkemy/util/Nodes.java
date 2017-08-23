@@ -30,7 +30,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.alkemy.AlkemyNodes;
+import org.alkemy.Alkemy;
 import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.util.Node.Builder;
 import org.alkemy.util.Traversers.PostorderIterator;
@@ -113,7 +113,8 @@ public class Nodes
         }
 
         // TODO: Probably bring this inside the calculateDepths.
-        // We need new IntRefs for each element in the for each and access them after every
+        // We need new IntRefs for each element in the for each and access them
+        // after every
         // iteration.
         private Node<E> drainTo(ArborescenceNode<E> parent, boolean isRoot)
         {
@@ -159,11 +160,11 @@ public class Nodes
             this.children = children;
             this.depth = depth;
         }
-        
+
         ArborescenceNode()
         {
         }
-        
+
         @Override
         public Iterator<E> iterator()
         {
@@ -233,7 +234,7 @@ public class Nodes
 
         public static <R> RootNode<R, AlkemyElement> create(Class<R> type)
         {
-            return new RootNode<R, AlkemyElement>(AlkemyNodes.get(type), type);
+            return new RootNode<R, AlkemyElement>(Alkemy.parse(type), type);
         }
 
         public static <R, E> RootNode<R, E> create(Node<E> root, Class<R> type)
@@ -243,7 +244,7 @@ public class Nodes
 
         public static <R, E> RootNode<R, E> create(Class<R> type, Function<AlkemyElement, E> f)
         {
-            final Node<AlkemyElement> src = AlkemyNodes.get(type);
+            final Node<AlkemyElement> src = Alkemy.parse(type);
             final Builder<E> dst = arborescence(f.apply(src.data()));
             final Node<E> copy = copy(src, dst, p -> true, f).build();
             return new RootNode<R, E>(copy, type);
