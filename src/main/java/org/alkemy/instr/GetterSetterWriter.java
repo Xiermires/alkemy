@@ -24,16 +24,12 @@ package org.alkemy.instr;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ATHROW;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.IRETURN;
-import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
@@ -53,8 +49,7 @@ public class GetterSetterWriter
     {
     }
 
-    public static void appendGetters(ClassWriter cw, String className, List<String> fieldNames,
-            Map<String, FieldProperties> fieldMap, Map<String, MethodProperties> methodMap)
+    public static void appendGetters(ClassWriter cw, String className, List<String> fieldNames, Map<String, FieldProperties> fieldMap, Map<String, MethodProperties> methodMap)
     {
         for (String fieldName : fieldNames)
         {
@@ -63,8 +58,7 @@ public class GetterSetterWriter
         }
     }
 
-    public static void appendSetters(ClassWriter cw, String className, List<String> fieldNames,
-            Map<String, FieldProperties> fieldMap, Map<String, MethodProperties> methodMap)
+    public static void appendSetters(ClassWriter cw, String className, List<String> fieldNames, Map<String, FieldProperties> fieldMap, Map<String, MethodProperties> methodMap)
     {
         for (String fieldName : fieldNames)
         {
@@ -73,15 +67,15 @@ public class GetterSetterWriter
         }
     }
 
-    private static void appendGetter(ClassWriter cw, String className, String fieldName, FieldProperties fieldProperties,
-            String methodName, MethodProperties methodProperties)
+    private static void appendGetter(ClassWriter cw, String className, String fieldName, FieldProperties fieldProperties, String methodName, MethodProperties methodProperties)
     {
         if (methodProperties == null || !("()" + fieldProperties.desc).equals(methodProperties.desc))
         {
-            final MethodVisitor mv = cw.visitMethod(fieldProperties.isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName,
-                    "()" + fieldProperties.desc, null, null);
+            final MethodVisitor mv = cw.visitMethod(fieldProperties.isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "()" + fieldProperties.desc, null, null);
 
-            mv.visitVarInsn(ALOAD, 0);
+            if (!fieldProperties.isStatic)
+                mv.visitVarInsn(ALOAD, 0);
+            
             mv.visitFieldInsn(fieldProperties.isStatic ? GETSTATIC : GETFIELD, className, fieldName, fieldProperties.desc);
             mv.visitInsn(Type.getType(fieldProperties.desc).getOpcode(IRETURN));
             mv.visitMaxs(0, 0);
@@ -89,58 +83,58 @@ public class GetterSetterWriter
         }
     }
 
-    private static void appendSetter(ClassWriter cw, String className, String fieldName, FieldProperties fieldProperties,
-            String methodName, MethodProperties methodProperties)
+    private static void appendSetter(ClassWriter cw, String className, String fieldName, FieldProperties fieldProperties, String methodName, MethodProperties methodProperties)
     {
-        if (methodProperties == null || !("(" + fieldProperties.desc + ")V").equals(methodProperties.desc))
+        if (!hasSetter(fieldProperties.desc, methodProperties))
         {
             // typified
             appendSetter(cw, className, fieldName, fieldProperties.desc, methodName, fieldProperties.isStatic);
 
-            if (fieldProperties.isEnum)
+            if (fieldProperties.isEnum && !hasSetter("Ljava/lang/String;", methodProperties))
             {
                 // String support
-                final MethodVisitor mv = cw.visitMethod(fieldProperties.isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC,
-                        methodName, "(" + "Ljava/lang/String;" + ")V", null, null);
-
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitLdcInsn(Type.getType(fieldProperties.desc));
-                mv.visitVarInsn(ALOAD, 1);
-                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/instr/AlkemizerUtils$Proxy", "toEnum",
-                        "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;", false);
+                final MethodVisitor mv = cw.visitMethod(fieldProperties.isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC, methodName, "(" + "Ljava/lang/String;" + ")V", null, null);
+                if (fieldProperties.isStatic)
+                {
+                    mv.visitLdcInsn(Type.getType(fieldProperties.desc));
+                    mv.visitVarInsn(ALOAD, 0);
+                }
+                else
+                {
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitLdcInsn(Type.getType(fieldProperties.desc));
+                    mv.visitVarInsn(ALOAD, 1);
+                }
+                mv.visitMethodInsn(INVOKESTATIC, "org/alkemy/instr/AlkemizerUtils$Proxy", "toEnum", "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;", false);
                 mv.visitTypeInsn(CHECKCAST, AlkemizerUtils.toClassNameFromDesc(fieldProperties.desc));
                 mv.visitFieldInsn(fieldProperties.isStatic ? PUTSTATIC : PUTFIELD, className, fieldName, fieldProperties.desc);
                 mv.visitInsn(RETURN);
                 mv.visitMaxs(0, 0);
                 mv.visitEnd();
             }
-            else if (!"Ljava/lang/String;".equals(fieldProperties.desc))
-            {
-                // String support
-                final MethodVisitor mv = cw.visitMethod(fieldProperties.isStatic ? ACC_PUBLIC + ACC_STATIC : ACC_PUBLIC,
-                        methodName, "(" + "Ljava/lang/String;" + ")V", null, null);
-
-                mv.visitTypeInsn(NEW, "java/lang/UnsupportedOperationException");
-                mv.visitInsn(DUP);
-                mv.visitLdcInsn("Invalid conversion.");
-                mv.visitMethodInsn(INVOKESPECIAL, "java/lang/UnsupportedOperationException", "<init>", "(Ljava/lang/String;)V",
-                        false);
-                mv.visitInsn(ATHROW);
-                mv.visitMaxs(0, 0);
-                mv.visitEnd();
-            }
         }
     }
 
-    private static void appendSetter(ClassWriter cw, String className, String name, String desc, String methodName,
-            boolean isStatic)
+    private static boolean hasSetter(String fieldDesc, MethodProperties methodProperties)
+    {
+        return methodProperties != null && ("(" + fieldDesc + ")V").equals(methodProperties.desc);
+    }
+
+    private static void appendSetter(ClassWriter cw, String className, String name, String desc, String methodName, boolean isStatic)
     {
         final MethodVisitor mv = cw.visitMethod(isStatic ? //
         ACC_PUBLIC + ACC_STATIC
                 : ACC_PUBLIC, methodName, "(" + desc + ")V", null, null);
 
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitVarInsn(Type.getType(desc).getOpcode(ILOAD), 1);
+        if (isStatic)
+        {
+            mv.visitVarInsn(Type.getType(desc).getOpcode(ILOAD), 0);
+        }
+        else
+        {
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(Type.getType(desc).getOpcode(ILOAD), 1);
+        }
 
         mv.visitFieldInsn(isStatic ? PUTSTATIC : PUTFIELD, className, name, desc);
         mv.visitInsn(RETURN);

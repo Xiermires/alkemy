@@ -205,8 +205,6 @@ public class AlkemizerTest
     @Test
     public void performanceAccesingStrategies() throws Throwable
     {
-        System.out.println("**** Compare accessing / creating fiels (1e7 iterations) ****");
-
         final Field field = clazz.getDeclaredField("bar");
         field.setAccessible(true);
         final Method method = clazz.getDeclaredMethod("getBar");
@@ -403,8 +401,6 @@ public class AlkemizerTest
                 TestAlkemizerCompiledVersion.create$$args(1, "two", Lorem.ipsum, 1f);
             }
         }) / 1000000 + " ms");
-
-        System.out.println("**** Compare end ****");
     }
 
     @Test

@@ -72,8 +72,6 @@ public class MethodReferenceFactory
 
     static ValueAccessor createReferencedValueAccessor(Field f) throws IllegalAccessException, SecurityException, NoSuchMethodException
     {
-        final ValueAccessor valueAccessor = new StringReference(f);
-
         if (f.getType() == double.class) return new DoubleReference(f);
         else if (f.getType() == float.class) return new FloatReference(f);
         else if (f.getType() == long.class) return new LongReference(f);
@@ -82,8 +80,10 @@ public class MethodReferenceFactory
         else if (f.getType() == char.class) return new CharReference(f);
         else if (f.getType() == byte.class) return new ByteReference(f);
         else if (f.getType() == boolean.class) return new BooleanReference(f);
+        else if (f.getType().isEnum()) return new StringReference(f);
+        else if (f.getType() == String.class) return new StringReference(f);
         else
-            return valueAccessor;
+            return new LambdaReference(f);
     }
 
     static NodeFactory createReferencedNodeFactory(AutoCastValueAccessor valueAccessor) throws IllegalAccessException, SecurityException

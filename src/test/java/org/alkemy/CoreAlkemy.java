@@ -135,23 +135,22 @@ public class CoreAlkemy
     @Test
     public void testStaticGet()
     {
-        final TestStatic ts = new TestStatic();
         final Summation sum = new Summation();
         AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
-        .forEach(c -> sum.add(c.getInt(ts)));
+                .forEach(c -> sum.add(c.get(null, Integer.class)));
 
         assertThat(sum.sum, is(1));
     }
-    
+
     @Test
     public void testStaticSet()
     {
         AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
-        .forEach(c -> c.set(5, null));
+                .forEach(c -> c.set(5, null));
 
         final Summation sum = new Summation();
         AlkemyNodes.get(TestStatic.class).stream().filter(c -> !c.isNode() && c.alkemyType() == Foo.class)//
-        .forEach(c -> sum.add(c.getInt(null)));
+                .forEach(c -> sum.add(c.get(null, Integer.class)));
 
         assertThat(sum.sum, is(5));
     }
