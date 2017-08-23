@@ -43,11 +43,49 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     private final Class<? extends Annotation> alkemyType;
     private final boolean node;
 
-    AlkemyElement(AnnotatedMember desc, NodeFactory nodeFactory, ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers,
-            Class<? extends Annotation> alkemyType, boolean node)
+    // Concrete references to lambdas are much faster than through an interface.
+    private final StringReference strref;
+    private final DoubleReference dref;
+    private final FloatReference fref;
+    private final LongReference jref;
+    private final IntReference iref;
+    private final ShortReference sref;
+    private final CharReference cref;
+    private final ByteReference bref;
+    private final BooleanReference zref;
+
+    AlkemyElement(AnnotatedMember desc, NodeFactory nodeFactory, ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<? extends Annotation> alkemyType, boolean node)
     {
         this.desc = desc;
         this.valueAccessor = valueAccessor;
+        if (valueAccessor instanceof StringReference) strref = (StringReference) valueAccessor;
+        else
+            strref = null;
+        if (valueAccessor instanceof DoubleReference) dref = (DoubleReference) valueAccessor;
+        else
+            dref = null;
+        if (valueAccessor instanceof FloatReference) fref = (FloatReference) valueAccessor;
+        else
+            fref = null;
+        if (valueAccessor instanceof LongReference) jref = (LongReference) valueAccessor;
+        else
+            jref = null;
+        if (valueAccessor instanceof IntReference) iref = (IntReference) valueAccessor;
+        else
+            iref = null;
+        if (valueAccessor instanceof ShortReference) sref = (ShortReference) valueAccessor;
+        else
+            sref = null;
+        if (valueAccessor instanceof CharReference) cref = (CharReference) valueAccessor;
+        else
+            cref = null;
+        if (valueAccessor instanceof ByteReference) bref = (ByteReference) valueAccessor;
+        else
+            bref = null;
+        if (valueAccessor instanceof BooleanReference) zref = (BooleanReference) valueAccessor;
+        else
+            zref = null;
+
         this.nodeFactory = nodeFactory;
         this.methodInvokers = new HashMap<String, MethodInvoker>();
         methodInvokers.forEach(c -> this.methodInvokers.put(c.name(), c));
@@ -61,6 +99,15 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
 
         this.desc = other.desc;
         this.valueAccessor = other.valueAccessor;
+        this.strref = other.strref;
+        this.dref = other.dref;
+        this.fref = other.fref;
+        this.jref = other.jref;
+        this.iref = other.iref;
+        this.sref = other.sref;
+        this.cref = other.cref;
+        this.bref = other.bref;
+        this.zref = other.zref;
         this.nodeFactory = other.nodeFactory;
         this.methodInvokers = other.methodInvokers;
         this.alkemyType = other.alkemyType;
@@ -187,96 +234,128 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     @Override
     public void set(double value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (dref != null) dref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public double getDouble(Object parent) throws AlkemyException
     {
-        return valueAccessor.getDouble(parent);
+        if (dref != null) return dref.getDouble(parent);
+        else
+            return valueAccessor.getDouble(parent);
     }
 
     @Override
     public void set(float value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (fref != null) fref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public float getFloat(Object parent) throws AlkemyException
     {
-        return valueAccessor.getFloat(parent);
+        if (fref != null) return fref.getFloat(parent);
+        else
+            return valueAccessor.getFloat(parent);
     }
 
     @Override
     public void set(long value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (jref != null) jref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public long getLong(Object parent) throws AlkemyException
     {
-        return valueAccessor.getLong(parent);
+        if (jref != null) return jref.getLong(parent);
+        else
+            return valueAccessor.getLong(parent);
     }
 
     @Override
     public void set(int value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (iref != null) iref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public int getInt(Object parent) throws AlkemyException
     {
-        return valueAccessor.getInt(parent);
+        if (iref != null) return iref.getInt(parent);
+        else
+            return valueAccessor.getInt(parent);
     }
 
     @Override
     public void set(short value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (sref != null) sref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public short getShort(Object parent) throws AlkemyException
     {
-        return valueAccessor.getShort(parent);
+        if (sref != null) return sref.getShort(parent);
+        else
+            return valueAccessor.getShort(parent);
     }
 
     @Override
     public void set(char value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (cref != null) cref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public char getChar(Object parent) throws AlkemyException
     {
-        return valueAccessor.getChar(parent);
+        if (cref != null) return cref.getChar(parent);
+        else
+            return valueAccessor.getChar(parent);
     }
 
     @Override
     public void set(byte value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (bref != null) bref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public byte getByte(Object parent) throws AlkemyException
     {
-        return valueAccessor.getByte(parent);
+        if (bref != null) return bref.getByte(parent);
+        else
+            return valueAccessor.getByte(parent);
     }
 
     @Override
     public void set(boolean value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (zref != null) zref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
     }
 
     @Override
     public boolean getBoolean(Object parent) throws AlkemyException
     {
-        return valueAccessor.getBoolean(parent);
+        if (zref != null) return zref.getBoolean(parent);
+        else
+            return valueAccessor.getBoolean(parent);
     }
 }

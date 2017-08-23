@@ -22,7 +22,6 @@
 package org.alkemy.parse.impl;
 
 import org.alkemy.Bar;
-import org.alkemy.Foo;
 
 public class TestAlkemizer
 {
@@ -31,7 +30,6 @@ public class TestAlkemizer
         ipsum
     };
 
-    @Foo("foo")
     @Bar
     int foo = -1;
 

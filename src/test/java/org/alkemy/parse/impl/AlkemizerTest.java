@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 
 import org.alkemy.AlkemyNodes;
 import org.alkemy.annotations.Order;
@@ -220,27 +221,27 @@ public class AlkemizerTest
         final NodeFactory ctortmf = MethodReferenceFactory.createReferencedNodeFactory(new SelfAccessor(TestManyFields.class));
         final ToDoubleFunction<TestAlkemizer> lambda = l -> l.getDolor();
 
-        final TestAlkemizer tc = new TestAlkemizer();
+        final TestAlkemizer testee = new TestAlkemizer();
 
         final Field foo = TestAlkemizer.class.getDeclaredField("foo");
         final IntReference iref = new IntReference(foo);
-        final ValueAccessor reflectedFooAccessor = new ReflectedReference(foo);       
+        final ValueAccessor reflectedFooAccessor = new ReflectedReference(foo);
 
         // warm up
         for (int i = 0; i < 1000; i++)
         {
             @SuppressWarnings("unused")
-            String bar = (String) handle.invokeExact(tc);
-            handle.invoke(tc);
-            function.apply(tc);
-            method.invoke(tc);
-            barAccessor.get(tc);
-            fooAccessor.getInt(tc);
-            reflectedFooAccessor.getInt(tc);
-            barAccessor.set("foo", tc);
-            iref.getInt(tc);
-            fooAccessor.set(1, tc);
-            lambda.applyAsDouble(tc);
+            String bar = (String) handle.invokeExact(testee);
+            handle.invoke(testee);
+            function.apply(testee);
+            method.invoke(testee);
+            barAccessor.get(testee);
+            fooAccessor.getInt(testee);
+            reflectedFooAccessor.getInt(testee);
+            barAccessor.set("foo", testee);
+            iref.getInt(testee);
+            fooAccessor.set(1, testee);
+            lambda.applyAsDouble(testee);
         }
 
         System.out.println("MethodHandle#invokeExact(): " + Measure.measure(() ->
@@ -248,7 +249,7 @@ public class AlkemizerTest
             for (int i = 0; i < ITER; i++)
             {
                 @SuppressWarnings("unused")
-                String bar = (String) handle.invokeExact(tc);
+                String bar = (String) handle.invokeExact(testee);
             }
         }) / 1000000 + " ms");
 
@@ -256,7 +257,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                String.class.cast(handle.invoke(tc));
+                String.class.cast(handle.invoke(testee));
             }
         }) / 1000000 + " ms");
 
@@ -264,7 +265,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                function.apply(tc);
+                function.apply(testee);
             }
         }) / 1000000 + " ms");
 
@@ -272,7 +273,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                barAccessor.get(tc);
+                barAccessor.get(testee);
             }
         }) / 1000000 + " ms");
 
@@ -280,7 +281,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                fooAccessor.getInt(tc);
+                fooAccessor.getInt(testee);
             }
         }) / 1000000 + " ms");
 
@@ -288,15 +289,15 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                reflectedFooAccessor.getInt(tc);
+                reflectedFooAccessor.getInt(testee);
             }
         }) / 1000000 + " ms");
-        
+
         System.out.println("Accessor iref (TestClass)int: " + Measure.measure(() ->
         {
             for (int i = 0; i < ITER; i++)
             {
-                iref.getInt(tc);
+                iref.getInt(testee);
             }
         }) / 1000000 + " ms");
 
@@ -304,7 +305,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                String.class.cast(field.get(tc));
+                String.class.cast(field.get(testee));
             }
         }) / 1000000 + " ms");
 
@@ -312,7 +313,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                barAccessor.set("foo", tc);
+                barAccessor.set("foo", testee);
             }
         }) / 1000000 + " ms");
 
@@ -320,7 +321,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                fooAccessor.set(1, tc);
+                fooAccessor.set(1, testee);
             }
         }) / 1000000 + " ms");
 
@@ -328,7 +329,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                field.set(tc, "foo");
+                field.set(testee, "foo");
             }
         }) / 1000000 + " ms");
 
@@ -336,7 +337,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                String.class.cast(method.invoke(tc));
+                String.class.cast(method.invoke(testee));
             }
         }) / 1000000 + " ms");
 
@@ -353,7 +354,7 @@ public class AlkemizerTest
         {
             for (int i = 0; i < ITER; i++)
             {
-                lambda.applyAsDouble(tc);
+                lambda.applyAsDouble(testee);
             }
         }) / 1000000 + " ms");
 
@@ -404,6 +405,36 @@ public class AlkemizerTest
         }) / 1000000 + " ms");
 
         System.out.println("**** Compare end ****");
+    }
+
+    @Test
+    public void performanceAlkemyElementGet() throws Throwable
+    {
+        final TestAlkemizer testee = new TestAlkemizer();
+        final AlkemyElement ae = AlkemyNodes.get(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
+
+        System.out.println("AlkemyElement#getInt: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                ae.getInt(testee);
+            }
+        }) / 1000000 + " ms");
+    }
+
+    @Test
+    public void performanceAlkemyElementSet() throws Throwable
+    {
+        final TestAlkemizer testee = new TestAlkemizer();
+        final AlkemyElement ae = AlkemyNodes.get(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
+
+        System.out.println("AlkemyElement#setInt: " + Measure.measure(() ->
+        {
+            for (int i = 0; i < ITER; i++)
+            {
+                ae.set(1, testee);
+            }
+        }) / 1000000 + " ms");
     }
 
     @Test
