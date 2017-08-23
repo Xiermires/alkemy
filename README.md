@@ -21,9 +21,9 @@ The library comes with an in-built parser which recognises annotations qualified
 Once an Alkemization has taken place, the resulting tree can be traversed applying effects on each of the nodes / leafs. Nodes can be streamed, and have two in-built traversing strategies (pre-order <default>, post-order).
 
 ```java 
-    AlkemyNodes.get(SomeType.class).forEach(consumer);
-    AlkemyNodes.get(SomeType.class).postorder().forEach(consumer);
-    AlkemyNodes.get(SomeType.class).stream().filter(filter).forEach(consumer);    
+    Alkemy.parse(SomeType.class).forEach(consumer);
+    Alkemy.parse(SomeType.class).postorder().forEach(consumer);
+    Alkemy.parse(SomeType.class).stream().filter(filter).forEach(consumer);    
 ```
 
 There is no limit in how many different alkemy elements a type can define, or how many different alkemy types an element visitor
@@ -70,7 +70,7 @@ public class TestClass
 public void generateRandoms()
 {
     final TestClass tc = new TestClass();
-    AlkemyNodes.get(TestClass.class)//
+    Alkemy.parse(TestClass.class)//
         .stream() //
         .filter(f -> Random.class == f.alkemyType() && !f.isNode()) //
         .forEach(e -> {
@@ -85,7 +85,7 @@ public void generateRandoms()
 public void generateUuid()
 {
     final TestClass tc = new TestClass();
-    AlkemyNodes.get(TestClass.class)//
+    Alkemy.parse(TestClass.class)//
         .stream() //
         .filter(f -> Uuid.class == f.alkemyType() && !f.isNode()) //
         .forEach(e -> {
@@ -124,7 +124,7 @@ public class RandomElement extends AlkemyElement
 public void generateRandoms()
 {
     final TestClass tc = new TestClass();
-    final Node<RandomElement> root = AlkemyNodes.get(TestClass.class) //
+    final Node<RandomElement> root = Alkemy.parse(TestClass.class) //
                                                     , p -> Random.class == p.alkemyType() //
                                                     , f -> new RandomElement(f));
     root.stream().filter(f -> !f.isNode()) //
