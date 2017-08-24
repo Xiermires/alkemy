@@ -56,7 +56,7 @@ public class LongReference extends LambdaReference implements ValueAccessor
 
             final String getterName = AlkemizerUtils.getGetterName(f.getName());
             final MethodHandle getterHandle = MethodReferenceFactory.methodHandle(f.getDeclaringClass(), getterName);
-            final Method apply = ToLongFunction.class.getMethod("apply", Object.class);
+            final Method apply = ToLongFunction.class.getMethod("applyAsLong", Object.class);
             jgetter = MethodReferenceFactory.methodReference(ToLongFunction.class, apply, getterHandle);
         }
     }

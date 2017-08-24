@@ -56,7 +56,7 @@ public class DoubleReference extends LambdaReference implements ValueAccessor
 
             final String getterName = AlkemizerUtils.getGetterName(f.getName());
             final MethodHandle getterHandle = MethodReferenceFactory.methodHandle(f.getDeclaringClass(), getterName);
-            final Method apply = ToDoubleFunction.class.getMethod("apply", Object.class);
+            final Method apply = ToDoubleFunction.class.getMethod("applyAsDouble", Object.class);
             dgetter = MethodReferenceFactory.methodReference(ToDoubleFunction.class, apply, getterHandle);
         }
     }

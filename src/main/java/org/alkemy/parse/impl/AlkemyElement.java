@@ -150,21 +150,25 @@ public class AlkemyElement implements ValueAccessor, NodeFactory
     }
 
     @Override
-    public <E> E get(Object parent, Class<E> type) throws AccessException
-    {
-        return valueAccessor.get(parent, type);
-    }
-
-    @Override
     public void set(Object value, Object parent) throws AccessException
     {
         valueAccessor.set(value, parent);
     }
-
+    
     @Override
     public void set(String value, Object parent) throws AlkemyException
     {
-        valueAccessor.set(value, parent);
+        if (strref != null) strref.set(value, parent);
+        else
+            valueAccessor.set(value, parent);
+    }
+
+    @Override
+    public String getString(Object parent) throws AlkemyException
+    {
+        if (strref != null) return strref.getString(parent);
+        else
+            return valueAccessor.getString(parent);
     }
 
     @Override

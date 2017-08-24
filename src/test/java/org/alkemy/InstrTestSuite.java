@@ -44,6 +44,7 @@ instrs = @Instr(classNames = { //
         "org.alkemy.TestTraverse$NestedE", //
         "org.alkemy.TestTraverse$NestedF", //
         "org.alkemy.TestStatic", //
+        "org.alkemy.TestAlkemyAccessor", //
         "org.alkemy.parse.impl.TestAlkemizer", //
         "org.alkemy.parse.impl.TestManyFields", //
         "org.alkemy.parse.impl.TestNode", //

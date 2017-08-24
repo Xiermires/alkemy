@@ -41,9 +41,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
-import java.util.stream.Collectors;
 
 import org.alkemy.Alkemy;
+import org.alkemy.AlkemyMap;
+import org.alkemy.TestAlkemyAccessor;
 import org.alkemy.annotations.Order;
 import org.alkemy.exception.AlkemyException;
 import org.alkemy.instr.ConstructorWriter;
@@ -406,14 +407,96 @@ public class AlkemizerTest
     @Test
     public void performanceAlkemyElementGet() throws Throwable
     {
-        final TestAlkemizer testee = new TestAlkemizer();
-        final AlkemyElement ae = Alkemy.parse(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
+        final TestAlkemyAccessor testee = new TestAlkemyAccessor();
+        final AlkemyMap map = new AlkemyMap(Alkemy.parse(TestAlkemyAccessor.class));
+        final AlkemyElement d = map.get(TestAlkemyAccessor.class, "d");
+        final AlkemyElement f = map.get(TestAlkemyAccessor.class, "f");
+        final AlkemyElement j = map.get(TestAlkemyAccessor.class, "j");
+        final AlkemyElement i = map.get(TestAlkemyAccessor.class, "i");
+        final AlkemyElement s = map.get(TestAlkemyAccessor.class, "s");
+        final AlkemyElement c = map.get(TestAlkemyAccessor.class, "c");
+        final AlkemyElement b = map.get(TestAlkemyAccessor.class, "b");
+        final AlkemyElement z = map.get(TestAlkemyAccessor.class, "z");
+        final AlkemyElement str = map.get(TestAlkemyAccessor.class, "str");
+        final AlkemyElement o = map.get(TestAlkemyAccessor.class, "o");
+
+        System.out.println("AlkemyElement#getDouble: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                d.getDouble(testee);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("AlkemyElement#getFloat: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                f.getFloat(testee);
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("AlkemyElement#getLong: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                j.getLong(testee);
+            }
+        }) / 1000000 + " ms");
 
         System.out.println("AlkemyElement#getInt: " + Measure.measure(() ->
         {
-            for (int i = 0; i < ITER; i++)
+            for (int k = 0; k < ITER; k++)
             {
-                ae.getInt(testee);
+                i.getInt(testee);
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("AlkemyElement#getShort: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                s.getShort(testee);
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("AlkemyElement#getChar: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                c.getChar(testee);
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("AlkemyElement#getByte: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                b.getByte(testee);
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("AlkemyElement#getBoolean: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                z.getBoolean(testee);
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("AlkemyElement#getString: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                str.getString(testee);
+            }
+        }) / 1000000 + " ms");
+
+        System.out.println("AlkemyElement#get: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                o.get(testee);
             }
         }) / 1000000 + " ms");
     }
@@ -421,14 +504,99 @@ public class AlkemizerTest
     @Test
     public void performanceAlkemyElementSet() throws Throwable
     {
-        final TestAlkemizer testee = new TestAlkemizer();
-        final AlkemyElement ae = Alkemy.parse(TestAlkemizer.class).stream().filter(f -> f.valueName().contains("foo")).collect(Collectors.toList()).get(0);
+        final TestAlkemyAccessor testee = new TestAlkemyAccessor();
+        final AlkemyMap map = new AlkemyMap(Alkemy.parse(TestAlkemyAccessor.class));
+        final AlkemyElement d = map.get(TestAlkemyAccessor.class, "d");
+        final AlkemyElement f = map.get(TestAlkemyAccessor.class, "f");
+        final AlkemyElement j = map.get(TestAlkemyAccessor.class, "j");
+        final AlkemyElement i = map.get(TestAlkemyAccessor.class, "i");
+        final AlkemyElement s = map.get(TestAlkemyAccessor.class, "s");
+        final AlkemyElement c = map.get(TestAlkemyAccessor.class, "c");
+        final AlkemyElement b = map.get(TestAlkemyAccessor.class, "b");
+        final AlkemyElement z = map.get(TestAlkemyAccessor.class, "z");
+        final AlkemyElement str = map.get(TestAlkemyAccessor.class, "str");
+        final AlkemyElement o = map.get(TestAlkemyAccessor.class, "o");
 
+        System.out.println("AlkemyElement#setDouble: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                d.set(1d, testee);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("AlkemyElement#setFloat: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                f.set(1f, testee);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("AlkemyElement#setLong: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                j.set(1l, testee);
+            }
+        }) / 1000000 + " ms");
+        
         System.out.println("AlkemyElement#setInt: " + Measure.measure(() ->
         {
-            for (int i = 0; i < ITER; i++)
+            for (int k = 0; k < ITER; k++)
             {
-                ae.set(1, testee);
+                i.set(1, testee);
+            }
+        }) / 1000000 + " ms");
+        
+        final short _short = 1;
+        System.out.println("AlkemyElement#setShort: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                s.set(_short, testee);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("AlkemyElement#setChar: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                c.set('a', testee);
+            }
+        }) / 1000000 + " ms");
+        
+        final byte _byte = 1;
+        System.out.println("AlkemyElement#setByte: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                b.set(_byte, testee);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("AlkemyElement#setBoolean: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                z.set(true, testee);
+            }
+        }) / 1000000 + " ms");
+        
+        System.out.println("AlkemyElement#setString: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                str.set("bar", testee);
+            }
+        }) / 1000000 + " ms");
+        
+        final Object _obj = new Object();
+        System.out.println("AlkemyElement#set: " + Measure.measure(() ->
+        {
+            for (int k = 0; k < ITER; k++)
+            {
+                o.set(_obj, testee);
             }
         }) / 1000000 + " ms");
     }
