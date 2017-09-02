@@ -113,7 +113,7 @@ public class RandomElement extends AlkemyElement
     public RandomElement(AlkemyElement other)
     {
         super(other);
-        final Random desc = e.desc().getAnnotation(Random.class);
+        final Random desc = other.desc().getAnnotation(Random.class);
         min = desc.min();
         max = desc.max();
     }
@@ -124,14 +124,61 @@ public class RandomElement extends AlkemyElement
 public void generateRandoms()
 {
     final TestClass tc = new TestClass();
-    final Node<RandomElement> root = Alkemy.parse(TestClass.class) //
+    final Node<RandomElement> root = Alkemy.parse(TestClass.class //
                                                     , p -> Random.class == p.alkemyType() //
                                                     , f -> new RandomElement(f));
-    root.stream().filter(f -> !f.isNode()) //
-        .forEach(e -> {
-            final double rand = e.min + (Math.random() * ((e.max - e.min)));
-            e.set(rand, tc);
+                                                    
+        root.stream().filter(f -> !f.isNode()).forEach(c -> {
+            final double rand = c.min + (Math.random() * ((c.max - c.min)));
+            c.set(rand, tc);
         });
+}
+```
+
+Finally, you probably want to pack your alkemy process "sugar'ish" for later uses. For instance, for this particular example we can build the following class.
+```java
+public class RandomGenerator<T>
+{
+    private final TypedNode<T, RandomElement> root;
+
+    public RandomGenerator(Class<T> type)
+    {
+        root = TypedNode.create(Alkemy.parse(type//
+                , p -> Random.class == p.alkemyType()//
+                , e -> new RandomElement(e))//
+                , type);
+    }
+
+    public T generate() 
+    {        
+        return generate(root.data().newInstance(root.type()));
+    }
+    
+    public T generate(T t)
+    {
+        root.stream().filter(f -> !f.isNode()).forEach(c -> {
+            c.set(generateRandom(c), t);
+        });
+        return t;
+    }
+
+    // Extend this class && method for other random generators (i.e XORRandomGenerator)
+    protected double generateRandom(RandomElement c)
+    {
+        final double rand = c.min + (Math.random() * ((c.max - c.min)));
+        return rand;
+    }
+}
+```
+
+And later on use it as follows...
+
+```java
+public void generateRandoms()
+{
+    final RandomGenerator<TestClass> randomGenerator = new RandomGenerator<>();
+    final TestClass tc = new TestClass();
+    randomGenerator.generate(tc);
 }
 ```
 
