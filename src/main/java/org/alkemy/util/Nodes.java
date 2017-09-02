@@ -222,32 +222,32 @@ public class Nodes
         }
     }
 
-    public static class RootNode<R, E> extends ArborescenceNode<E>
+    public static class TypedNode<R, E> extends ArborescenceNode<E>
     {
         private Class<R> type;
 
-        public RootNode(Node<E> root, Class<R> type)
+        public TypedNode(Node<E> node, Class<R> type)
         {
-            super(root.data(), null, root.children(), root.branchDepth());
+            super(node.data(), null, node.children(), node.branchDepth());
             this.type = type;
         }
 
-        public static <R> RootNode<R, AlkemyElement> create(Class<R> type)
+        public static <R> TypedNode<R, AlkemyElement> create(Class<R> type)
         {
-            return new RootNode<R, AlkemyElement>(Alkemy.parse(type), type);
+            return new TypedNode<R, AlkemyElement>(Alkemy.parse(type), type);
         }
 
-        public static <R, E> RootNode<R, E> create(Node<E> root, Class<R> type)
+        public static <R, E> TypedNode<R, E> create(Node<E> root, Class<R> type)
         {
-            return new RootNode<R, E>(root, type);
+            return new TypedNode<R, E>(root, type);
         }
 
-        public static <R, E> RootNode<R, E> create(Class<R> type, Function<AlkemyElement, E> f)
+        public static <R, E> TypedNode<R, E> create(Class<R> type, Function<AlkemyElement, E> f)
         {
             final Node<AlkemyElement> src = Alkemy.parse(type);
             final Builder<E> dst = arborescence(f.apply(src.data()));
             final Node<E> copy = copy(src, dst, p -> true, f).build();
-            return new RootNode<R, E>(copy, type);
+            return new TypedNode<R, E>(copy, type);
         }
 
         public Class<R> type()
