@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.alkemy.util.Traversers.Callback;
 import org.alkemy.util.Traversers.Traversable;
 
 public interface Node<E> extends Traversable<E>
@@ -65,6 +66,13 @@ public interface Node<E> extends Traversable<E>
      * Equivalent to {@link Traversers#preorder(node)}
      */
     Node<E> preorder();
+    
+    /**
+     * Establish that any {@link #iterator()} created by this node will be pre-order iterator. This is the default behaviour.
+     * <p>
+     * Equivalent to {@link Traversers#preorder(Node, Callback))}
+     */
+    Node<E> preorder(Callback<E> callback);
 
     /**
      * Establish that any {@link #iterator()} created by this node will be post-order iterator. 
@@ -72,6 +80,13 @@ public interface Node<E> extends Traversable<E>
      * Equivalent to {@link Traversers#postorder(node)}
      */
     Node<E> postorder();
+    
+    /**
+     * Establish that any {@link #iterator()} created by this node will be post-order iterator. 
+     * <p>
+     * Equivalent to {@link Traversers#postorder(Node, Callback)}
+     */
+    Node<E> postorder(Callback<E> callback);
 
     interface Builder<E>
     {

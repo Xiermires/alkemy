@@ -27,7 +27,7 @@ import org.alkemy.parse.impl.AlkemyElement;
 
 public class AlkemyUtils
 {
-    public static Object getInstance(Node<? extends AlkemyElement> e, Object parent, boolean newNodeIfNull)
+    public static Object getOrCreateNode(Node<? extends AlkemyElement> e, Object parent, boolean newNodeIfNull)
     {
         Object instance = e.data().get(parent);
         if (newNodeIfNull && instance == null)

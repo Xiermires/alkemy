@@ -21,6 +21,9 @@
  *******************************************************************************/
 package org.alkemy.util;
 
+import static org.alkemy.util.Traversers.TraverseStrategy.POSTORDER;
+import static org.alkemy.util.Traversers.TraverseStrategy.PREORDER;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,8 +36,12 @@ import java.util.stream.Collectors;
 import org.alkemy.Alkemy;
 import org.alkemy.parse.impl.AlkemyElement;
 import org.alkemy.util.Node.Builder;
+import org.alkemy.util.Traversers.Callback;
 import org.alkemy.util.Traversers.PostorderIterator;
+import org.alkemy.util.Traversers.PostorderIteratorWithCallback;
 import org.alkemy.util.Traversers.PreorderIterator;
+import org.alkemy.util.Traversers.PreorderIteratorWithCallback;
+import org.alkemy.util.Traversers.TraverseStrategy;
 
 public class Nodes
 {
@@ -142,16 +149,12 @@ public class Nodes
 
     static class ArborescenceNode<E> implements Node<E>
     {
-        private enum TraverseStrategy
-        {
-            PREORDER, POSTORDER
-        };
-
         private E data;
         private Node<E> parent;
         private List<Node<E>> children;
         private int depth;
-        private TraverseStrategy traverseStrategy = TraverseStrategy.PREORDER;
+        private TraverseStrategy traverseStrategy = PREORDER;
+        private Callback<E> callback;
 
         ArborescenceNode(E data, Node<E> parent, List<Node<E>> children, int depth)
         {
@@ -168,7 +171,14 @@ public class Nodes
         @Override
         public Iterator<E> iterator()
         {
-            return traverseStrategy == TraverseStrategy.PREORDER ? new PreorderIterator<E>(this) : new PostorderIterator<E>(this);
+            if (traverseStrategy == PREORDER)
+            {
+                return callback != null ? new PreorderIteratorWithCallback<E>(this, callback) : new PreorderIterator<E>(this);
+            }
+            else
+            {
+                return callback != null ? new PostorderIteratorWithCallback<E>(this, callback) : new PostorderIterator<E>(this);
+            }
         }
 
         @Override
@@ -210,15 +220,29 @@ public class Nodes
         @Override
         public Node<E> preorder()
         {
-            traverseStrategy = TraverseStrategy.PREORDER;
+            traverseStrategy = PREORDER;
             return this;
         }
 
         @Override
         public Node<E> postorder()
         {
-            traverseStrategy = TraverseStrategy.POSTORDER;
+            traverseStrategy = POSTORDER;
             return this;
+        }
+
+        @Override
+        public Node<E> preorder(Callback<E> callback)
+        {
+            this.callback = callback;
+            return preorder();
+        }
+
+        @Override
+        public Node<E> postorder(Callback<E> callback)
+        {
+            this.callback = callback;
+            return postorder();
         }
     }
 

@@ -29,6 +29,11 @@ import java.util.stream.StreamSupport;
 
 public class Traversers
 {
+    public enum TraverseStrategy
+    {
+        PREORDER, POSTORDER
+    };
+
     private Traversers()
     {
     }
@@ -38,9 +43,19 @@ public class Traversers
         return new PreorderIterable<E>(node);
     }
 
+    public static <E> Traversable<E> preorder(Node<E> node, Callback<E> callback)
+    {
+        return new PreorderIterableWithCallback<E>(node, callback);
+    }
+
     public static <E> Traversable<E> postorder(Node<E> node)
     {
         return new PostorderIterable<E>(node);
+    }
+
+    public static <E> Traversable<E> postorder(Node<E> node, Callback<E> callback)
+    {
+        return new PostorderIterableWithCallback<E>(node, callback);
     }
 
     public static interface Traversable<E> extends Iterable<E>
@@ -66,7 +81,59 @@ public class Traversers
             return new PreorderIterator<E>(node);
         }
     }
-    
+
+    static class PreorderIterableWithCallback<E> implements Traversable<E>
+    {
+        private final Node<E> node;
+        private final Callback<E> callback;
+
+        PreorderIterableWithCallback(Node<E> node, Callback<E> callback)
+        {
+            this.node = node;
+            this.callback = callback;
+        }
+
+        @Override
+        public Iterator<E> iterator()
+        {
+            return new PreorderIteratorWithCallback<E>(node, callback);
+        }
+    }
+
+    static class PostorderIterable<E> implements Traversable<E>
+    {
+        private final Node<E> node;
+
+        PostorderIterable(Node<E> node)
+        {
+            this.node = node;
+        }
+
+        @Override
+        public Iterator<E> iterator()
+        {
+            return new PostorderIterator<E>(node);
+        }
+    }
+
+    static class PostorderIterableWithCallback<E> implements Traversable<E>
+    {
+        private final Node<E> node;
+        private final Callback<E> callback;
+
+        PostorderIterableWithCallback(Node<E> node, Callback<E> callback)
+        {
+            this.node = node;
+            this.callback = callback;
+        }
+
+        @Override
+        public Iterator<E> iterator()
+        {
+            return new PostorderIteratorWithCallback<E>(node, callback);
+        }
+    }
+
     static class PreorderIterator<E> implements Iterator<E>
     {
         private final Deque<Iterator<Node<E>>> stack = new ArrayDeque<Iterator<Node<E>>>();
@@ -128,19 +195,102 @@ public class Traversers
         }
     }
 
-    static class PostorderIterable<E> implements Traversable<E>
+    static class PreorderIteratorWithCallback<E> implements Iterator<E>
     {
-        private final Node<E> node;
+        private final Deque<Pair<Node<E>, Iterator<Node<E>>>> stack = new ArrayDeque<>();
+        private final Deque<Node<E>> exit = new ArrayDeque<>();
+        private final Callback<E> callback;
 
-        PostorderIterable(Node<E> node)
+        private Iterator<Node<E>> currentChildren = null;
+        private Node<E> currentParent = null;
+        private Node<E> next = null;
+
+        boolean onEnter = false;
+
+        PreorderIteratorWithCallback(Node<E> node, Callback<E> callback)
         {
-            this.node = node;
+            this.next = node;
+            this.callback = callback;
+            if (next.hasChildren())
+            {
+                onEnter = true;
+                currentParent = next;
+                currentChildren = next.children().iterator();
+            }
         }
 
         @Override
-        public Iterator<E> iterator()
+        public boolean hasNext()
         {
-            return new PostorderIterator<E>(node);
+            if (next == null)
+            {
+                doOnExit();
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public E next()
+        {
+            doOnEnter();
+            doOnExit();
+
+            final E current = next.data();
+            advance();
+            return current;
+        }
+
+        void doOnEnter()
+        {
+            if (onEnter)
+            {
+                callback.onEnterNode(next);
+                onEnter = false;
+            }
+        }
+
+        void doOnExit()
+        {
+            while (!exit.isEmpty())
+            {
+                callback.onExitNode(exit.pop());
+            }
+        }
+
+        void advance()
+        {
+            if (currentChildren.hasNext())
+            {
+                next = currentChildren.next();
+                if (next.hasChildren())
+                {
+                    stack.push(Pair.create(currentParent, currentChildren));
+                    currentChildren = next.children().iterator();
+                    currentParent = next;
+                    onEnter = true;
+                }
+            }
+            else
+            {
+                exit.push(currentParent);
+                reverse();
+            }
+        }
+
+        void reverse()
+        {
+            if (!stack.isEmpty())
+            {
+                final Pair<Node<E>, Iterator<Node<E>>> pop = stack.pop();
+                currentParent = pop.first;
+                currentChildren = pop.second;
+                advance();
+            }
+            else
+            {
+                next = null;
+            }
         }
     }
 
@@ -227,5 +377,109 @@ public class Traversers
                 next = null;
             }
         }
+    }
+
+    static class PostorderIteratorWithCallback<E> implements Iterator<E>
+    {
+        private final Deque<Object> stack = new ArrayDeque<>();
+
+        private Iterator<Node<E>> currentChildren = null;
+        private final Callback<E> callback;
+        private Node<E> next = null;
+        private boolean init = false;
+
+        PostorderIteratorWithCallback(Node<E> node, Callback<E> callback)
+        {
+            this.next = node;
+            this.callback = callback;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return next != null;
+        }
+
+        void init()
+        {
+            if (next.hasChildren())
+            {
+                currentChildren = next.children().iterator();
+                stack.push(next);
+                stack.push(currentChildren);
+                next = currentChildren.next();
+                advanceUntilLeaf();
+            }
+        }
+
+        @Override
+        public E next()
+        {
+            if (!init)
+                init();
+
+            final E current = next.data();
+            if (currentChildren.hasNext())
+            {
+                next = currentChildren.next();
+                advanceUntilLeaf();
+            }
+            else
+            {
+                reverseUntilLeaf();
+            }
+            return current;
+        }
+
+        void advanceUntilLeaf()
+        {
+            if (next.hasChildren())
+            {
+                callback.onEnterNode(next);
+                stack.push(currentChildren);
+                stack.push(next);
+                currentChildren = next.children().iterator();
+                next = currentChildren.next();
+                advanceUntilLeaf();
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        void reverseUntilLeaf()
+        {
+            if (!stack.isEmpty())
+            {
+                final Object x = stack.pop();
+                if (x instanceof Iterator)
+                {
+                    currentChildren = (Iterator<Node<E>>) x;
+                    if (currentChildren.hasNext())
+                    {
+                        next = currentChildren.next();
+                        advanceUntilLeaf();
+                    }
+                    else
+                    {
+                        callback.onExitNode(next);
+                        reverseUntilLeaf();
+                    }
+                }
+                else
+                {
+                    next = (Node<E>) x;
+                }
+            }
+            else
+            {
+                next = null;
+            }
+        }
+    }
+
+    public static interface Callback<E>
+    {
+        boolean onEnterNode(Node<E> node);
+
+        boolean onExitNode(Node<E> node);
     }
 }
