@@ -29,14 +29,16 @@ import java.util.function.Predicate;
 
 import org.alkemy.parse.AlkemyParser;
 import org.alkemy.parse.impl.AlkemyElement;
-import org.alkemy.parse.impl.AlkemyParsers;
+import org.alkemy.parse.impl.AlkemyLeafLexer;
+import org.alkemy.parse.impl.AnnotatedAlkemyElementFactory;
+import org.alkemy.parse.impl.TypeParser;
 import org.alkemy.util.Node;
 import org.alkemy.util.Node.Builder;
 
 public class Alkemy
 {
     private static final int MAXIMUM_CACHE_SIZE_IN_BYTES = 2 * 1024 * 1024;
-    private static final AlkemyParser TYPE_PARSER = AlkemyParsers.typeParser();
+    private static final AlkemyParser TYPE_PARSER = TypeParser.create(AlkemyLeafLexer.create(AnnotatedAlkemyElementFactory.create()));
 
     private static NodeCache cache = new NodeCache(TYPE_PARSER, MAXIMUM_CACHE_SIZE_IN_BYTES);
 

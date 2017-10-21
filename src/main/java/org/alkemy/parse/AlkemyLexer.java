@@ -25,26 +25,26 @@ import java.util.List;
 
 import org.alkemy.parse.impl.AlkemyElement;
 
-public interface AlkemyLexer<N, L>
+public interface AlkemyLexer<T>
 {
     /**
      * Returns if the descriptor defines an element with additional nested alkemy elements.
      */
-    boolean isNode(N desc);
+    boolean isNode(T desc);
 
     /**
      * Returns if the descriptor defines a single element.
      */
-    boolean isLeaf(L desc);
+    boolean isLeaf(T desc);
 
     /**
      * Creates an {@link AlkemyElement} for this leaf.
      */
-    AlkemyElement createLeaf(L desc, ValueAccessor valueAccessor);
+    AlkemyElement createLeaf(T desc, ValueAccessor valueAccessor);
 
     /**
      * Creates an {@link AlkemyElement} for this node.
      */
-    AlkemyElement createNode(N desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
+    AlkemyElement createNode(T desc, NodeFactory valueConstructor, ValueAccessor valueAccessor,
             List<MethodInvoker> methodInvokers, Class<?> nodeType);
 }

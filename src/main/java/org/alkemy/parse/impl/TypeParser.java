@@ -68,16 +68,16 @@ import org.alkemy.util.Types;
  * <code>
  * The parser will create a tree such as follows: Root (Foo { method }) { Leaf (bar) , Leaf (foo) }
  */
-class TypeParser implements AlkemyParser
+public class TypeParser implements AlkemyParser
 {
-    private final AlkemyLexer<AnnotatedMember, AnnotatedMember> lexer;
+    private final AlkemyLexer<AnnotatedMember> lexer;
 
-    private TypeParser(AlkemyLexer<AnnotatedMember, AnnotatedMember> lexer)
+    private TypeParser(AlkemyLexer<AnnotatedMember> lexer)
     {
         this.lexer = lexer;
     }
 
-    static AlkemyParser create(AlkemyLexer<AnnotatedMember, AnnotatedMember> lexer)
+    public static AlkemyParser create(AlkemyLexer<AnnotatedMember> lexer)
     {
         return new TypeParser(lexer);
     }
@@ -88,7 +88,7 @@ class TypeParser implements AlkemyParser
         final ValueAccessor valueAccessor = AccessorFactory.createSelfAccessor(type);
         final NodeFactory nodeFactory = AccessorFactory.createNodeFactory(valueAccessor);
         final List<MethodInvoker> methodInvokers = AccessorFactory.createInvokers(getLeafMethods(type));
-        final AnnotatedMember am = new AnnotatedMember(type.getName(), type, type);
+        final AnnotatedMember am = new AnnotatedMember(type, type.getName(), type);
         final AlkemyElement root = lexer.createNode(am, nodeFactory, valueAccessor, methodInvokers, type);
         return _parse(nodeFactory, Nodes.arborescence(root)).build();
     }
@@ -103,7 +103,7 @@ class TypeParser implements AlkemyParser
             final Class<?> childComponentType = Types.getComponentType(f);
             final Class<?> childType = childComponentType != null ? childComponentType : f.getType();
 
-            final AnnotatedMember am = new AnnotatedMember(f.getName(), f, childType);
+            final AnnotatedMember am = new AnnotatedMember(f, f.getName(), childType);
             if (lexer.isLeaf(am))
             {
                 final ValueAccessor valueAccessor = AccessorFactory.createValueAccessor(f);
@@ -127,7 +127,7 @@ class TypeParser implements AlkemyParser
         final List<Method> ms = new ArrayList<Method>();
         for (Method m : type.getDeclaredMethods())
         {
-            if (lexer.isLeaf(new AnnotatedMember(m.getName(), m, null)))
+            if (lexer.isLeaf(new AnnotatedMember(m, m.getName(), null)))
             {
                 ms.add(m);
             }

@@ -21,34 +21,52 @@
  *******************************************************************************/
 package org.alkemy.parse.impl;
 
+import java.util.List;
+
 import org.alkemy.parse.AlkemyLexer;
-import org.alkemy.parse.AlkemyParser;
+import org.alkemy.parse.MethodInvoker;
+import org.alkemy.parse.NodeFactory;
+import org.alkemy.parse.ValueAccessor;
+import org.alkemy.util.AnnotationUtils;
 
-/**
- * Common parser implementations.
- */
-public class AlkemyParsers
+public class AlkemyLeafLexer implements AlkemyLexer<AnnotatedMember>
 {
-    private AlkemyParsers()
+    private AlkemyElementFactory<AnnotatedMember> factory;
+
+    private AlkemyLeafLexer(AlkemyElementFactory<AnnotatedMember> factory)
     {
+        this.factory = factory;
     }
 
-    public static AlkemyLexer<AnnotatedMember, AnnotatedMember> fieldLexer()
+    public static AlkemyLexer<AnnotatedMember> create(AlkemyElementFactory<AnnotatedMember> factory)
     {
-        final AlkemyElementFactory<AnnotatedMember> elementFactory = AnnotatedAlkemyElementFactory.create();
-        return TypeLexer.create(elementFactory);
+        return new AlkemyLeafLexer(factory);
     }
 
-    /**
-     * See {@link TypeParser}
-     */
-    public static AlkemyParser typeParser()
+    @Override
+    public boolean isNode(AnnotatedMember desc)
     {
-        return TypeParser.create(fieldLexer());
+        final DeepLeafSearch leafFinder = new DeepLeafSearch();
+        leafFinder.search(desc.type);
+        return leafFinder.get();
     }
 
-    public static AlkemyParser typeParser(AlkemyLexer<AnnotatedMember, AnnotatedMember> lexer)
+    @Override
+    public boolean isLeaf(AnnotatedMember desc)
     {
-        return TypeParser.create(lexer);
+        return AnnotationUtils.findAlkemyTypes(desc) != null;
+    }
+
+    @Override
+    public AlkemyElement createLeaf(AnnotatedMember desc, ValueAccessor valueAccessor)
+    {
+        return factory.createLeaf(desc, valueAccessor);
+    }
+
+    @Override
+    public AlkemyElement createNode(AnnotatedMember desc, NodeFactory valueConstructor,
+            ValueAccessor valueAccessor, List<MethodInvoker> methodInvokers, Class<?> nodeType)
+    {
+        return factory.createNode(desc, valueConstructor, valueAccessor, methodInvokers, nodeType);
     }
 }

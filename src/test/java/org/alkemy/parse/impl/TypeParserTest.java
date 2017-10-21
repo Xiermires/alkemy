@@ -30,8 +30,6 @@ import java.util.List;
 
 import org.alkemy.TestClass;
 import org.alkemy.parse.AlkemyParser;
-import org.alkemy.parse.impl.AlkemyElement;
-import org.alkemy.parse.impl.AlkemyParsers;
 import org.junit.Test;
 
 public class TypeParserTest
@@ -39,7 +37,7 @@ public class TypeParserTest
     @Test
     public void parseTestClass()
     {
-        final AlkemyParser parser = AlkemyParsers.typeParser();
+        final AlkemyParser parser = TypeParser.create(AlkemyLeafLexer.create(AnnotatedAlkemyElementFactory.create()));
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestClass.class).drainTo(result);
 
@@ -52,7 +50,7 @@ public class TypeParserTest
     @Test
     public void parseTestNode() throws IOException, InstantiationException, IllegalAccessException
     {
-        final AlkemyParser parser = AlkemyParsers.typeParser();
+        final AlkemyParser parser = TypeParser.create(AlkemyLeafLexer.create(AnnotatedAlkemyElementFactory.create()));
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestNode.class).drainTo(result);
 
@@ -62,7 +60,7 @@ public class TypeParserTest
     @Test
     public void testOrdered()
     {
-        final AlkemyParser parser = AlkemyParsers.typeParser();
+        final AlkemyParser parser = TypeParser.create(AlkemyLeafLexer.create(AnnotatedAlkemyElementFactory.create()));
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestOrdered.class).drainTo(result);
 
@@ -81,7 +79,7 @@ public class TypeParserTest
     @Test
     public void testDeepLeaves()
     {
-        final AlkemyParser parser = AlkemyParsers.typeParser();
+        final AlkemyParser parser = TypeParser.create(AlkemyLeafLexer.create(AnnotatedAlkemyElementFactory.create()));
         final List<AlkemyElement> result = new ArrayList<AlkemyElement>();
         parser.parse(TestDeepLeaves.class).drainTo(result);
 

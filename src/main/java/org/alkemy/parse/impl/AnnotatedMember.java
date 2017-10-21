@@ -35,7 +35,7 @@ public class AnnotatedMember implements AnnotatedElement
     private final String name;
     final Class<?> type;
 
-    public AnnotatedMember(String name, AnnotatedElement annotatedElement, Class<?> type)
+    public AnnotatedMember(AnnotatedElement annotatedElement, String name, Class<?> type)
     {
         Assertions.nonNull(annotatedElement);
         
